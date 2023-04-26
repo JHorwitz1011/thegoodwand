@@ -111,3 +111,8 @@ if [ $? != 0 ]
 then 
     echo "ERROR: Running Deamon script"; exit 1
 fi
+
+# Add temp files to bashrc
+echo "export PATH="~/thegoodwant/templates:$PATH"" > temp
+cat temp >> ~/.bashrc
+rm temp
