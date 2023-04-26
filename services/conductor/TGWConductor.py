@@ -7,7 +7,7 @@ import subprocess
 
 import sys
 import os
-sys.path.append(os.path.expanduser('~/templates'))
+sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
 
 from MQTTObject import MQTTObject
 import helper
@@ -69,7 +69,7 @@ class TGWConductor(MQTTObject):
             BUTTON_TOPIC: self.on_button_press,
         }
 
-        self.play_light ('power_up')	
+        	
 
 
     def play_light(self, lightEffect):
@@ -165,6 +165,7 @@ class TGWConductor(MQTTObject):
 
     def run(self):
         self.start_mqtt(CONDUCTOR_CLIENT_ID, self.callbacks)
+        self.play_light ('power_up')
         signal.pause()
 
 

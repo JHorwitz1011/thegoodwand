@@ -93,16 +93,21 @@ echo "Step 1: update and upgrade the system"
 
 # Install Seed studio 
 # Seeed studio is added as a git submodule of this repo
-git submodule update --init
-echo "Step 4: Install Seeed studio voice card"
-cd ../seeed-voicecard/ #change directory to seeed voice card. 
-echo $PWD
-sudo ./install.sh
-if [ $? != 0 ]
-then 
-    echo "ERROR: Installing SeedStudio voice card"; exit 1
-fi
-cd - #change directory back
+# git submodule update --init
+# echo "Step 4: Install Seeed studio voice card"
+# cd ../seeed-voicecard/ #change directory to seeed voice card. 
+# echo $PWD
+# sudo ./install.sh
+# if [ $? != 0 ]
+# then 
+#     echo "ERROR: Installing SeedStudio voice card"; exit 1
+# fi
+# cd - #change directory back
+
+# Add temp files to bashrc
+echo "export PATH="~/thegoodwant/templates:$PATH"" > temp
+cat temp >> ~/.bashrc
+rm temp
 
 #Pass path to the all the services to daemon script.
 echo "Step 3: Setting up system daemons script"
@@ -112,7 +117,4 @@ then
     echo "ERROR: Running Deamon script"; exit 1
 fi
 
-# Add temp files to bashrc
-echo "export PATH="~/thegoodwant/templates:$PATH"" > temp
-cat temp >> ~/.bashrc
-rm temp
+

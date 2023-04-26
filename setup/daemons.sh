@@ -26,7 +26,7 @@ fi
 
 echo "Creating Button Service"
 echo "[program:button]
-command=python3 -u FWButtonService.py
+command=python3 -u button_service.py
 directory=home/"$path"/button
 autostart=true
 autorestart=true

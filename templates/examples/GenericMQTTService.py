@@ -2,7 +2,7 @@ import time
 
 import sys
 import os
-sys.path.append(os.path.expanduser('~/templates'))
+sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
 from MQTTObject import MQTTObject
 
 CALLBACK1_TOPIC = "topic1"
