@@ -100,7 +100,7 @@ fi
 
 echo "Creating Conductor Service"
 echo "[program:conductor] 
-command=python3 -u TGWconductor.py 
+command=python3 -u TGWConductor.py 
 directory=home/"$path"/conductor 
 autostart=true 
 autorestart=true
