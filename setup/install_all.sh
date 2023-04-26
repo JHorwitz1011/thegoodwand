@@ -91,7 +91,7 @@ fi
 
 #Pass user name to daemon script to use for the path. 
 echo "Step 3: Setting up system daemons script"
-sudo ./daemons.sh "$USER/thgoodwand/services"
+sudo ./daemons.sh "$USER/thegoodwand/services"
 if [ $? != 0 ]
 then 
     echo "ERROR: Running Deamon script"; exit 1
