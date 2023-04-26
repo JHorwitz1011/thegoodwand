@@ -89,13 +89,7 @@ echo "Step 1: update and upgrade the system"
 #     echo "ERROR: Installing adafruit-blinka"; exit 1
 # fi
 
-#Pass user name to daemon script to use for the path. 
-echo "Step 3: Setting up system daemons script"
-sudo ./daemons.sh "$USER/thegoodwand/services"
-if [ $? != 0 ]
-then 
-    echo "ERROR: Running Deamon script"; exit 1
-fi
+
 
 # Install Seed studio 
 # Seeed studio is added as a git submodule of this repo
@@ -109,3 +103,11 @@ then
     echo "ERROR: Installing SeedStudio voice card"; exit 1
 fi
 cd - #change directory back
+
+#Pass path to the all the services to daemon script.
+echo "Step 3: Setting up system daemons script"
+sudo ./daemons.sh "$USER/thegoodwand/services"
+if [ $? != 0 ]
+then 
+    echo "ERROR: Running Deamon script"; exit 1
+fi
