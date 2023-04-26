@@ -9,6 +9,14 @@ else
     echo "Error: Missing Path argument"; exit 1
 fi
 
+if [ $2 ]
+then 
+user=$2
+
+ else 
+    echo "Missing user argument"; exit 1
+fi
+
 echo "Creating Lightbar service"
 #supervisor config files
 echo "[program:lightbar]
@@ -17,7 +25,7 @@ directory=home/"$path"/lights
 autostart=true
 autorestart=true
 priority=50
-user=root
+user=$user
 "  > /etc/supervisor/conf.d/lightbar.conf
 if [ $? != 0 ]
 then 
@@ -31,7 +39,7 @@ directory=home/"$path"/button
 autostart=true
 autorestart=true
 priority=50
-user=root
+user=$user
 "  > /etc/supervisor/conf.d/button.conf
 if [ $? != 0 ]
 then 
@@ -46,7 +54,7 @@ directory=home/"$path"/audio
 autostart=true
 autorestart=true
 priority=50
-user=root
+user=$user
 " > /etc/supervisor/conf.d/audio.conf
 if [ $? != 0 ]
 then 
@@ -61,7 +69,7 @@ directory=home/"$path"/nfc
 autostart=true
 autorestart=true
 priority=50
-user=root
+user=$user
 " > /etc/supervisor/conf.d/nfc.conf
 if [ $? != 0 ]
 then 
@@ -76,7 +84,7 @@ directory=home/"$path"/uvlight
 autostart=true
 autorestart=true
 priority=50
-user=root
+user=$user
 " > /etc/supervisor/conf.d/uv.conf
 if [ $? != 0 ]
 then 
@@ -91,7 +99,7 @@ directory=home/"$path"/imu
 autostart=true
 autorestart=true
 priority=50
-user=root
+user=$user
 " > /etc/supervisor/conf.d/accel.conf
 if [ $? != 0 ]
 then 
@@ -105,7 +113,7 @@ directory=home/"$path"/conductor
 autostart=true 
 autorestart=true
 priority=50
-user=root
+user=$user
 " > /etc/supervisor/conf.d/conductor.conf
 if [ $? != 0 ]
 then 

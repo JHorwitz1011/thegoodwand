@@ -105,13 +105,13 @@ echo "Step 1: update and upgrade the system"
 # cd - #change directory back
 
 # Add temp files to bashrc
-echo "export PATH="~/thegoodwant/templates:$PATH"" > temp
-cat temp >> ~/.bashrc
-rm temp
+# echo "export PATH="~/thegoodwand/templates:$PATH"" > temp
+# cat temp >> ~/.bashrc
+# rm temp
 
 #Pass path to the all the services to daemon script.
 echo "Step 3: Setting up system daemons script"
-sudo ./daemons.sh "$USER/thegoodwand/services"
+sudo ./daemons.sh "$USER/thegoodwand/services" $USER
 if [ $? != 0 ]
 then 
     echo "ERROR: Running Deamon script"; exit 1
