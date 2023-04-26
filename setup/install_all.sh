@@ -99,8 +99,7 @@ fi
 
 # Install Seed studio 
 echo "Step 4: Install Seeed studio voice card"
-git -C ../ clone https://github.com/Seeed-Projects/seeed-voicecard.git
-cd ../seeed-voicecard/ #change directory to seeed voice card. 
+cd ../libraries/seeed-voicecard/ #change directory to seeed voice card. 
 sudo ./install.sh
 if [ $? != 0 ]
 then 
