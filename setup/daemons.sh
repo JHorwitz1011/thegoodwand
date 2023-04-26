@@ -1,11 +1,12 @@
 echo "Creating the Supervisor configuration files"
 
 #Pass $USER as the first argument to auto set the path
+#
 if [ $1 ]
 then 
     path=$1
 else
-    read -p "Type user directory without space (default is pi)" path
+    echo "Error: Missing Path argument"; exit 1
 fi
 
 echo "Creating Lightbar service"

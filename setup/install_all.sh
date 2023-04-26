@@ -100,6 +100,7 @@ fi
 # Install Seed studio 
 echo "Step 4: Install Seeed studio voice card"
 cd ../libraries/seeed-voicecard/ #change directory to seeed voice card. 
+echo $PWD
 sudo ./install.sh
 if [ $? != 0 ]
 then 
