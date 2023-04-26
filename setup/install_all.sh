@@ -98,9 +98,10 @@ then
 fi
 
 # Install Seed studio 
+# Seeed studio is added as a git submodule of this repo
 git submodule update --init
 echo "Step 4: Install Seeed studio voice card"
-cd ../libraries/seeed-voicecard/ #change directory to seeed voice card. 
+cd ../seeed-voicecard/ #change directory to seeed voice card. 
 echo $PWD
 sudo ./install.sh
 if [ $? != 0 ]
