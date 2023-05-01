@@ -1,0 +1,411 @@
+# Copyright (c) 2016- 2021 FishLabs.
+# All Rights Reserved
+# Unauthorized copying of this file, via any medium is strictly prohibited
+# Proprietary and confidential
+ 
+import smbus
+
+class bq24296M:
+
+    NUM_REG = 10
+
+    ##Register Deffinitions##
+
+    #REG 0x0 INPUT_SOURCE_CONTROL_REG
+    INPUT_SOURCE_CONTROL_REG = 0X00
+   
+    HI_Z_MASK = 0x01 << 7
+    
+    VINDPM_SHIFT = 3
+    VINDPM_MASK = 0x0F << VINDPM_SHIFT
+    VINDPM_3880MV = 0b0000 << VINDPM_SHIFT
+    VINDPM_3960MV = 0b0001 << VINDPM_SHIFT
+    VINDPM_4040MV = 0b0010 << VINDPM_SHIFT
+    VINDPM_4120MV = 0b0011 << VINDPM_SHIFT
+    VINDPM_4200MV = 0b0100 << VINDPM_SHIFT
+    VINDPM_4280MV = 0b0101 << VINDPM_SHIFT
+    VINDPM_4360MV = 0b0110 << VINDPM_SHIFT
+    VINDPM_4440MV = 0b0111 << VINDPM_SHIFT
+    VINDPM_4520MV = 0b1000 << VINDPM_SHIFT
+    VINDPM_4600MV = 0b1001 << VINDPM_SHIFT
+    VINDPM_4680MV = 0b1010 << VINDPM_SHIFT
+    VINDPM_4760MV = 0b1011 << VINDPM_SHIFT
+    VINDPM_4840MV = 0b1100 << VINDPM_SHIFT
+    VINDPM_4920MV = 0b1101 << VINDPM_SHIFT
+    VINDPM_5000MV = 0b1110 << VINDPM_SHIFT
+    VINDPM_5080MV = 0b1110 << VINDPM_SHIFT
+    
+    IINLIM_MASK = 0x07
+
+    IINLIM_100MA = 0b000
+    IINLIM_150MA = 0b001
+    IINLIM_500MA = 0b010
+    IINLIM_900MA = 0b011
+    IINLIM_1000MA = 0b100
+    IINLIM_1500MA = 0b101
+    IINLIM_2000MA = 0b110
+    IINLIM_3000MA = 0b111
+
+    #REG 0x1 POWER_ON_CONFIG_REG
+    POWER_ON_CONFIG_REG = 0X01
+
+    RESET_REG_MASK = 0x01 << 7
+    I2C_WATCHDOG_MASK = 0X01 << 6
+    OTG_CONFIG_MASK = 0X01 << 5
+    CHG_CONFIG_MASK = 0X01 << 4
+    SYS_MIN_SIFT = 1
+    SYS_MIN_MASK = 0X07 << SYS_MIN_SIFT
+    SYS_MIN_3000MV = 0b000 << SYS_MIN_SIFT
+    SYS_MIN_3100MV = 0b001 << SYS_MIN_SIFT
+    SYS_MIN_3200MV = 0b010 << SYS_MIN_SIFT
+    SYS_MIN_3300MV = 0b011 << SYS_MIN_SIFT
+    SYS_MIN_3400MV = 0b100 << SYS_MIN_SIFT
+    SYS_MIN_3500MV = 0b101 << SYS_MIN_SIFT
+    SYS_MIN_3600MV = 0b110 << SYS_MIN_SIFT
+    SYS_MIN_3700MV = 0b111 << SYS_MIN_SIFT
+    BOOST_LIM_MASK = 0X01
+
+    #REG 0x2 CHARGE_CURRENT_CONTROL_REG
+    CHARGE_CURRENT_CONTROL_REG = 0X02
+
+    ICHRG_SHIFT = 2
+    ICHRG_MASK = 0X3F << ICHRG_SHIFT
+    ICHRG_512MA = 0b000000 << ICHRG_SHIFT
+    ICHRG_576MA = 0b000001 << ICHRG_SHIFT
+    ICHRG_640MA = 0b000010 << ICHRG_SHIFT
+    ICHRG_704MA = 0b000011 << ICHRG_SHIFT
+    ICHRG_768MA = 0b000100 << ICHRG_SHIFT
+    ICHRG_832MA = 0b000101 << ICHRG_SHIFT
+    ICHRG_896MA = 0b000110 << ICHRG_SHIFT
+    ICHRG_960MA = 0b000111 << ICHRG_SHIFT
+    ICHRG_1024MA = 0b001000 << ICHRG_SHIFT
+    ICHRG_1088MA = 0b001001 << ICHRG_SHIFT
+    ICHRG_1152MA = 0b001010 << ICHRG_SHIFT
+    ICHRG_1216MA = 0b001011 << ICHRG_SHIFT
+    ICHRG_1280MA = 0b001100 << ICHRG_SHIFT
+    ICHRG_1344MA = 0b001101 << ICHRG_SHIFT
+    ICHRG_1408MA = 0b001110 << ICHRG_SHIFT
+    ICHRG_1472MA = 0b001111 << ICHRG_SHIFT
+    ICHRG_1536MA = 0b010000 << ICHRG_SHIFT
+    ICHRG_1600MA = 0b010001 << ICHRG_SHIFT
+    ICHRG_1664MA = 0b010010 << ICHRG_SHIFT
+    ICHRG_1728MA = 0b010011 << ICHRG_SHIFT
+    ICHRG_1792MA = 0b010100 << ICHRG_SHIFT
+    ICHRG_1856MA = 0b010101 << ICHRG_SHIFT
+    ICHRG_1920MA = 0b010110 << ICHRG_SHIFT
+    ICHRG_1984MA = 0b010111 << ICHRG_SHIFT
+    ICHRG_2048MA = 0b011000 << ICHRG_SHIFT
+    ICHRG_2112MA = 0b011001 << ICHRG_SHIFT
+    ICHRG_2176MA = 0b011010 << ICHRG_SHIFT
+    ICHRG_2240MA = 0b011011 << ICHRG_SHIFT
+    ICHRG_2304MA = 0b011100 << ICHRG_SHIFT
+    ICHRG_2368MA = 0b011101 << ICHRG_SHIFT
+    ICHRG_2432MA = 0b011110 << ICHRG_SHIFT
+    ICHRG_2496MA = 0b011111 << ICHRG_SHIFT
+    ICHRG_2560MA = 0b100000 << ICHRG_SHIFT
+    ICHRG_2624MA = 0b100001 << ICHRG_SHIFT
+    ICHRG_2688MA = 0b100010 << ICHRG_SHIFT
+    ICHRG_2752MA = 0b100011 << ICHRG_SHIFT
+    ICHRG_2816MA = 0b100100 << ICHRG_SHIFT
+    ICHRG_2880MA = 0b100101 << ICHRG_SHIFT
+    ICHRG_2944MA = 0b100110 << ICHRG_SHIFT
+    ICHRG_3008MA = 0b100111 << ICHRG_SHIFT
+    
+ 
+    BCOLD_MASK = 0X01 << 1
+    FORCE_20PCT_MASK = 0X01
+    
+    #REG 0x3 PRECHARGE_TERMINATION_CONTROL_REG
+    PRECHARGE_TERMINATION_CONTROL_REG = 0X03
+
+    IPRECHRG_SHIFT = 4
+    IPRECHG_MASK = 0X0F << IPRECHRG_SHIFT
+    IPRECHG_128MA = 0b0000 << IPRECHRG_SHIFT
+    IPRECHG_128MA = 0b0001 << IPRECHRG_SHIFT
+    IPRECHG_256MA = 0b0010 << IPRECHRG_SHIFT
+    IPRECHG_384MA = 0b0011 << IPRECHRG_SHIFT
+    IPRECHG_512MA = 0b0100 << IPRECHRG_SHIFT
+    IPRECHG_768MA = 0b0101 << IPRECHRG_SHIFT
+    IPRECHG_896MA = 0b0110 << IPRECHRG_SHIFT
+    IPRECHG_1024MA = 0b0111 << IPRECHRG_SHIFT
+    IPRECHG_1152MA = 0b1000 << IPRECHRG_SHIFT
+    IPRECHG_1280MA = 0b1001 << IPRECHRG_SHIFT
+    IPRECHG_1408MA = 0b1010 << IPRECHRG_SHIFT
+    IPRECHG_1526MA = 0b1011 << IPRECHRG_SHIFT
+    IPRECHG_1664MA = 0b1100 << IPRECHRG_SHIFT
+    IPRECHG_1792MA = 0b1101 << IPRECHRG_SHIFT
+    IPRECHG_1920MA = 0b1110 << IPRECHRG_SHIFT
+    IPRECHG_2048MA = 0b1111 << IPRECHRG_SHIFT
+
+    ITERM_MASK = 0X07
+    ITERM_128MA = 0b0000
+    ITERM_256MA = 0b0001
+    ITERM_384MA = 0b0010
+    ITERM_512MA = 0b0011
+    ITERM_640MA = 0b0100
+    ITERM_768MA = 0b0101
+    ITERM_896MA = 0b0110
+    ITERM_1024MA = 0b0111
+
+    #REG 0x4 CHARGE_VOLTAGE_CONTROL_REG
+    CHARGE_VOLTAGE_CONTROL_REG = 0X04
+
+    VREG_SHIFT = 2
+    VREG_MASK = 0X03 << VREG_SHIFT
+    VREG_3504V = 0b000000 << VREG_SHIFT
+    VREG_3520V = 0b000001 << VREG_SHIFT
+    VREG_3536V = 0b000010 << VREG_SHIFT
+    VREG_3552V = 0b000011 << VREG_SHIFT
+    VREG_3568V = 0b000100 << VREG_SHIFT
+    VREG_3584V = 0b000101 << VREG_SHIFT
+    VREG_3600V = 0b000110 << VREG_SHIFT
+    VREG_3616V = 0b000111 << VREG_SHIFT
+    VREG_3632V = 0b001000 << VREG_SHIFT
+    VREG_3648V = 0b001001 << VREG_SHIFT
+    VREG_3664V = 0b001010 << VREG_SHIFT
+    VREG_3680V = 0b001011 << VREG_SHIFT
+    VREG_3696V = 0b001100 << VREG_SHIFT
+    VREG_3712V = 0b001101 << VREG_SHIFT
+    VREG_3728V = 0b001110 << VREG_SHIFT
+    VREG_3744V = 0b001111 << VREG_SHIFT
+    VREG_3760V = 0b010000 << VREG_SHIFT
+    VREG_3776V = 0b010001 << VREG_SHIFT
+    VREG_3792V = 0b010010 << VREG_SHIFT
+    VREG_3808V = 0b010011 << VREG_SHIFT
+    VREG_3824V = 0b010100 << VREG_SHIFT
+    VREG_3840V = 0b010101 << VREG_SHIFT
+    VREG_3856V = 0b010110 << VREG_SHIFT
+    VREG_3872V = 0b010111 << VREG_SHIFT
+    VREG_3888V = 0b011000 << VREG_SHIFT
+    VREG_3904V = 0b011001 << VREG_SHIFT
+    VREG_3920V = 0b011010 << VREG_SHIFT
+    VREG_3936V = 0b011011 << VREG_SHIFT
+    VREG_3952V = 0b011100 << VREG_SHIFT
+    VREG_3968V = 0b011101 << VREG_SHIFT
+    VREG_3984V = 0b011110 << VREG_SHIFT
+    VREG_4000V = 0b011111 << VREG_SHIFT
+    VREG_4016V = 0b100000 << VREG_SHIFT
+    VREG_4032V = 0b100001 << VREG_SHIFT
+    VREG_4048V = 0b100010 << VREG_SHIFT
+    VREG_4064V = 0b100011 << VREG_SHIFT
+    VREG_4080V = 0b100100 << VREG_SHIFT
+    VREG_4096V = 0b100101 << VREG_SHIFT
+    VREG_4112V = 0b100110 << VREG_SHIFT
+    VREG_4128V = 0b100111 << VREG_SHIFT
+    VREG_4144V = 0b101000 << VREG_SHIFT
+    VREG_4160V = 0b101001 << VREG_SHIFT
+    VREG_4176V = 0b101010 << VREG_SHIFT
+    VREG_4192V = 0b101011 << VREG_SHIFT
+    VREG_4208V = 0b101100 << VREG_SHIFT
+
+    BATLOWV_MASK = 0X01 << 1 
+    BATLOWV_2800MV = 0X00 << 1
+    BATLOWV_3000MV = 0X01 << 1
+
+    VRECHRG_MASK = 0X01
+    VRECHRG_100MV = 0X0
+    VRECHRG_300MV = 0X01
+
+    #REG 0x5 CHARGE_TIMER_CONTROL_REG
+    CHARGE_TIMER_CONTROL_REG = 0X05
+
+    WATCHDOG_SHIFT = 4
+    WATCHDOG_MASK = 0x03 << WATCHDOG_SHIFT
+    WATCHDOG_DISABLE = 0x00 << WATCHDOG_SHIFT
+    WATCHDOG_40 = 0x01 << WATCHDOG_SHIFT
+    WATCHDOG_80 = 0x02 << WATCHDOG_SHIFT
+    WATCHDOG_160 = 0x03 << WATCHDOG_SHIFT
+
+
+    #REG 0x6 BOOST_THERMAL_CONTROL_REG
+    BOOST_THERMAL_CONTROL_REG = 0X06
+
+    #REG 0x7 MISC_CONTROL_REG
+    MISC_CONTROL_REG = 0X07
+
+    BATFET_SHIFT = 0x05
+    BATFET_MASK = 0x01 << BATFET_SHIFT
+    BATFET_OFF = 0x01 << BATFET_SHIFT
+    BATFET_ON = 0x00 << BATFET_SHIFT
+
+    #REG 0x08 SYSTEM_STATUS_REG
+    SYSTEM_STATUS_REG = 0x08
+
+    VBUS_STAT_SHIFT = 0x06
+    VBUS_STAT_MASK = 0x03 << VBUS_STAT_SHIFT
+
+    CHRG_STAT_SHIFT = 0x04
+    CHRG_STAT_MASK = 0x03 << CHRG_STAT_SHIFT
+
+    DPM_STAT_SHIFT = 0x03
+    DPM_STAT_MASK = 0x01 << DPM_STAT_SHIFT
+
+    PG_STAT_SHIFT = 0x02
+    PG_STAT_MASK = 0x01 << PG_STAT_SHIFT
+
+    THERM_STAT_SHIFT = 0X01 
+    THERM_STAT_MASK = 0X01 << THERM_STAT_SHIFT
+
+    VSYS_STAT_SHIFT = 0X00
+    VSYS_STAT_MASK = 0X01 << VSYS_STAT_SHIFT
+
+    #REG 0x09 NEW_FAULT_REG
+    NEW_FAULT_REG = 0x09
+
+    WATCHDOG_FAULT_SHIFT = 0X07
+    WATCHDOG_FAULT_MASK = 0X01 << WATCHDOG_FAULT_SHIFT
+
+    OTG_FAULT_SHIFT = 0X06
+    OTG_FAULT_MASK = 0X01 << OTG_FAULT_SHIFT
+
+    CHRG_FAULT_SHIFT = 0X04
+    CHRG_FAULT_MASK = 0X03 << CHRG_FAULT_SHIFT
+
+    BAT_FAULT_SHIFT = 0X03
+    BAT_FAULT_MASK = 0X01 << BAT_FAULT_SHIFT
+
+    NTC_FAULT_SHIFT = 0X00
+    NTC_FAULT_MASK = 0X03 << NTC_FAULT_SHIFT
+
+    #REG 0x0A VENDER_REVISION_REG
+    VENDER_REVISION_REG = 0x0A
+
+    def __init__(self, i2c_bus=1, address=0x6b):
+        self.bus =  smbus.SMBus(1)
+        self.address = address
+
+    ##Private Methods## 
+    def _readByte(self, reg):
+        return self.bus.read_byte_data(self.address, reg)
+
+    def _writeByte(self, reg, data):
+        return self.bus.write_byte_data(self.address, reg, data)
+    
+    def _readByte(self, reg):
+        return self.bus.read_byte_data(self.address, reg)
+
+    def _modifyReg(self, reg, mask, data):
+        return self._writeByte(reg, (self._readByte(reg) & (~mask)) | data)
+
+    
+    ##Public Methods##
+
+    #REGISTER 0X00 INPUT_SOURCE_CONTROL_REG METHODS 
+    def enableHiZ(self):
+        return self._modifyReg(self.INPUT_SOURCE_CONTROL_REG, self.HI_Z_MASK, 0x01 << 7)
+    
+    def disenableHiZ(self):
+        return self._modifyReg(self.INPUT_SOURCE_CONTROL_REG, self.HI_Z_MASK, 0x00 << 7)
+
+    def setInputCurrentLimit(self, val):
+        return self._modifyReg(self.INPUT_SOURCE_CONTROL_REG, self.IINLIM_MASK, val)
+
+    def getInputCurrentLimit(self):
+        return self._readByte(self.INPUT_SOURCE_CONTROL_REG) & self.IINLIM_MASK
+    
+    def setInputVoltageLimit(self, val):
+        return self._modifyReg(self.INPUT_SOURCE_CONTROL_REG, self.VINDPM_MASK, val)
+
+    def getInputVoltageLimit(self):
+        return self._readByte(self.INPUT_SOURCE_CONTROL_REG) & self.VINDPM_MASK
+
+    #REGISTER 0X01 POWER_ON_CONFIG_REG METHODS
+    
+    # disable = 0, enable =1
+    def enableOTG(self, val):
+        return self._modifyReg(self.POWER_ON_CONFIG_REG, self.OTG_CONFIG_MASK, val << 0x05)
+    
+    # disable = 0, enable =1
+    def enableCHG(self, val):
+        return self._modifyReg(self.POWER_ON_CONFIG_REG, self.CHG_CONFIG_MASK, val << 0x04)
+
+    def setSysMinVoltage(self, val):
+        return self._modifyReg(self.POWER_ON_CONFIG_REG, self.SYS_MIN_MASK, val << self.SYS_MIN_SIFT)
+
+    def getSysMinVoltage(self):
+        return self._readByte(self.POWER_ON_CONFIG_REG) & self.SYS_MIN_MASK
+
+    #REGISTER 0X02 CHARGE_CURRENT_CONTROL_REG
+
+    def setICHG(self, val):
+        return self._modifyReg(self.CHARGE_CURRENT_CONTROL_REG, self.ICHRG_MASK, val)
+
+    def getICHG(self, ):
+        return self._readByte(self.CHARGE_CURRENT_CONTROL_REG) & self.ICHRG_MASK
+
+    #REGISTER 0X03 PRECHARGE_TERMINATION_CONTROL_REG
+    def setIPRECHG(self, val):
+        return self._modifyReg(self.PRECHARGE_TERMINATION_CONTROL_REG, self.IPRECHG_MASK, val)\
+    
+    def getIPRECHG(self):
+        return self._readByte(self.PRECHARGE_TERMINATION_CONTROL_REG) & self.IPRECHG_MASK
+
+    def setITERM(self, val):
+        return self._modifyReg(self.PRECHARGE_TERMINATION_CONTROL_REG, self.ITERM_MASK, val)
+    
+    def getITERM(self):
+        return self._readByte(self.PRECHARGE_TERMINATION_CONTROL_REG) & self.ITERM_MASK
+
+    #REGISTER 0X04 CHARGE_VOLTAGE_CONTROL_REG
+    def setVREG(self, val):
+        return self._modifyReg(self.CHARGE_CURRENT_CONTROL_REG, self.VREG_MASK, val)
+
+    def getVREG(self):
+        return self._readByte(self.CHARGE_CURRENT_CONTROL_REG) & self.VREG_MASK
+
+    def setBATLOWV(self, val):
+        return self._modifyReg(self.CHARGE_CURRENT_CONTROL_REG, self.BATLOWV_MASK, val)
+
+    def getBATLOWV(self):
+        return self._readByte(self.CHARGE_CURRENT_CONTROL_REG) & self.BATLOWV_MASK
+
+    def setVRECHRG(self, val):
+        return self._modifyReg(self.CHARGE_CURRENT_CONTROL_REG, self.VRECHRG_MASK, val)
+
+    def getVRECHRG(self):
+        return self._readByte(self.CHARGE_CURRENT_CONTROL_REG) & self.VRECHRG_MASK
+
+    #REGISTER 0X05 CHARGE_TIMER_CONTROL_REG
+    def setWatchdog(self, val):
+        return self._modifyReg(self.CHARGE_TIMER_CONTROL_REG, self.WATCHDOG_MASK, val)
+    #REGISTER 0X06 BOOST_THERMAL_CONTROL_REG
+
+    #REGISTER 0X07 MISC_CONTROL_REG
+    def setBATFET(self, val):
+        return self._modifyReg(self.MISC_CONTROL_REG, self.BATFET_MASK, val)
+
+    #REGISTER 0X08 SYSTEM_STATUS_REG
+
+    def getSystemStatus(self):
+        return self._readByte(self.SYSTEM_STATUS_REG)
+
+    def getVbusStatus(self):
+        return (self._readByte(self.SYSTEM_STATUS_REG) & self.VBUS_STAT_MASK) >> self.VBUS_STAT_SHIFT
+    
+    def getChrgStatus(self):
+        return (self._readByte(self.SYSTEM_STATUS_REG) & self.CHRG_STAT_MASK) >> self.CHRG_STAT_SHIFT
+
+    def getDpmStatus(self):
+        return (self._readByte(self.SYSTEM_STATUS_REG) & self.DPM_STAT_MASK) >> self.DPM_STAT_SHIFT
+
+    def getPgStatus(self):
+        return (self._readByte(self.SYSTEM_STATUS_REG) & self.PG_STAT_MASK) >> self.PG_STAT_SHIFT
+    
+    def getThermStatus(self):
+        return (self._readByte(self.SYSTEM_STATUS_REG) & self.THERM_STAT_MASK) >> self.THERM_STAT_SHIFT
+
+    def getVsysStatus(self):
+        return (self._readByte(self.SYSTEM_STATUS_REG) & self.VBUS_STAT_MASK) >> self.VSYS_STAT_SHIFT
+
+
+    #REGISTER 0X09 NEW_FAULT_REG
+
+    def getNewFaults(self):
+        return self._readByte(self.NEW_FAULT_REG)
+
+
+    #HELPER FUNCTIONS
+
+    def powerDown(self):
+        self.setWatchdog(self.WATCHDOG_DISABLE)
+        self.setBATFET(self.BATFET_OFF)
