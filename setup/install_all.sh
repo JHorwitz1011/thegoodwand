@@ -96,7 +96,6 @@ fi
 git submodule update --init
 echo "Step 4: Install Seeed studio voice card"
 cd ../seeed-voicecard/ #change directory to seeed voice card. 
-echo $PWD
 sudo ./install.sh
 if [ $? != 0 ]
 then 
@@ -110,6 +109,7 @@ if grep -Fq "export PATH=~/thegoodwand/templates:" ~/.bashrc
 then 
     echo "Templates already added to ./bashrc"
 else
+    echo "Adding template to path" 
     echo "export PATH="~/thegoodwand/templates:$PATH"" > temp
     cat temp >> ~/.bashrc
     rm temp

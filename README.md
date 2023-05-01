@@ -12,20 +12,11 @@ ATCTT3xFfGN0_hPNa5cD3xyTp8eeLd-tIBV5AQhfUNYwk8lHSuL9FN_WlCAQ3yKDfZURT0dOypsdJzHq
 
 ### How do I get set up? ###
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+1. Clone repo above 
+2. cd to setup folder 
+3. run ./install_all.sh (DO NOT RUN AS SUDO)
+4. Monitor for errors 
 
 ### Contribution guidelines ###
 
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+* No pushing directly to master. All changes are to be done on a feature branch and merged in with a PR. 

@@ -18,14 +18,14 @@ user=$2
 fi
 
 echo "Creating Lightbar service"
-#supervisor config files
+#supervisor config files: ONLY SERVICE THAT NEEDS ROOT user
 echo "[program:lightbar]
 command=python3 -u FWLightService.py
 directory=home/"$path"/lights
 autostart=true
 autorestart=true
 priority=50
-user=$user
+user=root
 "  > /etc/supervisor/conf.d/lightbar.conf
 if [ $? != 0 ]
 then 
