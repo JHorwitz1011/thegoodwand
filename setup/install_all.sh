@@ -123,4 +123,4 @@ then
     echo "ERROR: Running Deamon script"; exit 1
 fi
 
-
+sudo reboot now
