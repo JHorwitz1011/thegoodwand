@@ -8,6 +8,8 @@ import os
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
 from MQTTObject import MQTTObject
 
+BATTERY_SERVICE_PATH = "../battery_charger"
+
 pkt_template = {
     "header": {
         "type": "UI_BUTTON",
@@ -52,7 +54,7 @@ class TGWButtonService(MQTTObject):
         duration = self.press_end - self.press_start
 
         if duration > SHUTDOWN_LENGTH:                              # power off
-            os.system("sudo python3 " + os.path.expanduser('~/charger_bq24296m') +'/charger_cli.py --power_off')
+            os.system("sudo python3 " + os.path.expanduser(BATTERY_SERVICE_PATH) +'/charger_cli.py --power_off')
         else:
             pkt = pkt_template
             if duration < LONG_PRESS_DURATION:                      # trigger short
