@@ -6,10 +6,6 @@ Authorization: Bearer ATCTT3xFfGN0_hPNa5cD3xyTp8eeLd-tIBV5AQhfUNYwk8lHSuL9FN_WlC
 
 ATCTT3xFfGN0_hPNa5cD3xyTp8eeLd-tIBV5AQhfUNYwk8lHSuL9FN_WlCAQ3yKDfZURT0dOypsdJzHqpRl99A77V6DVTsvLEAUg7a43dwW25FfryWnvSdME6vQDg827UzSqXKFfP9Kvttm6NLqH-wLZLOk_cE4VV5skRE-erkvolAiWpIDNQ5A=F09C70EA
 
-### What is this repository for? ###
-
-
-
 ### How do I get set up? ###
 
 1. Clone repo above 

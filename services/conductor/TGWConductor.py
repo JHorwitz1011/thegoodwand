@@ -135,33 +135,36 @@ class TGWConductor(MQTTObject):
         """
         global runningSpell
         payload = json.loads(msg.payload)
-        if len(payload['card_data']['records']) > 0:
-            cardRecord0 = payload_url = payload['card_data']['records'][0]
-            if cardRecord0 ["data"] == "https://www.thegoodwand.com":
-                print ("One of our cards")
-                cardRecord1 = payload['card_data']['records'][1]
-                cardData = cardRecord1 ["data"]
-                card_dict = json.loads(cardData)
-                game_on_card = card_dict ["spell"]
-                print ("spell is:",game_on_card, " and running spell is ",runningSpell)
-                if runningSpell != game_on_card:
-                    # This is a different spell, so start it:
-                    if self.child_process is None: #no game is running so just start new game
-                        self._start_game(game_on_card)
-                    else:
-                        # Stop currently running game
-                        self._kill_game ()
-                        self._start_game(game_on_card)                        
+        try:
+            if len(payload['card_data']['records']) > 0:
+                cardRecord0 = payload_url = payload['card_data']['records'][0]
+                if cardRecord0 ["data"] == "https://www.thegoodwand.com":
+                    print ("One of our cards")
+                    cardRecord1 = payload['card_data']['records'][1]
+                    cardData = cardRecord1 ["data"]
+                    card_dict = json.loads(cardData)
+                    game_on_card = card_dict ["spell"]
+                    print ("spell is:",game_on_card, " and running spell is ",runningSpell)
+                    if runningSpell != game_on_card:
+                        # This is a different spell, so start it:
+                        if self.child_process is None: #no game is running so just start new game
+                            self._start_game(game_on_card)
+                        else:
+                            # Stop currently running game
+                            self._kill_game ()
+                            self._start_game(game_on_card)                        
 
-                    # Update runningSpell. NOT HANDLING edge condition of spells failing to start
-                    runningSpell = game_on_card
-                else:  
-                    print ("same as running game, doing nothing")                
+                        # Update runningSpell. NOT HANDLING edge condition of spells failing to start
+                        runningSpell = game_on_card
+                    else:  
+                        print ("same as running game, doing nothing")                
+                else:
+                        print("NOT a TGW card") 
+                        # Add here support for identifying Yoto and starting it
             else:
-                    print("NOT a TGW card") 
-                    # Add here support for identifying Yoto and starting it
-        else:
-            print('no records found')
+                print('no records found')
+        except:
+            print("ERROR parsing NFC card")
 
     def run(self):
         self.start_mqtt(CONDUCTOR_CLIENT_ID, self.callbacks)
