@@ -1,6 +1,6 @@
 import os
 
-GAMES_DIR = "~/spells"
+GAMES_DIR = "/thegoodwand/spells"
 MAIN_FUNCTION = 'main.py'
 
 def game_exists(game_name:str) -> bool:

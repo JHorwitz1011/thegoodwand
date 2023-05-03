@@ -7,7 +7,7 @@ To use, add repository to system path at the top of a python script:
 ```python
 import sys
 import os
-sys.path.append(os.path.expanduser('~/templates'))
+sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
 from MQTTObject import MQTTObject
 ```
 
@@ -42,7 +42,7 @@ import time
 
 import sys
 import os
-sys.path.append(os.path.expanduser('~/templates'))
+sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
 from MQTTObject import MQTTObject
 
 CALLBACK1_TOPIC = "topic1"
