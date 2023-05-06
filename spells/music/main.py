@@ -35,17 +35,17 @@ gesture_topic = "goodwand/ui/controller/gesture"
 nfc_topic = "goodwand/ui/controller/nfc"
 
 # generate client ID with pub prefix randomly
-client_id = 'temp-test-client'
+client_id = 'musicSpell'
+#client_id = 'musicSpell' + str(time.time())
 
-
-start_audio_pkt = {
+audio_pkt = {
     "header": {
       "type": "UI_AUDIO", "version": 1
 },
     "data": {
-     	"action": "START", 
-	 	"path": os.getcwd(),
-	 	"file": "2SPWelcome.wav"
+     	"action": " ", 
+	 	"path": " ",
+	 	"file": " "
 }
 }
 
@@ -57,26 +57,31 @@ light_pkt = {
             },
             "data": {
                 "granularity": 1,
-                "animation": "yipee",
-				"path": os.getcwd(),
+                "animation": "",
+				"path": "" ,
         		"crossfade": 0
             }
         }
 
 
-class SpellTwo ():
+class musicSpell():
 	global old_orient
 	global instrumentName 
 
 	def play_audio(self, client, file):
+		global currentPath
 		print ("Playing" , file)
-		start_audio_pkt ['data']['file'] = file
-		start_audio_pkt ['data']['path'] = os.getcwd()
-		self.publish(client, audio_topic, start_audio_pkt)
+		audio_pkt ['data']['action'] = "START"
+		audio_pkt ['data']['file'] = file
+		self.publish(client, audio_topic, audio_pkt)
+
+	def stop_audio(self, client):
+		print ("Stopping all Audio")
+		audio_pkt ['data']['action'] = "STOP"
+		self.publish(client, audio_topic, audio_pkt)
 
 	def play_light(self, client, lightEffect):
 		light_pkt ['data']['animation'] = lightEffect
-		light_pkt ['data']['path'] = os.getcwd() 
 		print ("Light Effect" , lightEffect, " in ", light_pkt ['data']['path'] )
 		self.publish(client, light_topic, light_pkt)
 
@@ -85,7 +90,7 @@ class SpellTwo ():
 	def connect_mqtt(self):
 		def on_connect(client, userdata, flags, rc): ### FIXED INDENTATION ERROR
 			if rc == 0:
-				print("Connected to MQTT Broker!")
+				print("Music Spell Connected to MQTT Broker! PID=", os.getpid())
 			else:
 				print("Failed to connect, return code %d\n", rc)
 		client = mqtt_client.Client(client_id)
@@ -109,6 +114,7 @@ class SpellTwo ():
 				if record['type'] == "text":
 					cardData = json.loads(record['data'])
 					if cardData['spell']=='music':
+
 						if "instrument" in cardData: 
 							instrumentName = cardData['instrument']
 							print ('instrumentName set to', instrumentName)
@@ -118,7 +124,9 @@ class SpellTwo ():
 							fileName = backTrack + '.wav'
 							print ("playing in background:", fileName)
 							# we should stop the old background music - but thats tricky
+							self.stop_audio (client)
 							self.play_audio (client, fileName)
+						
 						self.play_light (client, 'yes')	
 
 		if msgType == "UI_GESTURE":
@@ -149,24 +157,48 @@ class SpellTwo ():
 
 	def run(self):
 		global old_orient
+		global currentPath
 		old_orient = 0
 		instrumentName = 'drum'
 
+		print ("Music spell running")
 		client = self.connect_mqtt()
 		client.on_message = self.on_message
 		client.subscribe(gesture_topic)
 		client.subscribe(nfc_topic)
 		client.enable_logger()
-		print('subscribed!')
+		print('Music spell subscribed to mqtt!')
+		param_1 = ""
+		param_2 = ""
+		try:
+			param_1= sys.argv[1] 
+			param_2= sys.argv[2] 
+		except:
+			print ("no args")
+
+		# if started by conductor, param1 is the path,
+		# otherwise use cwd
+		if param_1 !="":
+			currentPath = param_1
+		else:
+			currentPath =os.getcwd() 
+		print ("Setting path to:",currentPath)	
+		audio_pkt ['data']['path'] = currentPath
+		light_pkt ['data']['path'] = currentPath
+		
+
+		# Need to put here code to arse the second argument which is a JSON f
+		# from the conductor with the startup info on the card
 
 		#Play the initial audio and light
 
-		self.play_audio (client, "2SPL2B.wav")
+		self.play_audio (client, ".wav")
 		self.play_light (client, "yipee")
 
 		client.loop_forever()
 
 
 if __name__ == '__main__':
-    service = SpellTwo()
-    service.run()
+	print ("running music spell")
+	service = musicSpell()
+	service.run()

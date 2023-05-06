@@ -41,7 +41,7 @@ class MQTTObject():
         
         # Start MQTT
         # Add all callbacks
-        print(self.topics_and_callbacks)
+        #print(self.topics_and_callbacks)
         for topic in self.topics_and_callbacks.keys():
             self.client.message_callback_add(topic, self.topics_and_callbacks[topic])
             print('subscribed to ', topic)

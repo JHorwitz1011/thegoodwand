@@ -29,9 +29,9 @@ class FWAudioService():
     def connect_mqtt(self):
         def on_connect(client, userdata, flags, rc):
             if rc == 0:
-                print("Connected to MQTT Broker!")
+                print("Audio Connected to MQTT Broker!")
             else:
-                print("Failed to connect to MQTT server, return code %d\n", rc)
+                print("Audio Failed to connect to MQTT server, return code %d\n", rc)
 
         client = mqtt_client.Client(client_id)
         client.on_connect = on_connect
@@ -40,8 +40,15 @@ class FWAudioService():
 
     def on_message(self, client, userdata, msg):
         payload = json.loads(msg.payload)
-        
-        if payload["data"]["action"] == "START":
+        msgCommand = payload["data"]["action"]
+        print ("Audio command",msgCommand)
+       
+        try:
+            playMode = payload["data"]["mode"]
+        except:
+            playMode =""
+
+        if  msgCommand == "START":
             print('START msg received')
             
             try:
@@ -53,11 +60,19 @@ class FWAudioService():
                 fileToPlay = audioPath + "/" + payload['data']["file"]
             else:
                 fileToPlay = payload['data']["file"]
+                
             print('Playing file:'+ fileToPlay) 
-            os.system("aplay " + fileToPlay)
+
+            if playMode == "background":
+                os.system("aplay " + fileToPlay + "&")
+            else:
+                os.system("aplay " + fileToPlay)
         else:
-            print('OTHER? msg received. self.STOP')
-            self.stop = True
+            if msgCommand == "STOP":
+               os.system("sudo killall aplay") 
+            else:
+                print('OTHER? msg received:', msgCommand)
+                self.stop = True
 
 
     ################## MAIN LOOP ##########################

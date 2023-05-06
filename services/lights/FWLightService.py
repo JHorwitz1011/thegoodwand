@@ -93,9 +93,9 @@ class FWLightService():
     def connect_mqtt(self):
         def on_connect(client, userdata, flags, rc):
             if rc == 0:
-                print("Connected to MQTT Broker!")
+                print("Lightbar Connected to MQTT Broker!")
             else:
-                print("Failed to connect to MQTT server, return code %d\n", rc)
+                print("Failed to connect Lightbar to MQTT server, return code %d\n", rc)
 
         client = mqtt_client.Client(client_id)
         client.on_connect = on_connect
@@ -109,14 +109,14 @@ class FWLightService():
             print(f'animation received: {animation_codes[payload["data"]["animation"]]}')
             self.animation_queue.append(grab_animation_from_csv(animation_codes[payload['data']['animation']]))
         except KeyError:
-            print("ERROR: Invalid Animation")
+            print("ERROR: Invalid Animation:",msg)
 
     def on_main_led_message(self, client, userdata, msg):
         payload = json.loads(msg.payload)
         try:
             self.pixels[0] = tuple(payload["data"]["color1"])
         except KeyError:
-            print("ERROR: Invalid Animation")
+            print("ERROR: Invalid MAIN LED Animation")
 
     ################## MAIN LOOP ##########################
     def run(self):
