@@ -8,6 +8,7 @@ import signal
 import sys
 import time
 import ndef
+import logging
 
 SERVICE_TYPE = "UI_NFC"
 SERVICE_VERSION = "1"
@@ -17,12 +18,28 @@ MQTT_PORT = 1883
 MQTT_TOPIC = 'goodwand/ui/controller/nfc'
 MQTT_CLIENT_ID = 'TGW_NFC_SERVICE'
 
+## Logger configuration
+## Change level by changing DEBUG_LEVEL variable to ["DEBUG", "INFO", "WARNING", "ERROR"]
+DEBUG_LEVEL = "INFO"
+LOGGER_HANDLER=sys.stdout
+LOGGER_NAME = __name__
+LOGGER_FORMAT = '[%(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
+
+logger = logging.getLogger(LOGGER_NAME)
+logger.setLevel(logging.getLevelName(DEBUG_LEVEL))
+
+handler = logging.StreamHandler(LOGGER_HANDLER)
+handler.setLevel(logging.getLevelName(DEBUG_LEVEL))
+format = logging.Formatter(LOGGER_FORMAT)
+handler.setFormatter(format)
+logger.addHandler(handler)
+
 
 def mqtt_on_connect(client, userdata, flags, rc):
     if rc == 0:
-        reader.READER.logger.info("Connected to MQTT Broker!")
+        logger.info("Connected to MQTT Broker!")
     else:
-        reader.READER.logger.warning("Failed to connect to MQTT server, return code %d\n", rc)
+        logger.warning("Failed to connect to MQTT server, return code %d\n", rc)
 
 
 def mqtt_connect():
@@ -35,9 +52,9 @@ def mqtt_connect():
 def mqtt_on_message(self, client, userdata, msg):
     #payload = json.loads(msg.payload)
     try:
-        reader.READER.logger.info(msg)
+        logger.info(msg)
     except KeyError:
-        reader.READER.logger.warning("Json Key error")
+        logger.warning("Json Key error")
 
 
 def mqtt_on_publish(client, userdata, mid):
@@ -48,7 +65,7 @@ def mqtt_publish(client,type, version, uid, records):
     header = {"type": type, "version": version}
     card_data =   {"uid": uid, "records": records}
     msg = {"header": header, "card_data": card_data}
-    reader.READER.logger.info(f"[MQTT MESSAGE]  {msg}")
+    logger.info(f"[MQTT MESSAGE]  {msg}")
     client.publish(MQTT_TOPIC, json.dumps(msg))
 
 
@@ -104,23 +121,23 @@ class Ndef():
         i = self.__getTermination(byte_array)
         
         if i == -1:
-            reader.READER.logger.warning("Failed to find termination character")
+            logger.warning("Failed to find termination character")
             return []
         
         for record in ndef.message_decoder(byte_array[2:i]): 
-            reader.READER.logger.debug(f"{record}  {type(record)}")
+            logger.debug(f"{record}  {type(record)}")
             
             if record.type == "urn:nfc:wkt:T":
-                reader.READER.logger.debug(f"[TEXT RECORD] {record.type}")
+                logger.debug(f"[TEXT RECORD] {record.type}")
                 mqtt_data.append({"type": "text", "data" : record.text})
             
             elif record.type == "urn:nfc:wkt:U":
-                reader.READER.logger.debug(f"[URI RECORD]  {record.type}")  
+                logger.debug(f"[URI RECORD]  {record.type}")  
                 mqtt_data.append({"type": "uri", "data" : record.iri}) 
             
             #Custom Type. 
             else: 
-                reader.READER.logger.debug(f"[Unknown Record Type] {record.type}  {record.data}")
+                logger.debug(f"[Unknown Record Type] {record.type}  {record.data}")
                 mqtt_data.append({"type": record.type, "data" : record.data.decode("utf-8")}) 
                 
 
@@ -141,7 +158,7 @@ if __name__ == '__main__':
             id, text = reader.read(.25) #added delay to prevent 100% CPU usage
             message_byte_array = text.encode('latin-1')
             
-            reader.READER.logger.debug(f'[RAW DATA  [UID]{id} \t [DATA]{text}')
+            logger.debug(f'[RAW DATA  [UID]{id} \t [DATA]{text}')
             
             if len(message_byte_array):
                 #Is the data NDEF encoded
@@ -155,7 +172,7 @@ if __name__ == '__main__':
                 time.sleep(.25) 
 
             else:
-                reader.READER.logger.warning("Error reading card data  {message_byte_array}")
+                logger.warning("Error reading card data  {message_byte_array}")
         except KeyboardInterrupt:
             cleanup()
         except:

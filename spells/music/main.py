@@ -4,8 +4,26 @@ import json
 import sys
 import math
 import os
-
+import logging 
 from paho.mqtt import client as mqtt_client
+
+## Logger configuration
+## Change level by changing DEBUG_LEVEL variable to ["DEBUG", "INFO", "WARNING", "ERROR"]
+
+DEBUG_LEVEL = "DEBUG"
+LOGGER_HANDLER=sys.stdout
+LOGGER_NAME = __name__
+LOGGER_FORMAT = '[%(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
+
+logger = logging.getLogger(LOGGER_NAME)
+logger.setLevel(logging.getLevelName(DEBUG_LEVEL))
+
+handler = logging.StreamHandler(LOGGER_HANDLER)
+handler.setLevel(logging.getLevelName(DEBUG_LEVEL))
+format = logging.Formatter(LOGGER_FORMAT)
+handler.setFormatter(format)
+logger.addHandler(handler)
+
 
 # orientation values
 # {-1: "unknown", 1: "X-", 2: "X+", 4: "Y-", 8: "Y+", 16: "Z-", 32: "Z+"}     
@@ -70,19 +88,19 @@ class musicSpell():
 
 	def play_audio(self, client, file):
 		global currentPath
-		print ("Playing" , file)
+		logger.info(f"Play audio file {file}")
 		audio_pkt ['data']['action'] = "START"
 		audio_pkt ['data']['file'] = file
 		self.publish(client, audio_topic, audio_pkt)
 
 	def stop_audio(self, client):
-		print ("Stopping all Audio")
+		logger.info("[Audio] stop all")
 		audio_pkt ['data']['action'] = "STOP"
 		self.publish(client, audio_topic, audio_pkt)
 
 	def play_light(self, client, lightEffect):
 		light_pkt ['data']['animation'] = lightEffect
-		print ("Light Effect" , lightEffect, " in ", light_pkt ['data']['path'] )
+		logger.info("Light Effect" , lightEffect, " in ", light_pkt ['data']['path'] )
 		self.publish(client, light_topic, light_pkt)
 
 
@@ -90,13 +108,13 @@ class musicSpell():
 	def connect_mqtt(self):
 		def on_connect(client, userdata, flags, rc): ### FIXED INDENTATION ERROR
 			if rc == 0:
-				print("Music Spell Connected to MQTT Broker! PID=", os.getpid())
+				logger.debug(f"Connected to MQTT Broker! PID= {os.getpid()}")
 			else:
-				print("Failed to connect, return code %d\n", rc)
+				logger.warning(f"Failed to connect, return code {rc}")
 		client = mqtt_client.Client(client_id)
 		client.on_connect = on_connect
 		client.connect(broker, port)
-		print("Attempting to connect to MQTT server")
+		logger.debug(f"Connecting to mqtt server...")
 		
 		return client
 
@@ -104,41 +122,45 @@ class musicSpell():
 		global old_orient
 		global instrumentName 
 
-		print ("Rcvd Message")
-		payload = json.loads(msg.payload)
-		msgType = payload['header']['type']
-		print ("Rcvd OnMessage with type=" + msgType)
+		logger.debug (f"MQTT Message from: {msg.topic}")
+		
+		try:
+			payload = json.loads(msg.payload)
+			msgType = payload['header']['type']
+			logger.debug(f"MQTT message type: {msgType}")
 
-		if msgType == 'UI_NFC':
-			for record in payload['card_data']['records']:
-				if record['type'] == "text":
-					cardData = json.loads(record['data'])
-					if cardData['spell']=='music':
+			if msgType == 'UI_NFC':
+				for record in payload['card_data']['records']:
+					if record['type'] == "text":
+						cardData = json.loads(record['data'])
+						if cardData['spell']=='music':
 
-						if "instrument" in cardData: 
-							instrumentName = cardData['instrument']
-							print ('instrumentName set to', instrumentName)
+							if "instrument" in cardData: 
+								instrumentName = cardData['instrument']
+								logger.info(f"instrumentName set to {instrumentName}")
 
-						if 'background' in cardData:
-							backTrack = cardData['background']
-							fileName = backTrack + '.wav'
-							print ("playing in background:", fileName)
-							# we should stop the old background music - but thats tricky
-							self.stop_audio (client)
-							self.play_audio (client, fileName)
-						
-						self.play_light (client, 'yes')	
+							if 'background' in cardData:
+								backTrack = cardData['background']
+								fileName = backTrack + '.wav'
+								logger.info(f"playing in background: {fileName}")
+								# we should stop the old background music - but thats tricky
+								self.stop_audio (client)
+								self.play_audio (client, fileName)
+							
+							self.play_light (client, 'yes')	
 
-		if msgType == "UI_GESTURE":
-			new_orientation =   payload['data']["orientation"]
-			new_orient = int(math.log(new_orientation,2))
-			print('new orientation is:',new_orient,'/', old_orient)
-			fileName = "2SPL" + orientationText[new_orient] + '-' + instrumentName
-			print('FileName is:', fileName)
-			self.play_audio (client, fileName + '.wav')
-			self.play_light (client, fileName + '.csv')	
-			old_orient = new_orient 
-
+			if msgType == "UI_GESTURE":
+				new_orientation =   payload['data']["orientation"]
+				new_orient = int(math.log(new_orientation,2))
+				logger.debug(f"orientation change. New: {new_orient}  Old: {old_orient}")
+				fileName = "2SPL" + orientationText[new_orient] + '-' + instrumentName
+				logger.debug(f"FileName is: {fileName}")
+				self.play_audio (client, fileName + '.wav')
+				self.play_light (client, fileName + '.csv')	
+				old_orient = new_orient 
+		
+		except Exception as e:
+			logger.warning(f"JSON parsing excetion {e}")
 
 
 	def publish(self, client, topic, pkt):
@@ -147,34 +169,33 @@ class musicSpell():
 			# result: [0, 1]
 			status = result[0]
 			if status == 0:
-				print(f"Publishing Msg")
+				logger.debug(f"published message: {topic}")
 			else:
-				print(f"Failed to send message to topic {topic}")
+				logger.error(f"Failed to send message to topic {topic}")
 		except IndexError:
-			print("ERROR: no argument given. please use format: python3 pub_client.py [animation code]") ### another......... indent error come on ram :(
+			logger.warning("no argument given. please use format: python3 pub_client.py [animation code]")
 	
-
 
 	def run(self):
 		global old_orient
 		global currentPath
 		old_orient = 0
 		instrumentName = 'drum'
-
-		print ("Music spell running")
 		client = self.connect_mqtt()
 		client.on_message = self.on_message
 		client.subscribe(gesture_topic)
 		client.subscribe(nfc_topic)
 		client.enable_logger()
-		print('Music spell subscribed to mqtt!')
+		logger.debug('Music spell subscribed to mqtt!')
 		param_1 = ""
 		param_2 = ""
+		
+		# TODO: Not the way to check for arguments
 		try:
 			param_1= sys.argv[1] 
 			param_2= sys.argv[2] 
 		except:
-			print ("no args")
+			logger.error ("no args")
 
 		# if started by conductor, param1 is the path,
 		# otherwise use cwd
@@ -182,7 +203,7 @@ class musicSpell():
 			currentPath = param_1
 		else:
 			currentPath =os.getcwd() 
-		print ("Setting path to:",currentPath)	
+		logger.info(f"Setting path to: {currentPath}")	
 		audio_pkt ['data']['path'] = currentPath
 		light_pkt ['data']['path'] = currentPath
 		
@@ -199,6 +220,6 @@ class musicSpell():
 
 
 if __name__ == '__main__':
-	print ("running music spell")
 	service = musicSpell()
+	logger.info(f"Music spell running")
 	service.run()

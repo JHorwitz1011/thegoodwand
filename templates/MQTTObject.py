@@ -1,8 +1,26 @@
 from paho.mqtt import client as mqtt_client
 import json
-
+import logging 
+import sys
 DEFAULT_BROKER = 'localhost'
 DEFAULT_PORT = 1883
+
+## Logger configuration
+## Change level by changing DEBUG_LEVEL variable to ["DEBUG", "INFO", "WARNING", "ERROR"]
+DEBUG_LEVEL = "INFO"
+LOGGER_HANDLER=sys.stdout
+LOGGER_NAME = __name__
+LOGGER_FORMAT = '[%(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
+
+logger = logging.getLogger(LOGGER_NAME)
+logger.setLevel(logging.getLevelName(DEBUG_LEVEL))
+
+handler = logging.StreamHandler(LOGGER_HANDLER)
+handler.setLevel(logging.getLevelName(DEBUG_LEVEL))
+format = logging.Formatter(LOGGER_FORMAT)
+handler.setFormatter(format)
+logger.addHandler(handler)
+
 
 class MQTTObject():
     """Abstracts away irrelevavnt aspects of mqtt functionality for ease of programming"""
@@ -31,7 +49,7 @@ class MQTTObject():
         # Connect to client
         def on_connect(client, userdata, flags, rc):
             if rc == 0:
-                print(f"Connected {self.client_id} to MQTT Broker!")
+                logger.info(f"Connected {self.client_id} to MQTT Broker!")
             else:
                 raise Exception(f"Failed to connect to MQTT server, return code {rc}")
 
@@ -41,10 +59,10 @@ class MQTTObject():
         
         # Start MQTT
         # Add all callbacks
-        #print(self.topics_and_callbacks)
+        #logger.info(self.topics_and_callbacks)
         for topic in self.topics_and_callbacks.keys():
             self.client.message_callback_add(topic, self.topics_and_callbacks[topic])
-            print('subscribed to ', topic)
+            logger.info(f"subscribed to {topic}")
             self.client.subscribe(topic)
             self.client.enable_logger()
     

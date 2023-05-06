@@ -4,6 +4,7 @@ from paho.mqtt import client as mqtt
 import json
 from lsm6dsox import *
 import RPi.GPIO as GPIO
+import logging 
 
 # # Used for timing debug
 # GPIO.setmode(GPIO.BCM)
@@ -36,12 +37,29 @@ WAKE_STATUS_ENABLED = True
 RAW_DATA_ENABLED = False
 
 
+## Logger configuration
+## Change level by changing DEBUG_LEVEL variable to ["DEBUG", "INFO", "WARNING", "ERROR"]
+DEBUG_LEVEL = "INFO"
+LOGGER_HANDLER=sys.stdout
+LOGGER_NAME = __name__
+LOGGER_FORMAT = '[%(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
+
+logger = logging.getLogger(LOGGER_NAME)
+logger.setLevel(logging.getLevelName(DEBUG_LEVEL))
+
+handler = logging.StreamHandler(LOGGER_HANDLER)
+handler.setLevel(logging.getLevelName(DEBUG_LEVEL))
+format = logging.Formatter(LOGGER_FORMAT)
+handler.setFormatter(format)
+logger.addHandler(handler)
+
+
 def is_awake(val):
     if(val & 0x10):
-        print("Inactive")
+        logger.debug("Inactive")
         res = False
     else:
-        print("Active")
+        logger.debug("Active")
         res = True
     return res
 
@@ -55,7 +73,7 @@ class imu_service:
                     gyro_scale = CTRL2_G_SCALE_1000DPS,
                     mag_scale= MAG_CTRL2_FS_16G,
                     mag_enable= False,
-                    debug_level="WARNING")
+                    debug_level= DEBUG_LEVEL)
         
         orientaion = -1
         wake_status = -1
@@ -63,9 +81,9 @@ class imu_service:
 
     def mqtt_on_connect(self, client, userdata, flags, rc):
             if rc == 0:
-                print("Connected to MQTT Broker!")
+                logger.debug("Connected to MQTT Broker!")
             else:
-                print("Failed to connect to MQTT server, return code %d\n", rc)
+                logger.warning(f"Failed to connect to MQTT server, return code {rc}")
 
 
     def mqtt_connect(self):
@@ -89,16 +107,16 @@ class imu_service:
                         self.imu.disable_data_ready_int()
 
             else: 
-                print("Unknown commnad\n" + msg_json)
-        except:
-            print("Command error " + json.loads(message.payload))
+                logger.warning("Unknown commnad\n" + msg_json)
+        except Exception as e:
+            logger.error(f"Mqtt Command error  {json.loads(message.payload)} \n{e}")
 
     def mqtt_on_publish(self, client, userdata, mid):
         pass
 
     
     def mqtt_on_subscribe(self, client, userdata, mid, qos):
-        print("subscribed")
+        logger.debug("subscribed")
         pass
 
 
@@ -130,7 +148,7 @@ class imu_service:
         client.disconnect
 
     def imu_on_d6d_change(self, val):
-        print(f"Position Change {IMU_6D_LABLES[val&0x3F]}")
+        logger.debug(f"Position Change {IMU_6D_LABLES[val&0x3F]}")
         self.orientaion = val&0x3F
         self.mqtt_publish_guesture(client,SERVICE_TYPE, SERVICE_VERSION, imu_gesture, \
                     self.orientaion, self.wake_status)
@@ -182,10 +200,10 @@ if __name__ == '__main__':
     #         accel = service.imu.getAccData()
     #         gyro  = service.imu.getGyroData()
     #         #mag   = service.imu.get_mag_data()
-    #         print("[A]\tX: {0:.3f}mg    Y: {1:.3f}mg    Z: {2:.3f}mg".format(accel[0],accel[1], accel[2]))
-    #         print("[G]\tX: {0:.3f}mdps  Y: {1:.3f}mdps  Z: {2:.3f}mdps".format(gyro[0],gyro[1], gyro[2]))
-    #        # print("[M]\tX: {0:.3f}mGs   Y: {1:.3f}mGs   Z: {2:.3f}mGs".format(mag[0],mag[1], mag[2]))
-    #         print("\n")
+    #         logger.debug("[A]\tX: {0:.3f}mg    Y: {1:.3f}mg    Z: {2:.3f}mg".format(accel[0],accel[1], accel[2]))
+    #         logger.debug("[G]\tX: {0:.3f}mdps  Y: {1:.3f}mdps  Z: {2:.3f}mdps".format(gyro[0],gyro[1], gyro[2]))
+    #        # logger.debug("[M]\tX: {0:.3f}mGs   Y: {1:.3f}mGs   Z: {2:.3f}mGs".format(mag[0],mag[1], mag[2]))
+    #         logger.debug("\n")
     #         time.sleep(1)
 
     signal.signal(signal.SIGINT, signal_handler)

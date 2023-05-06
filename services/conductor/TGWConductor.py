@@ -20,7 +20,22 @@ AUDIO_TOPIC = "goodwand/ui/view/audio_playback"
 
 CONDUCTOR_CLIENT_ID = "TGWConductor"
 
+## Logger configuration
+## Change level by changing DEBUG_LEVEL variable to ["DEBUG", "INFO", "WARNING", "ERROR"]
 DEBUG_LEVEL = "DEBUG"
+LOGGER_HANDLER=sys.stdout
+LOGGER_NAME = __name__
+LOGGER_FORMAT = '[%(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
+
+logger = logging.getLogger(LOGGER_NAME)
+logger.setLevel(logging.getLevelName(DEBUG_LEVEL))
+
+handler = logging.StreamHandler(LOGGER_HANDLER)
+handler.setLevel(logging.getLevelName(DEBUG_LEVEL))
+format = logging.Formatter(LOGGER_FORMAT)
+handler.setFormatter(format)
+logger.addHandler(handler)
+
 
 start_audio_pkt = {
     "header": { "type": "UI_AUDIO", "version": 1},
@@ -57,11 +72,6 @@ class TGWConductor(MQTTObject):
     def __init__(self):
         super().__init__()
         
-        self.logger = logging.getLogger('tgw_conductor')
-        self.logger.addHandler(logging.StreamHandler())
-        level = logging.getLevelName(DEBUG_LEVEL)
-        self.logger.setLevel(level)
-        
         self.runningSpell = "" 
 
         self.child_process = None
@@ -74,16 +84,16 @@ class TGWConductor(MQTTObject):
             NFC_TOPIC : self.on_nfc_scan,
             BUTTON_TOPIC: self.on_button_press,
         }
-        #print ("Done init self")
+        
 	
     def play_light(self, lightEffect):
         light_pkt ['data']['animation'] = lightEffect
         light_pkt ['data']['path'] = os.getcwd() 
-        print(f"Light Effect {lightEffect}  in {light_pkt['data']['path']}" )
+        logger.debug(f"Light Effect {lightEffect}  in {light_pkt['data']['path']}" )
         self.publish(LIGHT_TOPIC, json.dumps(light_pkt))
     
     def play_audio(self, file):
-        print ("Playing" , file)
+        logger.debug ("Playing" , file)
         start_audio_pkt ['data']['file'] = file
         start_audio_pkt ['data']['path'] = os.getcwd()
         self.publish(AUDIO_TOPIC, json.dumps(start_audio_pkt))
@@ -92,7 +102,7 @@ class TGWConductor(MQTTObject):
     def _kill_game(self):
         # kills current game
         
-        print("Killing Process")
+        logger.debug("Killing Process")
         self.child_process.kill()
         self.child_process = None
         self.play_light ('app_stopped.csv')
@@ -108,31 +118,31 @@ class TGWConductor(MQTTObject):
                 self._kill_game() 
             else:
                 #Long press while idle - what should the behavior be?
-                print("Long press while idle")
+                logger.debug("Long press while idle")
             
 
     def _start_game(self, game: str):
         """
         starts game. assumes path is valid per helper.fetch_game checking
         """
-        print("Start game called")
+        logger.debug("Start game called")
         
         filePath = helper.fetch_game(game)
         filePathandMain = filePath + "/main.py"
         
         if filePath is not None:
-            print(f"Setting Process args to {filePathandMain} {filePath}")
+            logger.debug(f"Setting Process args to {filePathandMain} {filePath}")
             self.child_process = subprocess.Popen(['python3', filePathandMain, filePath ] )
-            print(f"[SUBPROCESS ID] {self.child_process.pid}")
+            logger.debug(f"[SUBPROCESS ID] {self.child_process.pid}")
             
         else:
-            print("invalid game found...")
+            logger.debug("invalid game found...")
 
     def on_nfc_scan(self, client, userdata, msg):
         """
         handles logic for starting games
         """
-        print("[NFC SCAN] Scan event")
+        logger.debug("[NFC SCAN] Scan event")
         payload = json.loads(msg.payload)
         
         try:
@@ -140,11 +150,11 @@ class TGWConductor(MQTTObject):
                 cardRecord0 = payload_url = payload['card_data']['records'][0]
                 
                 if cardRecord0 ["data"] == "https://www.thegoodwand.com":
-                    print("[NFC SCAN] The Good Wand Card")
+                    logger.debug("[NFC SCAN] The Good Wand Card")
                     cardData = payload['card_data']['records'][1]["data"]
                     card_dict = json.loads(cardData)
                     game_on_card = card_dict ["spell"]
-                    print (f"[SPELL] {game_on_card}      [RUNNING] {self.runningSpell}")
+                    logger.debug (f"[SPELL] {game_on_card}      [RUNNING] {self.runningSpell}")
                     
                     if self.runningSpell != game_on_card:
                         # This is a different spell then running spell, so start it:
@@ -158,24 +168,24 @@ class TGWConductor(MQTTObject):
                         # Update runningSpell. NOT HANDLING edge condition of spells failing to start
                         self.runningSpell = game_on_card
                     else:  
-                        print("[NFC SCAN] Spell already running")                
+                        logger.debug("[NFC SCAN] Spell already running")                
                 else:
-                        print("[NFC SCAN] NOT a TGW card") 
+                        logger.debug("[NFC SCAN] NOT a TGW card") 
                         # Add here support for identifying Yoto and starting it
             else:
-                print('[NFC SCAN] No records')
+                logger.debug('[NFC SCAN] No records')
         except:
-            print('[NFC SCAN] JSON parsing error')
+            logger.debug('[NFC SCAN] JSON parsing error')
 
     def run(self):
-        #print ("Conductor Running self")
+        #logger.debug ("Conductor Running self")
         self.start_mqtt(CONDUCTOR_CLIENT_ID, self.callbacks)
         self.play_light ('power_on.csv')
-        #print("Done with init animation")
+        #logger.debug("Done with init animation")
         signal.pause()
 
 
 if __name__ == '__main__':
     service = TGWConductor()  
-    #print ("starting in __name")
+    #logger.debug ("starting in __name")
     service.run() 
