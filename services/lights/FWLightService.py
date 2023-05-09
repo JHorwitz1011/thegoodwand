@@ -5,7 +5,10 @@ import time
 import neopixel
 import board
 import csv
+import os
 import math
+import sys
+import logging
 from paho.mqtt import client as mqtt_client
 
 broker = 'localhost'
@@ -20,7 +23,25 @@ ORDER = neopixel.GRB
 DEFAULT_CROSSFADE_LENGTH = 0.2 #s
 DEFAULT_SAMPLING_RATE = 30 #hz
 
-animation_codes = {
+## Logger configuration
+## Change level by changing DEBUG_LEVEL variable to ["DEBUG", "INFO", "WARNING", "ERROR"]
+DEBUG_LEVEL = "DEBUG"
+LOGGER_HANDLER=sys.stdout
+LOGGER_NAME = __name__
+LOGGER_FORMAT = '[%(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
+
+logger = logging.getLogger(LOGGER_NAME)
+logger.setLevel(logging.getLevelName(DEBUG_LEVEL))
+
+handler = logging.StreamHandler(LOGGER_HANDLER)
+handler.setLevel(logging.getLevelName(DEBUG_LEVEL))
+format = logging.Formatter(LOGGER_FORMAT)
+handler.setFormatter(format)
+logger.addHandler(handler)
+
+
+
+systemAnimations = {
     "yipee": "yipee.csv",
     "yes": "yes_confirmed.csv",
     "no": "no_failed.csv",
@@ -70,16 +91,10 @@ def grab_animation_from_csv(filepath):
             for index in range(len(data)):
                 data[index] = int(data[index][1:], 16)
     except KeyError:
-        print(f"ERROR: {filepath} not found")
+        logger.debug(f"ERROR: {filepath} not found")
     return lengths, color
 
 class FWLightService():
-    
-    #### animations ####
-    # def _pulse
-
-
-
     #set constants and the such
     def __init__(self, pin=PIN, fs=60):
         self.fs = fs
@@ -88,14 +103,15 @@ class FWLightService():
         self.empty = True
         self.indicatorColor = (255,255,255)
         self.indicatorAnimation = 'pulse'
+        logger.debug("Lightbar Finished __init")
      
     ############### MQTT ###############################
     def connect_mqtt(self):
         def on_connect(client, userdata, flags, rc):
             if rc == 0:
-                print("Lightbar Connected to MQTT Broker!")
+                logger.debug("Lightbar Connected to MQTT Broker!")
             else:
-                print("Failed to connect Lightbar to MQTT server, return code %d\n", rc)
+                logger.debug(f"Failed to connect Lightbar to MQTT server, return code {rc}")
 
         client = mqtt_client.Client(client_id)
         client.on_connect = on_connect
@@ -105,18 +121,32 @@ class FWLightService():
     def on_lightbar_message(self, client, userdata, msg):
         self.empty = False
         payload = json.loads(msg.payload)
+        logger.debug(f"Lightbar message rcvd")
         try:
-            print(f'animation received: {animation_codes[payload["data"]["animation"]]}')
-            self.animation_queue.append(grab_animation_from_csv(animation_codes[payload['data']['animation']]))
+            animationName = payload['data']['animation']
+            anomationPath = payload['data']['path']
+            try:
+                animationFile = systemAnimations[animationName]
+            except KeyError: 
+                animationFile = anomationPath + "/" + animationName  
+  
+            if os.path.isfile(animationFile):
+                self.animation_queue.append(grab_animation_from_csv(animationFile))
+                logger.info(f'Lightbar animation added: {animationFile}')
+            else:
+                logger.error(f'animation file not found {animationFile}')
+    
+       
         except KeyError:
-            print("ERROR: Invalid Animation:",msg)
+            logger.warning("ERROR: Invalid Animation file key error:",msg)
 
     def on_main_led_message(self, client, userdata, msg):
         payload = json.loads(msg.payload)
+        logger.debug(f"Lightbar System LED message rcvd with {str(paylod)}")
         try:
             self.pixels[0] = tuple(payload["data"]["color1"])
         except KeyError:
-            print("ERROR: Invalid MAIN LED Animation")
+            logger.warning("ERROR: Invalid MAIN LED Animation")
 
     ################## MAIN LOOP ##########################
     def run(self):
@@ -135,14 +165,13 @@ class FWLightService():
                 try:
                     animation = self.animation_queue.pop(0)
                     self.animate_blocking(animation[1], animation[0])
-                    print(f"playing animation {animation}")
                 except:
-                    print("ERROR: frame not played")
+                    logger.warning(f"Frame not played")
             elif not self.empty:
                 self.current_frame = EMPTY_LIGHTS
                 self.update_strip(EMPTY_LIGHTS)
                 self.empty=True
-                print('empty!')
+                logger.debug(f'Done playing Animation. Turning LEDs off')
             else:
                 time.sleep(.05)
 
@@ -162,5 +191,6 @@ class FWLightService():
 
 
 if __name__ == '__main__':
+    logger.debug ("Light Service starting")
     service = FWLightService()  
     service.run() 

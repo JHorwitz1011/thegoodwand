@@ -1,80 +1,79 @@
 # python 3.6
 
 import json
-import pigpio
-from paho.mqtt import client as mqtt_client
+import RPi.GPIO as GPIO
+import sys
+import os
+import signal
+sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
+from MQTTObject import MQTTObject
+import logging
+import time
 
-broker = 'localhost'
 port = 1883
-uv_topic = "goodwand/ui/view/uv"
+UV_TOPIC = "goodwand/ui/view/uv"
 
-client_id = 'TGW-UVService'
-PWM_FREQ = 60
-PWM_UPPER_RANGE = 100
-PIN = 27
+UV_CLIENT_ID = 'TGW_UVService'
 
-class FWUVService():
+UV_PIN = 27
+
+## Logger configuration
+## Change level by changing DEBUG_LEVEL variable to ["DEBUG", "INFO", "WARNING", "ERROR"]
+DEBUG_LEVEL = "DEBUG"
+LOGGER_HANDLER=sys.stdout
+LOGGER_NAME = __name__
+LOGGER_FORMAT = '[%(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
+
+logger = logging.getLogger(LOGGER_NAME)
+logger.setLevel(logging.getLevelName(DEBUG_LEVEL))
+
+handler = logging.StreamHandler(LOGGER_HANDLER)
+handler.setLevel(logging.getLevelName(DEBUG_LEVEL))
+format = logging.Formatter(LOGGER_FORMAT)
+handler.setFormatter(format)
+logger.addHandler(handler)
+
+class FWUVService(MQTTObject):
     #set constants and the such
     def __init__(self):
-        self.on = False
-        self.brightness = 100
-        self.pi = pigpio.pi()
-        self.pi.set_mode(PIN, pigpio.OUTPUT)
-        self.pi.set_PWM_frequency(PIN, PWM_FREQ)
-        self.pi.set_PWM_dutycycle(PIN, self.on*self.brightness)
-        self.pi.set_PWM_range(PIN, PWM_UPPER_RANGE)
-     
-    ############### MQTT ###############################
-    def connect_mqtt(self):
-        def on_connect(client, userdata, flags, rc):
-            if rc == 0:
-                print("Connected to MQTT Broker!")
-            else:
-                print("Failed to connect to MQTT server, return code %d\n", rc)
+        super().__init__()
+        self.pinStatus = False
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(UV_PIN, GPIO.OUT)
+        GPIO.output(UV_PIN, 0)
+        self.callbacks = {
+            UV_TOPIC : self.on_uv_message
+         }
 
-        client = mqtt_client.Client(client_id)
-        client.on_connect = on_connect
-        client.connect(broker, port)
-        return client
+    def update_uv(self, pinStatus):
+        if pinStatus is not None:
+            self.pinStatus = pinStatus
+        logger.info(f"Setting UVLED value to {pinStatus}")
+        GPIO.output(UV_PIN, pinStatus) 
 
     def on_uv_message(self, client, userdata, msg):
         payload = json.loads(msg.payload)
         try:
-            on = payload["data"].get("state")
-            if  on == 'on':
-                on = True
-            elif on == 'off':
-                on = False
-            else:
-                raise ValueError()
+            timeOn = payload["data"].get("timeOn")
+            GPIO.output(UV_PIN, 1) 
+            time.sleep (timeOn)
+            GPIO.output(UV_PIN, 0) 
             
-            brightness = payload["data"].get("brightness")
-            print(f"setting uv {on} to brightness level {brightness}")
-            self.update_uv(on, brightness)
 
         except KeyError:
-            print("ERROR parsing incoming message")
+            logger.debug(f"UV ERROR parsing incoming message")
 
     ################## MAIN LOOP ##########################
     def run(self):
-        client = self.connect_mqtt()
-        client.on_message = self.on_uv_message
-
-        client.subscribe(uv_topic)
-        client.enable_logger()
-        client.loop_forever()
+        logger.debug ("UV Running self")
+        self.start_mqtt(UV_CLIENT_ID, self.callbacks)
+        signal.pause()
 
 
 
     ################# LIGHT HANDLING ######################
-    def update_uv(self, on, brightness):
-        if on is not None:
-            self.on = on
-        if brightness is not None:
-            self.brightness = brightness
 
-        self.pi.set_PWM_dutycycle(PIN, self.on*self.brightness)
-
+        
 
 if __name__ == '__main__':
     service = FWUVService()  

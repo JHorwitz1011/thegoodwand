@@ -63,7 +63,8 @@ audio_pkt = {
     "data": {
      	"action": " ", 
 	 	"path": " ",
-	 	"file": " "
+	 	"file": " ",
+		"mode": " "
 }
 }
 
@@ -86,21 +87,22 @@ class musicSpell():
 	global old_orient
 	global instrumentName 
 
-	def play_audio(self, client, file):
+	def play_audio(self, client, file, playMode):
 		global currentPath
 		logger.info(f"Play audio file {file}")
 		audio_pkt ['data']['action'] = "START"
 		audio_pkt ['data']['file'] = file
+		audio_pkt ["data"]["mode"] = playMode 
 		self.publish(client, audio_topic, audio_pkt)
 
 	def stop_audio(self, client):
-		logger.info("[Audio] stop all")
+		logger.info(f"[Audio] stop all")
 		audio_pkt ['data']['action'] = "STOP"
 		self.publish(client, audio_topic, audio_pkt)
 
 	def play_light(self, client, lightEffect):
 		light_pkt ['data']['animation'] = lightEffect
-		logger.info("Light Effect" , lightEffect, " in ", light_pkt ['data']['path'] )
+		logger.info(f"Light Effect" , lightEffect, " in ", light_pkt ['data']['path'] )
 		self.publish(client, light_topic, light_pkt)
 
 
@@ -108,9 +110,9 @@ class musicSpell():
 	def connect_mqtt(self):
 		def on_connect(client, userdata, flags, rc): ### FIXED INDENTATION ERROR
 			if rc == 0:
-				logger.debug(f"Connected to MQTT Broker! PID= {os.getpid()}")
+				logger.debug(f"Music Spell Connected to MQTT Broker! PID= {os.getpid()}")
 			else:
-				logger.warning(f"Failed to connect, return code {rc}")
+				logger.warning(f"Music Spell Failed to connect, return code {rc}")
 		client = mqtt_client.Client(client_id)
 		client.on_connect = on_connect
 		client.connect(broker, port)
@@ -145,7 +147,7 @@ class musicSpell():
 								logger.info(f"playing in background: {fileName}")
 								# we should stop the old background music - but thats tricky
 								self.stop_audio (client)
-								self.play_audio (client, fileName)
+								self.play_audio (client, fileName, "background")
 							
 							self.play_light (client, 'yes')	
 
@@ -155,7 +157,7 @@ class musicSpell():
 				logger.debug(f"orientation change. New: {new_orient}  Old: {old_orient}")
 				fileName = "2SPL" + orientationText[new_orient] + '-' + instrumentName
 				logger.debug(f"FileName is: {fileName}")
-				self.play_audio (client, fileName + '.wav')
+				self.play_audio (client, fileName + '.wav', "foreground")
 				self.play_light (client, fileName + '.csv')	
 				old_orient = new_orient 
 		
@@ -201,6 +203,7 @@ class musicSpell():
 		# otherwise use cwd
 		if param_1 !="":
 			currentPath = param_1
+			
 		else:
 			currentPath =os.getcwd() 
 		logger.info(f"Setting path to: {currentPath}")	
@@ -213,9 +216,10 @@ class musicSpell():
 
 		#Play the initial audio and light
 
-		self.play_audio (client, ".wav")
-		self.play_light (client, "yipee")
-
+		#The spell plays audio of its own name
+		self.play_audio (client, "music.wav", "background")
+		#But Dont play light - conductor plays spell startr light
+		
 		client.loop_forever()
 
 
