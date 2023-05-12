@@ -10,7 +10,7 @@ from paho.mqtt import client as mqtt_client
 ## Logger configuration
 ## Change level by changing DEBUG_LEVEL variable to ["DEBUG", "INFO", "WARNING", "ERROR"]
 
-DEBUG_LEVEL = "DEBUG"
+DEBUG_LEVEL = "DEBUG" #
 LOGGER_HANDLER=sys.stdout
 LOGGER_NAME = __name__
 LOGGER_FORMAT = '[%(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
