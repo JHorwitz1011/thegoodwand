@@ -140,15 +140,10 @@ class Pooftos(MQTTObject):
                     game_on_card = card_dict ["spell"]
                     logger.debug (f"spell is: {game_on_card}")
                     # Need to add code that:
-                    if game_on_card == "secretica":
-                        logger.info (f"re activating secretica through NFC")
-                        self.activate_uv() 
-                        
-                    # if the spell=secretica, then turn UV light on for 20 seconds
-                    # LED effect of 20 seconds goes from all LEDs to none
-                    # Turn off UV Light
-                    # play humming audio in the background
-                
+                    if game_on_card == "pooftos":
+                        logger.info (f"re activating pooftos through NFC")
+                        #What should we do here
+                                        
                 except:
                     logger.debug (f"Not a spell")
 

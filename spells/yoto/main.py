@@ -1,62 +1,99 @@
 
-import subprocess
-import requests
+import time
+import signal
 import json
-import socket
+from multiprocessing import Process
+import subprocess
+import sys
 import os
+import logging
+import threading
+import math
+import helper
+import requests
+import socket
 import vlc
 
+
+sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
+from MQTTObject import MQTTObject
 from paho.mqtt import client as mqtt_client
 
 
 broker = 'localhost'
 port = 1883
-light_topic = "goodwand/ui/view/lightbar"
-audio_topic = "goodwand/ui/view/audio_playback"
-gesture_topic = "goodwand/ui/controller/gesture"
-nfc_topic = "goodwand/ui/controller/nfc"
+NFC_TOPIC = "goodwand/ui/controller/nfc"
+BUTTON_TOPIC = "goodwand/ui/controller/button"
+GESTURE_TOPIC = "goodwand/ui/controller/gesture"
+LIGHT_TOPIC = "goodwand/ui/view/lightbar"
+AUDIO_TOPIC = "goodwand/ui/view/audio_playback"
+UV_TOPIC = "goodwand/ui/view/uv"
 
 wandOrient = {"unknown":-1, "X-":1, "X+":2, "Y-":4, "Y+":8, "Z-":16, "Z+":32} 
 
 # generate client ID with pub prefix randomly
-client_id = 'temp-test-client'
+SPELL_CLIENT_ID = "Yoto"
+
+# Logger configuration
+## Change level by changing DEBUG_LEVEL variable to ["DEBUG", "INFO", "WARNING", "ERROR"]
+DEBUG_LEVEL = "DEBUG"
+LOGGER_HANDLER=sys.stdout
+LOGGER_NAME = __name__
+LOGGER_FORMAT = '[%(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
+
+logger = logging.getLogger(LOGGER_NAME)
+logger.setLevel(logging.getLevelName(DEBUG_LEVEL))
+
+handler = logging.StreamHandler(LOGGER_HANDLER)
+handler.setLevel(logging.getLevelName(DEBUG_LEVEL))
+format = logging.Formatter(LOGGER_FORMAT)
+handler.setFormatter(format)
+logger.addHandler(handler)
 
 
-start_audio_pkt = {
+audio_pkt = {
     "header": {
-        "type": "UI_AUDIO", "version": 1
+      "type": "UI_AUDIO", "version": 1
     },
     "data": {
-        "action": "START",
-        "file": "2SPL1.wav",
-        "path": ""
+     	"action": " ", 
+	 	"path": " ",
+	 	"file": " ",
+		"mode": " "
     }
 }
 
-
 light_pkt = {
-            "header": {
-                "type": "UI_LIGHTBAR",
-                "version": 1,
-            },
+            "header": {"type": "UI_LIGHTBAR","version": 1},
             "data": {
-                        "granularity": 1,
-                        "animation": "yipee",
-                "crossfade": 0
+                "granularity": 1,
+                "animation": "power_off",
+				"path": os.getcwd(),
+        		"crossfade": 0
             }
         }
+
 player = vlc.Instance()
 media_player = player.media_player_new()
 
 
+class Yoto ():
 
-class SpellYoto ():
+    def __init__(self):
+        super().__init__()
 
-    def play_audio(self, client, file):
-        print("Playing", file)
-        start_audio_pkt['data']['path'] = os.getcwd() 
-        start_audio_pkt['data']['file'] = file
-        self.publish(client, audio_topic, start_audio_pkt)
+        self.callbacks = {
+            NFC_TOPIC : self.on_nfc_scan,
+            BUTTON_TOPIC: self.on_button_press,
+            GESTURE_TOPIC: self.on_gesture,
+        }
+
+    def play_audio(self, file, playMode):
+        logger.info(f"Play audio file {file}")
+        audio_pkt ['data']['action'] = "START"
+        audio_pkt ['data']['file'] = file
+        audio_pkt ["data"]["mode"] = playMode 
+        self.publish(AUDIO_TOPIC, json.dumps(audio_pkt))
 
     def playYotoMedia (self,client,cardUrl):
         # Use the URL from the sample card. later on it should come from the NFC MQTT event
@@ -92,7 +129,6 @@ class SpellYoto ():
         print("Now playing media")
         media_player.play()
 
-
     def connect_mqtt(self):
         def on_connect(client, userdata, flags, rc):  # FIXED INDENTATION ERROR
             if rc == 0:
@@ -106,69 +142,74 @@ class SpellYoto ():
         print("Attempting to connect to MQTT server")
         return client
 
-    def on_message(self, client, userdate, msg):
-        msgPayload = json.loads(msg.payload)
-        msgType = msgPayload['header']['type']
-        print("Rcvd MSG:"+msgType)
-        
-        if msgType == "UI_GESTURE":
-            new_orientation = msgPayload['data']['orientation']
-            print('new orientation is:', new_orientation)
-            if new_orientation == 32:
+    def on_gesture(self, client, userdata, msg):    
+        global oldOrient
+        payload = json.loads(msg.payload)
+        newOrientation =   payload['data']["orientation"]
+        newOrient = int(math.log(newOrientation,2))
+
+        logger.debug(f'new orientation is: {newOrientation}')
+            if newOrientation == 32:
                 print("PLAY: This is what is should do when newOr==32==horizontal, top up")
                 media_player.play()
-            if new_orientation == 16:
+            if newOrientation == 16:
                 print("PAUSE: New Orientation is 16 ==horizontal, top DN ")
                 media_player.pause()
-            if new_orientation == 2:
+            if newOrientation == 2:
                 print("Volume Dn: New Orientation is 2 ==sidewaays left")
                 media_player.audio_set_volume(50)
-            if new_orientation == 1:
+            if newOrientation == 1:
                 print("Volume Up: New Orientation is 1 ==sidewaays right")
                 media_player.audio_set_volume(100)
 
-        if msgType == 'UI_NFC':
-            uid = msgPayload['card_data']['uid']
-            print ("Rcvd NFC message with payload=" + str(msgPayload))
-            cardData = []
-            for record in msgPayload['card_data']['records']:  #do what you want with data. 
-                if record['type'] == "text":
-                    cardData.append(record['data'])
-                    print("Record text=",record['data'])
+    def on_nfc_scan(self, client, userdata, msg):
+        """
+        handles logic for starting games
+        """
+        payload = json.loads(msg.payload)
+        if len(payload['card_data']['records']) > 0:
+            cardUrl = payload['card_data']['records'][0]["data"]
+            if cardUrl [0:16] == "https://yoto.io/":
+                logger.debug (f"Yoto reactivated with {cardUrl}')
+                 cardData = []
+                for record in msgPayload['card_data']['records']:  #do what you want with data. 
+                    if record['type'] == "text":
+                        cardData.append(record['data'])
+                        print("Record text=",record['data'])
 
-                if record['type'] == "uri":
-                    print("Record URL=",record['data'])
-                    cardData.append(record['data']) 
+                    if record['type'] == "uri":
+                        print("Record URL=",record['data'])
+                        cardData.append(record['data']) 
             
-            print("Going to fetch media for card:",cardData[0] )
-            self.playYotoMedia (client, cardData[0])
+                    print("Going to fetch media for card:",cardData[0] )
+                    self.playYotoMedia (client, cardData[0])
 
-    def publish(self, client, topic, pkt):
-        try:
-            result = client.publish(topic, json.dumps(pkt))
-            # result: [0, 1]
-            status = result[0]
-            if status == 0:
-                print(f"Publishing MQTT Event")
             else:
-                print(f"Failed to send message to topic {topic}")
-        except IndexError:
-            # another......... indent error come on ram :(
-            print(
-                "ERROR: no argument given. please use format: python3 pub_client.py [animation code]")
+                logger.debug ("not a Yoto card so Conductor should handle")
 
     def run(self):
         global old_orient
         old_orient = 0
+        global currentPath
+        logger.debug(f'Yoto spell started')
+        self.start_mqtt(SPELL_CLIENT_ID, self.callbacks)
         
-        # Lets prep the vlc to play audio
-       
-        
+        param_1 = ""
+        param_2 = ""
+		# TODO: Not the way to check for arguments
+        try:
+            param_1= sys.argv[1] 
+            param_2= sys.argv[2] 
+        except:
+            logger.error ("no args")
+		# if started by conductor, param1 is the path,
+		# otherwise use cwd
+        if param_1 !="":
+            currentPath = param_1
+        else:
+        	currentPath =os.getcwd() 
 
-        client = self.connect_mqtt()
-        client.on_message = self.on_message
-        client.subscribe(gesture_topic)
-        client.subscribe(nfc_topic)
+        # Lets prep the vlc to play audio
         client.enable_logger()
         print('subscribed!')
         self.publish(client, light_topic, light_pkt)
@@ -177,5 +218,5 @@ class SpellYoto ():
 
 
 if __name__ == '__main__':
-    service = SpellYoto()
+    service = Yoto()
     service.run()

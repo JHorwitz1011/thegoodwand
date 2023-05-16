@@ -158,14 +158,26 @@ class TGWConductor(MQTTObject):
         try:
             if len(payload['card_data']['records']) > 0:
                 cardRecord0 = payload_url = payload['card_data']['records'][0]
+                game_on_card = ""
+                recordString = cardRecord0 ["data"]
                 
-                if cardRecord0 ["data"] == "https://www.thegoodwand.com":
+                if recordString == "https://www.thegoodwand.com":
                     logger.debug("[NFC SCAN] The Good Wand Card")
                     cardData = payload['card_data']['records'][1]["data"]
                     card_dict = json.loads(cardData)
                     game_on_card = card_dict ["spell"]
                     logger.debug (f"[SPELL] {game_on_card}      [RUNNING] {self.runningSpell}")
-                    
+                else:
+                    # Wasnt a TGW card, so lets check if Yoto
+                    logger.info("[NFC SCAN] NOT a TGW card. Checking if Yoto") 
+                    if recordString[0:16]== "https://yoto.io/":
+                        logger.debug (f"Activating Yoto")
+                        game_on_card = "yoto"
+                    else:
+                        logger.debug (f"Not a Yoto card. Conductor should handle")
+                
+                logger.debug (f"Now checking if a spell is to be activated")
+                if game_on_card != "":
                     if self.runningSpell != game_on_card:
                         # This is a different spell then running spell, so start it:
                         if self.child_process is None: #no game is running so just start new game
@@ -180,8 +192,7 @@ class TGWConductor(MQTTObject):
                     else:  
                         logger.debug("[NFC SCAN] Spell already running")                
                 else:
-                        logger.debug("[NFC SCAN] NOT a TGW card") 
-                        # Add here support for identifying Yoto and starting it
+                    logger.debug (f"Not a TGW or Yoto cards. Do nothing")
             else:
                 logger.debug('[NFC SCAN] No records')
         except:
