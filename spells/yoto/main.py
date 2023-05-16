@@ -33,6 +33,7 @@ wandOrient = {"unknown":-1, "X-":1, "X+":2, "Y-":4, "Y+":8, "Z-":16, "Z+":32}
 
 # generate client ID with pub prefix randomly
 SPELL_CLIENT_ID = "Yoto"
+YOTO_URL = "https://yoto.io/"
 
 # Logger configuration
 ## Change level by changing DEBUG_LEVEL variable to ["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -77,7 +78,7 @@ player = vlc.Instance()
 media_player = player.media_player_new()
 
 
-class Yoto ():
+class Yoto (MQTTObject):
 
     def __init__(self):
         super().__init__()
@@ -129,18 +130,11 @@ class Yoto ():
         print("Now playing media")
         media_player.play()
 
-    def connect_mqtt(self):
-        def on_connect(client, userdata, flags, rc):  # FIXED INDENTATION ERROR
-            if rc == 0:
-                print("Connected to MQTT Broker!")
-            else:
-                print("Failed to connect, return code %d\n", rc)
-
-        client = mqtt_client.Client(client_id)
-        client.on_connect = on_connect
-        client.connect(broker, port)
-        print("Attempting to connect to MQTT server")
-        return client
+    def on_button_press(self, client, userdata, msg):
+            payload = json.loads(msg.payload)
+            keyPressType = payload['data']['event'] 
+            if keyPressType == 'short':
+                logger.debug(f"short button pressed while in Yoto")
 
     def on_gesture(self, client, userdata, msg):    
         global oldOrient
@@ -149,18 +143,18 @@ class Yoto ():
         newOrient = int(math.log(newOrientation,2))
 
         logger.debug(f'new orientation is: {newOrientation}')
-            if newOrientation == 32:
-                print("PLAY: This is what is should do when newOr==32==horizontal, top up")
-                media_player.play()
-            if newOrientation == 16:
-                print("PAUSE: New Orientation is 16 ==horizontal, top DN ")
-                media_player.pause()
-            if newOrientation == 2:
-                print("Volume Dn: New Orientation is 2 ==sidewaays left")
-                media_player.audio_set_volume(50)
-            if newOrientation == 1:
-                print("Volume Up: New Orientation is 1 ==sidewaays right")
-                media_player.audio_set_volume(100)
+        if newOrientation == 32:
+            print("PLAY: This is what is should do when newOr==32==horizontal, top up")
+            media_player.play()
+        if newOrientation == 16:
+            print("PAUSE: New Orientation is 16 ==horizontal, top DN ")
+            media_player.pause()
+        if newOrientation == 2:
+            print("Volume Dn: New Orientation is 2 ==sidewaays left")
+            media_player.audio_set_volume(50)
+        if newOrientation == 1:
+            print("Volume Up: New Orientation is 1 ==sidewaays right")
+            media_player.audio_set_volume(100)
 
     def on_nfc_scan(self, client, userdata, msg):
         """
@@ -169,10 +163,10 @@ class Yoto ():
         payload = json.loads(msg.payload)
         if len(payload['card_data']['records']) > 0:
             cardUrl = payload['card_data']['records'][0]["data"]
-            if cardUrl [0:16] == "https://yoto.io/":
-                logger.debug (f"Yoto reactivated with {cardUrl}')
-                 cardData = []
-                for record in msgPayload['card_data']['records']:  #do what you want with data. 
+            if cardUrl [0:16] == YOTO_URL:
+                logger.debug (f"Yoto reactivated with {cardUrl}")
+                cardData = []
+                for record in msgPayload['card_data']['records']: 
                     if record['type'] == "text":
                         cardData.append(record['data'])
                         print("Record text=",record['data'])
@@ -210,11 +204,13 @@ class Yoto ():
         	currentPath =os.getcwd() 
 
         # Lets prep the vlc to play audio
-        client.enable_logger()
-        print('subscribed!')
-        self.publish(client, light_topic, light_pkt)
-        self.publish(client, audio_topic, start_audio_pkt)
-        client.loop_forever()
+        self.play_audio ("activating-yoto.wav", "background")
+        if param_2 != "":
+            logger.debug (f"Need to start playing card {YOTO_URL} : {param_2}")
+            self.playYotoMedia (client, YOTO_URL+param_2)
+            
+
+        signal.pause()
 
 
 if __name__ == '__main__':

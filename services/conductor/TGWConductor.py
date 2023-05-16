@@ -129,7 +129,7 @@ class TGWConductor(MQTTObject):
                 logger.debug("Long press while idle")
             
 
-    def _start_game(self, game: str):
+    def _start_game(self, game: str, game_args):
         """
         starts game. assumes path is valid per helper.fetch_game checking
         """
@@ -141,8 +141,8 @@ class TGWConductor(MQTTObject):
         if filePath is not None:
             logger.debug(f"Playing app start animation")
             self.play_light ('app_launch.csv')
-            logger.debug(f"Launching spell: {game} {filePath}")
-            self.child_process = subprocess.Popen(['python3', filePathandMain, filePath ] )
+            logger.debug(f"Launching spell: {game} : {filePath} : {game_args}")
+            self.child_process = subprocess.Popen(['python3', filePathandMain, filePath, game_args ] )
             logger.debug(f"[SUBPROCESS ID] {self.child_process.pid}")
             
         else:
@@ -159,6 +159,8 @@ class TGWConductor(MQTTObject):
             if len(payload['card_data']['records']) > 0:
                 cardRecord0 = payload_url = payload['card_data']['records'][0]
                 game_on_card = ""
+                game_args = ""
+                # ADD here to past rest of URL to launch the game with so Yoto can play the card
                 recordString = cardRecord0 ["data"]
                 
                 if recordString == "https://www.thegoodwand.com":
@@ -171,8 +173,9 @@ class TGWConductor(MQTTObject):
                     # Wasnt a TGW card, so lets check if Yoto
                     logger.info("[NFC SCAN] NOT a TGW card. Checking if Yoto") 
                     if recordString[0:16]== "https://yoto.io/":
-                        logger.debug (f"Activating Yoto")
                         game_on_card = "yoto"
+                        game_args = recordString [16:]
+                        logger.debug (f"Activating Yoto with args {game_args}")
                     else:
                         logger.debug (f"Not a Yoto card. Conductor should handle")
                 
@@ -181,11 +184,11 @@ class TGWConductor(MQTTObject):
                     if self.runningSpell != game_on_card:
                         # This is a different spell then running spell, so start it:
                         if self.child_process is None: #no game is running so just start new game
-                            self._start_game(game_on_card)
+                            self._start_game(game_on_card, game_args)
                         else:
                             # Stop currently running game
                             self._kill_game ()
-                            self._start_game(game_on_card)                        
+                            self._start_game(game_on_card, game_args)                        
 
                         # Update runningSpell. NOT HANDLING edge condition of spells failing to start
                         self.runningSpell = game_on_card
