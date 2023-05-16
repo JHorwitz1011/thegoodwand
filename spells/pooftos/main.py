@@ -8,6 +8,7 @@ import sys
 import os
 import logging
 import threading
+import math
 
 
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
@@ -16,6 +17,7 @@ import helper
 
 NFC_TOPIC = "goodwand/ui/controller/nfc"
 BUTTON_TOPIC = "goodwand/ui/controller/button"
+GESTURE_TOPIC = "goodwand/ui/controller/gesture"
 LIGHT_TOPIC = "goodwand/ui/view/lightbar"
 AUDIO_TOPIC = "goodwand/ui/view/audio_playback"
 UV_TOPIC = "goodwand/ui/view/uv"
@@ -69,6 +71,8 @@ uv_pkt = {
         }
 
 class Pooftos(MQTTObject):
+    global oldOrient
+    global currentPath
 
     def __init__(self):
         super().__init__()
@@ -76,6 +80,7 @@ class Pooftos(MQTTObject):
         self.callbacks = {
             NFC_TOPIC : self.on_nfc_scan,
             BUTTON_TOPIC: self.on_button_press,
+            GESTURE_TOPIC: self.on_gesture,
         }
 
     def play_audio(self, file, playMode):
@@ -95,22 +100,30 @@ class Pooftos(MQTTObject):
 	    logger.info(f"Light Effect {lightEffect}")
 	    self.publish(LIGHT_TOPIC, json.dumps(light_pkt))
 
-    def activate_uv(self):
-        uvStartTime = time.strftime("%M:%S +000")
-        logger.info (f"Start  activate {uvStartTime}")
-        uv_pkt ['data']['timeOn'] = 8
-        self.publish(UV_TOPIC, json.dumps(uv_pkt))
-        self.play_audio ("uv_activated.wav", "background")
-        self.play_light ("uv_activated.csv")
-        
+    def deactivate_tv (self):
+        global currentPath
+        self.play_audio ("deactive.wav", "background")
+        self.play_light ("deactive.csv")
+        os.system("sh "+currentPath + "/Pooftos.sh "+ currentPath )
 
-    #Handles button events
+    #Handles Gesture events
+    def on_gesture(self, client, userdata, msg):
+        global oldOrient
+        payload = json.loads(msg.payload)
+        newOrientation =   payload['data']["orientation"]
+        newOrient = int(math.log(newOrientation,2))
+
+        if (newOrient == 5) and (oldOrient == 3): # 5=flt-up
+            self.deactivate_tv()
+        
+        oldOrient = newOrient
+
     def on_button_press(self, client, userdata, msg):
         payload = json.loads(msg.payload)
         keyPressType = payload['data']['event'] 
         
         if keyPressType == 'short':
-            self.activate_uv()
+            self.deactivate_tv()
 
     def on_nfc_scan(self, client, userdata, msg):
         """
@@ -143,6 +156,7 @@ class Pooftos(MQTTObject):
             logger.debug(f'No records found on NFC card')
 
     def run(self):
+        global currentPath
         logger.debug(f'Pooftos spell started')
         self.start_mqtt(SPELL_CLIENT_ID, self.callbacks)
         
@@ -166,7 +180,7 @@ class Pooftos(MQTTObject):
         logger.debug(f'Pooftos spell path is{currentPath}')
         audio_pkt ['data']['path'] = currentPath
         light_pkt ['data']['path'] = currentPath
-        self.play_audio ("pooftos.wav", "background")
+        self.play_audio ("activating-pooftos.wav", "background")
         signal.pause()
 
 
