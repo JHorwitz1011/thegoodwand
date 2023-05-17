@@ -1,3 +1,11 @@
+# On card scan, say "activating Yoto" and then start playing teh card content
+# Gestures to PAUSE, Rewing to begning of chapter, switch to next chapter
+# 
+# If another Yoto card is touched whileplaying, jump to this card
+#
+#
+#
+#
 
 import time
 import signal
@@ -95,8 +103,19 @@ class Yoto (MQTTObject):
         audio_pkt ['data']['file'] = file
         audio_pkt ["data"]["mode"] = playMode 
         self.publish(AUDIO_TOPIC, json.dumps(audio_pkt))
+    
+    def stop_audio(self):
+        logger.info(f"[Audio] stop all")
+        audio_pkt ['data']['action'] = "STOP"
+        self.publish(AUDIO_TOPIC, json.dumps(audio_pkt))
 
-    def playYotoMedia (self,client,cardUrl):
+    def play_light(self, lightEffect):
+	    light_pkt ['data']['animation'] = lightEffect
+	    logger.info(f"Light Effect {lightEffect}")
+	    self.publish(LIGHT_TOPIC, json.dumps(light_pkt))
+    
+
+    def playYotoMedia (self,cardUrl):
         # Use the URL from the sample card. later on it should come from the NFC MQTT event
         #cardUrl = 'http://yoto.io/eb9jP?84p7jlsM00p0=zXLJUAWfgktji'
         #cardUrl = "https://yoto.io/h84o2?84iqvisM00p1=cj24XMoeUhNsH"
@@ -124,10 +143,16 @@ class Yoto (MQTTObject):
             rcvdFile.write(response.content)
             print("Media File Fetched")
         print("Now adding filename to play")
+      
         media = player.media_new("rcvd23.m4a")
         print("Now setting media")
         media_player.set_media(media)
-        print("Now playing media")
+        logger.debug(f"Now playing media")
+        # Stop any background audio from the start spell
+        logger.debug(f"Stopping all background media")
+        self.stop_audio ()
+        # And start the VLC playing the m4a file we received
+        logger.debug(f"Now playing media")
         media_player.play()
 
     def on_button_press(self, client, userdata, msg):
@@ -203,11 +228,16 @@ class Yoto (MQTTObject):
         else:
         	currentPath =os.getcwd() 
 
+        audio_pkt ['data']['path'] = currentPath
+        light_pkt ['data']['path'] = currentPath
+
         # Lets prep the vlc to play audio
-        self.play_audio ("activating-yoto.wav", "background")
+        self.play_audio ("YotoComing.wav","")
+        self.play_light ("YotoCountdown.csv")
+        self.play_audio ("countdown10-1.wav","background")
         if param_2 != "":
             logger.debug (f"Need to start playing card {YOTO_URL} : {param_2}")
-            self.playYotoMedia (client, YOTO_URL+param_2)
+            self.playYotoMedia (YOTO_URL+param_2)
             
 
         signal.pause()
