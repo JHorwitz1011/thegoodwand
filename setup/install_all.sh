@@ -123,4 +123,12 @@ then
     echo "ERROR: Running Deamon script"; exit 1
 fi
 
+echo "Step 3: installing edge impulse"
+sudo ./edge_impulse.sh
+
+if [ $? != 0 ]
+then
+    echo "ERROR: Installing Edge Impulse"; exit 1
+fi
+
 sudo reboot now
