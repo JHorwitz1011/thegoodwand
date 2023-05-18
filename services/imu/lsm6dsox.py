@@ -34,6 +34,7 @@ FUN_SHUB_DISABLE          = 0X00
 CTRL1_XL_ODR_SHIFT       = 0x04
 CTRL1_XL_ODR_MASK        = 0x0F << CTRL1_XL_ODR_SHIFT
 CTRL1_XL_ODR_POWER_DOWN  = 0x00 << CTRL1_XL_ODR_SHIFT
+CTRL1_XL_ODR_1_6_HZ      = 0x0b << CTRL1_XL_ODR_SHIFT
 CTRL1_XL_ODR_12_5_HZ     = 0x01 << CTRL1_XL_ODR_SHIFT
 CTRL1_XL_ODR_26_HZ       = 0x02 << CTRL1_XL_ODR_SHIFT
 CTRL1_XL_ODR_52_HZ       = 0x03 << CTRL1_XL_ODR_SHIFT
@@ -61,6 +62,7 @@ CTRL1_XL_LPF2_XL_DISENABLE  = 0x00 << CTRL1_XL_LPF2_XL_EN_SHIFT
 CTRL2_G_ODR_SHIFT       = 0x04
 CTRL2_G_ODR_MASK        = 0x0F << CTRL2_G_ODR_SHIFT
 CTRL2_G_ODR_POWER_DOWN  = 0x00 << CTRL2_G_ODR_SHIFT
+CTRL2_G_ODR_1_6_HZ      = 0x0B << CTRL2_G_ODR_SHIFT
 CTRL2_G_ODR_12_5_HZ     = 0x01 << CTRL2_G_ODR_SHIFT
 CTRL2_G_ODR_26_HZ       = 0x02 << CTRL2_G_ODR_SHIFT
 CTRL2_G_ODR_52_HZ       = 0x03 << CTRL2_G_ODR_SHIFT
@@ -771,7 +773,7 @@ class LSM6DSOX:
         self.on_sleep_change = callback
 
     # Disables the sleep event
-    def disable_sleep_change_event(self, callback, wake_ths = 0x02, wake_dur = 0x01, sleep_dur = 0x01):  
+    def disable_sleep_change_event(self):  
                
         #Removes sleep change interrupt on INT1
         self.__route_int1_functions(MD1_CFG_INT1_SLEEP_CHANGE_MAKS, 0 << MD1_CFG_INT1_SLEEP_CHANGE_SHIFT)  

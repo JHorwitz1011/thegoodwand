@@ -1,5 +1,4 @@
-import time
-import sys, signal, getopt
+import sys, signal
 from paho.mqtt import client as mqtt
 import json
 from lsm6dsox import *
@@ -22,6 +21,7 @@ SERVICE_VERSION = "1"
 MQTT_BROKER = 'localhost'
 MQTT_PORT = 1883
 MQTT_TOPIC_BASE = 'goodwand/ui/controller/gesture'
+MQTT_TOPIC_GUESTURE = MQTT_TOPIC_BASE
 MQTT_TOPIC_DATA = MQTT_TOPIC_BASE  +'/data'
 MQTT_TOPIC_COMMAND = MQTT_TOPIC_BASE + '/command'
 MQTT_TOPIC = MQTT_TOPIC_BASE + '/#'  
@@ -35,7 +35,6 @@ IMU_STATUS_LABLES = { 0: "inactive", 1: "active"}
 D6D_ENABLED = True
 WAKE_STATUS_ENABLED = True
 RAW_DATA_ENABLED = False
-
 
 ## Logger configuration
 ## Change level by changing DEBUG_LEVEL variable to ["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -63,20 +62,27 @@ def is_awake(val):
         res = True
     return res
 
+
+# class imu_mqtt:
+
+#     def __init__(self):
+#         pass
+
+
 class imu_service: 
 
     def __init__(self, arg = None):
         
-        self.imu = LSM6DSOX(acc_odr = CTRL1_XL_ODR_26_HZ,
-                    gyro_odr = CTRL2_G_ODR_26_HZ,
+        self.imu = LSM6DSOX(acc_odr = CTRL1_XL_ODR_1_6_HZ,
+                    gyro_odr = CTRL2_G_ODR_1_6_HZ,
                     acc_scale = CTRL1_XL_SCALE_4G,
                     gyro_scale = CTRL2_G_SCALE_1000DPS,
                     mag_scale= MAG_CTRL2_FS_16G,
                     mag_enable= False,
                     debug_level= DEBUG_LEVEL)
         
-        orientaion = -1
-        wake_status = -1
+        self.orientaion = -1
+        self.wake_status = -1
 
 
     def mqtt_on_connect(self, client, userdata, flags, rc):
@@ -92,22 +98,57 @@ class imu_service:
         client.connect(MQTT_BROKER, MQTT_PORT)
         return client
 
+    
+    def configure_imu(self, odr, accel_en, gyro_en):
+        pass
+
+    def enable_raw_data_event(self):
+       logger.debug("Enable Raw Data")
+       self.imu.enable_data_ready_int(self.data_ready_callback,accel=True, gyro=True) # Raw data on INT2
+    
+    def disable_raw_data(self):
+        logger.debug("Disable Raw Data")
+        self.imu.disable_data_ready_int()
+
+    def enable_6d6_event(self):
+       logger.debug("Enable 6D6")
+       self.imu.enable_d6d_event(self.imu_on_d6d_change, SIXD_THS_70D)
+    
+    def disable_6d6_event(self):
+        logger.debug("Disable 6D6")
+        self.imu.disable_d6d_event()
+    
+    def enable_wakeup_event(self):
+        logger.debug("Enable wakeup")
+        self.imu.enable_sleep_change_event(self.imu_on_wakeup,wake_ths= 0x01, wake_dur=0x01)  #Enable wakeup interrupts on INT1 TODO Fix magic numbers
+    
+    def disable_wakeup_event(self):
+        logger.debug("Disable wakeup")
+        self.imu.disable_sleep_change_event()
+
+    def set_events(self, enable_raw, enable_orientation, enable_wake):
+        if enable_raw: self.enable_raw_data_event()
+        else: self.disable_raw_data()
+        
+        if enable_orientation:self.enable_6d6_event()
+        else: self.disable_6d6_event()
+        
+        if enable_wake: self.enable_wakeup_event()
+        else: self.disable_wakeup_event()
+
     # Message callback for the subtopic goodwand/ui/controller/gesture/command 
-    # TODO major refactor needed to clean up all the if staments and add the other service command 
     def mqtt_on_command(self, client, userdata, message):
-        msg_json = json.loads(message.payload)
-
+        msg = json.loads(message.payload)
+        logger.debug(f"Command {msg}")
         try: 
-            if msg_json["header"]["type"] == SERVICE_TYPE and msg_json["data"]["type"] == "command":
-                if msg_json["data"]["command"] == 'data':
-                    val = msg_json["data"]["rate"]
-                    if val == 1: 
-                        self.imu.enable_data_ready_int(service.data_ready_callback,accel=True, gyro=True)
-                    else:
-                        self.imu.disable_data_ready_int()
+            if 'type' in msg and msg['type'] == 'command':
+                logger.debug(f'command : {msg}')
 
-            else: 
-                logger.warning("Unknown commnad\n" + msg_json)
+                self.set_events(msg['data']['raw'], msg['data']['orientation'], msg['data']['wake'])
+        
+            else:
+                logger.debug(f"Unknown command: {msg}")
+
         except Exception as e:
             logger.error(f"Mqtt Command error  {json.loads(message.payload)} \n{e}")
 
@@ -119,50 +160,51 @@ class imu_service:
         logger.debug("subscribed")
         pass
 
-
+    ## Publish guesture events 
     def mqtt_publish_guesture(self, client,type, version, gesture, xyz, imu_status):
         header = {"type":type, "version":version}
         data =   {"gesture":gesture, "orientation": xyz, "active": imu_status}
         msg = {"header": header, "data": data}
-        client.publish(MQTT_TOPIC_BASE, json.dumps(msg))
+        client.publish(MQTT_TOPIC_GUESTURE, json.dumps(msg))
 
-
+    ## Publish raw Accel + Gyro data
     def mqtt_publish_raw(self, client ,type, version, accel, gyro):
-        header = {"type":type, "version":version}
+        #header = {"type":type, "version":version}
         accel_data = {"x": accel[0], "y": accel[1], "z": accel[2]}
         gyro_data =  {"x": gyro[0], "y": gyro[1], "z": gyro[2]}
         data = {"accel" : accel_data, "gyro" : gyro_data}   
-        msg = {"header": header, "data": data}
-        client.publish(MQTT_TOPIC_DATA, json.dumps(msg))
+        #msg = {"header": header, "data": data}
+        client.publish(MQTT_TOPIC_DATA, json.dumps(data))
+        logger.debug(f"[RAW] {accel_data} {gyro_data}")
 
 
     def mqtt_start(self):
-        client.on_message = self.mqtt_on_command
+        mqtt_client.on_message = self.mqtt_on_command
         
-        self.mqtt_publish_guesture(client,SERVICE_TYPE, SERVICE_VERSION, imu_gesture, \
+        self.mqtt_publish_guesture(mqtt_client, SERVICE_TYPE, SERVICE_VERSION, imu_gesture, \
                     self.orientaion, self.wake_status)
         
-        client.subscribe(MQTT_TOPIC_COMMAND)
-        client.enable_logger()
-        client.loop_start()
-        client.disconnect
+        mqtt_client.subscribe(MQTT_TOPIC_COMMAND)
+        mqtt_client.enable_logger()
+        mqtt_client.loop_start()
+        mqtt_client.disconnect
 
     def imu_on_d6d_change(self, val):
         logger.debug(f"Position Change {IMU_6D_LABLES[val&0x3F]}")
         self.orientaion = val&0x3F
-        self.mqtt_publish_guesture(client,SERVICE_TYPE, SERVICE_VERSION, imu_gesture, \
+        self.mqtt_publish_guesture(mqtt_client,SERVICE_TYPE, SERVICE_VERSION, imu_gesture, \
                     self.orientaion, self.wake_status)
         
     def imu_on_wakeup(self, val):  
         self.wake_status = is_awake(val)
-        self.mqtt_publish_guesture(client,SERVICE_TYPE, SERVICE_VERSION, imu_gesture, \
+        self.mqtt_publish_guesture(mqtt_client,SERVICE_TYPE, SERVICE_VERSION, imu_gesture, \
                     self.orientaion, self.wake_status)
 
     # Call back for accelerometer and gyrometer new data sample ready 
     # Publishes xyz data to the raw topic 
     # Works up to 26Hz sampling
     def data_ready_callback(self):
-        service.mqtt_publish_raw(client, SERVICE_TYPE, SERVICE_VERSION, service.imu.getAccData(), service.imu.getGyroData() )
+        service.mqtt_publish_raw(mqtt_client, SERVICE_TYPE, SERVICE_VERSION, service.imu.getAccData(), service.imu.getGyroData())
     
     def run(self):
         pass
@@ -184,27 +226,11 @@ if __name__ == '__main__':
     service.wake_status = is_awake(service.imu.get_wakeup_source())
     
     #Start to MQTT service
-    client = service.mqtt_connect()
+    mqtt_client = service.mqtt_connect()
     service.mqtt_start()
 
     #Enable interrupt events
-    if D6D_ENABLED:service.imu.enable_d6d_event(service.imu_on_d6d_change, SIXD_THS_70D) #Enable 6d orientation interrupts on INT1
-    if WAKE_STATUS_ENABLED: service.imu.enable_sleep_change_event(service.imu_on_wakeup,wake_ths= 0x01, wake_dur=0x01)  #Enable wakeup interrupts on INT1
-    if RAW_DATA_ENABLED: service.imu.enable_data_ready_int(service.data_ready_callback,accel=True, gyro=True) # Raw data on INT2
-
-    # while 1:
-    #     pass
-    # while True: 
-
-    #     if service.imu.get_status():
-    #         accel = service.imu.getAccData()
-    #         gyro  = service.imu.getGyroData()
-    #         #mag   = service.imu.get_mag_data()
-    #         logger.debug("[A]\tX: {0:.3f}mg    Y: {1:.3f}mg    Z: {2:.3f}mg".format(accel[0],accel[1], accel[2]))
-    #         logger.debug("[G]\tX: {0:.3f}mdps  Y: {1:.3f}mdps  Z: {2:.3f}mdps".format(gyro[0],gyro[1], gyro[2]))
-    #        # logger.debug("[M]\tX: {0:.3f}mGs   Y: {1:.3f}mGs   Z: {2:.3f}mGs".format(mag[0],mag[1], mag[2]))
-    #         logger.debug("\n")
-    #         time.sleep(1)
+    service.set_events(RAW_DATA_ENABLED, D6D_ENABLED, WAKE_STATUS_ENABLED)
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.pause()
