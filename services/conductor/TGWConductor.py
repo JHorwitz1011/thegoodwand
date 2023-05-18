@@ -22,7 +22,7 @@ CONDUCTOR_CLIENT_ID = "TGWConductor"
 
 ## Logger configuration
 ## Change level by changing DEBUG_LEVEL variable to ["DEBUG", "INFO", "WARNING", "ERROR"]
-DEBUG_LEVEL = "DEBUG"
+DEBUG_LEVEL = "INFO"
 LOGGER_HANDLER=sys.stdout
 LOGGER_NAME = __name__
 LOGGER_FORMAT = '[%(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
@@ -121,12 +121,13 @@ class TGWConductor(MQTTObject):
     def on_button_press(self, client, userdata, msg):
         payload = json.loads(msg.payload)
         keyPressType = payload['data']['event'] 
-        if keyPressType == 'long':
+        if keyPressType == 'medium':
             if self.child_process is not None:
+                logger.info("Medium button press")
                 self._kill_game() 
             else:
                 #Long press while idle - what should the behavior be?
-                logger.debug("Long press while idle")
+                logger.info("Medium press while idle")
             
 
     def _start_game(self, game: str):

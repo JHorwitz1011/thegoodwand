@@ -1,12 +1,9 @@
-
-
-
-
 import RPi.GPIO as GPIO
 import json 
 import time
 import signal
-
+import threading
+import logging
 import sys
 import os
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
@@ -14,24 +11,73 @@ from MQTTObject import MQTTObject
 
 BATTERY_SERVICE_PATH = "../battery_charger"
 
-pkt_template = {
-    "header": {
-        "type": "UI_BUTTON",
-        "version": 1
-    },
-    "data": {
-        "event": None,
-    }
-}
+MQTT_TYPE = "UI_BUTTON"
+MQTT_VERSION = "1"
+
 
 BUTTON_PIN = 26
 BUTTON_TOPIC = "goodwand/ui/controller/button"
 BUTTON_CLIENTID = 'TGW-ButtonService'
-LONG_PRESS_DURATION = 1
-SHUTDOWN_LENGTH = 5
+
+MEDIUM_PRESS_DURATION = 1.5
+LONG_PRESS_DURATION = 5.0
+
 SHORT_PRESS_ID = 'short'
+MEDIUM_PRESS_ID = 'medium'
 LONG_PRESS_ID = 'long'
 
+
+## Logger configuration
+## Change level by changing DEBUG_LEVEL variable to ["DEBUG", "INFO", "WARNING", "ERROR"]
+DEBUG_LEVEL = "INFO"
+LOGGER_HANDLER=sys.stdout
+LOGGER_NAME = __name__
+LOGGER_FORMAT = '[%(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
+
+logger = logging.getLogger(LOGGER_NAME)
+logger.setLevel(logging.getLevelName(DEBUG_LEVEL))
+
+handler = logging.StreamHandler(LOGGER_HANDLER)
+handler.setLevel(logging.getLevelName(DEBUG_LEVEL))
+format = logging.Formatter(LOGGER_FORMAT)
+handler.setFormatter(format)
+logger.addHandler(handler)
+
+
+class Button_timer():
+
+    def __init__(self, interval, function, args=[], kwargs={}, name=""):
+        self._interval = interval
+        self._function = function
+        self._args = args
+        self._kwargs = kwargs
+        self.timer = None
+        self.timer_name = name
+
+    def start_timer(self):
+        self.timer = threading.Timer(self._interval, self._function, self._args, self._kwargs)
+        self.timer.setName(self.timer_name)
+        self.timer.start()
+        pass
+
+    def cancel_timer(self):
+        try:
+            logger.debug(f"Timer Canceled {self.timer.getName()}")
+            self.timer.cancel()
+        except Exception as e:
+            logger.warning(f"cancel timer error {e}")
+ 
+
+    def is_alive(self):
+        try: 
+            if self.timer.is_alive():
+                return True
+            else:
+                return False
+        except Exception as e:
+            logger.warning(f"is alive exception {e}")
+            return False 
+        
 class TGWButtonService(MQTTObject):
     """
     Handles button info!
@@ -40,34 +86,63 @@ class TGWButtonService(MQTTObject):
         super().__init__()
 
         self.client = None
-        self.press_start = 0
-        self.press_end = 0
+        self.medium_timer = Button_timer(MEDIUM_PRESS_DURATION, self.medium_press_callback, name="medium timer")
+        self.long_timer = Button_timer(LONG_PRESS_DURATION, self.long_press_callback, name="long timer")
+        self.press = SHORT_PRESS_ID
+        self.press_mutex = threading.Lock()
 
     def gpio_init(self):
         """RPi.GPIO config"""
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
+    def publish_button_press(self, id):     
+        header = {"type": MQTT_TYPE, "version": MQTT_VERSION}
+        data = {"event": id}
+        msg = {"header": header, "data": data}
+        self.publish(BUTTON_TOPIC, json.dumps(msg))
+
+    # Called if the timer defined by MEDIUM_PRESS_DURATION expires 
+    def medium_press_callback(self):
+        logger.debug("Medium Press timer expired")
+        self.press_mutex.acquire()
+        self.press = MEDIUM_PRESS_ID
+        self.press_mutex.release()
+        self.publish_button_press(self.press)
+
+    # Called if the timer defined by LONG_PRESS_DURATION expires 
+    def long_press_callback(self):
+        self.press_mutex.acquire()
+        self.press = LONG_PRESS_ID
+        self.press_mutex.release()
+        self.publish_button_press(self.press)
+        logger.debug("Long Press timer expired")
+        logger.info("Powering down")
+
+        time.sleep(.5)
+        #TODO Play power down animation
+        os.system("sudo python3 " + os.path.expanduser(BATTERY_SERVICE_PATH) +'/charger_cli.py --power_off')
+
+
     def trigger_event_down(self):
-        """registers time on down edge of button press"""
-        self.press_start = time.time()
+        """Start timers """
+        #Reset press state
+        self.press_mutex.acquire()
+        self.press = SHORT_PRESS_ID
+        self.press_mutex.release()
+        self.medium_timer.start_timer()
+        self.long_timer.start_timer()
+
 
     def trigger_event_up(self):
-        """calculates duration on up edge of button press - handles correspond event accordingly"""
-        self.press_end = time.time()
-        duration = self.press_end - self.press_start
-
-        if duration > SHUTDOWN_LENGTH:                              # power off
-            os.system("sudo python3 " + os.path.expanduser(BATTERY_SERVICE_PATH) +'/charger_cli.py --power_off')
-        else:
-            pkt = pkt_template
-            if duration < LONG_PRESS_DURATION:                      # trigger short
-                pkt['data']['event'] = SHORT_PRESS_ID 
-            else:                                                   # trigger long
-                pkt['data']['event'] = LONG_PRESS_ID        
-
-            print(f"publishing {pkt['data']['event']} press")
-            self.publish(BUTTON_TOPIC, json.dumps(pkt))
+        """Stops timers for medium and long presses"""
+        self.medium_timer.cancel_timer()
+        self.long_timer.cancel_timer()
+        logger.info(f"Button Released: {self.press} press detected")
+        
+        ## Medium and long presses handled in the timer callbacks. Only publish short press
+        if self.press == SHORT_PRESS_ID:
+            self.publish_button_press(SHORT_PRESS_ID) 
 
 
     def trigger(self, *args):
