@@ -130,7 +130,7 @@ class TGWConductor(MQTTObject):
                 logger.info("Medium press while idle")
             
 
-    def _start_game(self, game: str):
+    def _start_game(self, game: str, game_args):
         """
         starts game. assumes path is valid per helper.fetch_game checking
         """
@@ -142,8 +142,8 @@ class TGWConductor(MQTTObject):
         if filePath is not None:
             logger.debug(f"Playing app start animation")
             self.play_light ('app_launch.csv')
-            logger.debug(f"Launching spell: {game} {filePath}")
-            self.child_process = subprocess.Popen(['python3', filePathandMain, filePath ] )
+            logger.debug(f"Launching spell: {game} : {filePath} : {game_args}")
+            self.child_process = subprocess.Popen(['python3', filePathandMain, filePath, game_args ] )
             logger.debug(f"[SUBPROCESS ID] {self.child_process.pid}")
             
         else:
@@ -159,30 +159,44 @@ class TGWConductor(MQTTObject):
         try:
             if len(payload['card_data']['records']) > 0:
                 cardRecord0 = payload_url = payload['card_data']['records'][0]
+                game_on_card = ""
+                game_args = ""
+                # ADD here to past rest of URL to launch the game with so Yoto can play the card
+                recordString = cardRecord0 ["data"]
                 
-                if cardRecord0 ["data"] == "https://www.thegoodwand.com":
+                if recordString == "https://www.thegoodwand.com":
                     logger.debug("[NFC SCAN] The Good Wand Card")
                     cardData = payload['card_data']['records'][1]["data"]
                     card_dict = json.loads(cardData)
                     game_on_card = card_dict ["spell"]
                     logger.debug (f"[SPELL] {game_on_card}      [RUNNING] {self.runningSpell}")
-                    
+                else:
+                    # Wasnt a TGW card, so lets check if Yoto
+                    logger.info("[NFC SCAN] NOT a TGW card. Checking if Yoto") 
+                    if recordString[0:16]== "https://yoto.io/":
+                        game_on_card = "yoto"
+                        game_args = recordString [16:]
+                        logger.debug (f"Activating Yoto with args {game_args}")
+                    else:
+                        logger.debug (f"Not a Yoto card. Conductor should handle")
+                
+                logger.debug (f"Now checking if a spell is to be activated")
+                if game_on_card != "":
                     if self.runningSpell != game_on_card:
                         # This is a different spell then running spell, so start it:
                         if self.child_process is None: #no game is running so just start new game
-                            self._start_game(game_on_card)
+                            self._start_game(game_on_card, game_args)
                         else:
                             # Stop currently running game
                             self._kill_game ()
-                            self._start_game(game_on_card)                        
+                            self._start_game(game_on_card, game_args)                        
 
                         # Update runningSpell. NOT HANDLING edge condition of spells failing to start
                         self.runningSpell = game_on_card
                     else:  
                         logger.debug("[NFC SCAN] Spell already running")                
                 else:
-                        logger.debug("[NFC SCAN] NOT a TGW card") 
-                        # Add here support for identifying Yoto and starting it
+                    logger.debug (f"Not a TGW or Yoto cards. Do nothing")
             else:
                 logger.debug('[NFC SCAN] No records')
         except:
