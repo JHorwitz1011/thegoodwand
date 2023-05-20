@@ -13,27 +13,17 @@ import os
 import sys
 import logging
 
+sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
+from log import log
+
+DEBUG_LEVEL = "DEBUG"
+LOGGER_NAME = __name__
+logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 
 broker = 'localhost'
 port = 1883
 audio_topic = "goodwand/ui/view/audio_playback"
 client_id = 'TGW-AudioService'
-
-## Logger configuration
-## Change level by changing DEBUG_LEVEL variable to ["DEBUG", "INFO", "WARNING", "ERROR"]
-DEBUG_LEVEL = "INFO"
-LOGGER_HANDLER=sys.stdout
-LOGGER_NAME = __name__
-LOGGER_FORMAT = '[%(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
-
-logger = logging.getLogger(LOGGER_NAME)
-logger.setLevel(logging.getLevelName(DEBUG_LEVEL))
-
-handler = logging.StreamHandler(LOGGER_HANDLER)
-handler.setLevel(logging.getLevelName(DEBUG_LEVEL))
-format = logging.Formatter(LOGGER_FORMAT)
-handler.setFormatter(format)
-logger.addHandler(handler)
 
 
 

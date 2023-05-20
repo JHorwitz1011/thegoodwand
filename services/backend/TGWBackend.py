@@ -9,21 +9,12 @@ import signal
 import sys
 import time
 
+sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
+from log import log
 
-DEBUG_LEVEL = "DEBUG" #
-LOGGER_HANDLER=sys.stdout
+DEBUG_LEVEL = "DEBUG"
 LOGGER_NAME = __name__
-LOGGER_FORMAT = '%(asctime)s.%(msecs)03d [%(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
-LOGGER_TIME_FMT = "%M:%S"
-logger = logging.getLogger(LOGGER_NAME)
-logger.setLevel(logging.getLevelName(DEBUG_LEVEL))
-
-handler = logging.StreamHandler(LOGGER_HANDLER)
-handler.setLevel(logging.getLevelName(DEBUG_LEVEL))
-format = logging.Formatter(LOGGER_FORMAT,datefmt = LOGGER_TIME_FMT )
-handler.setFormatter(format)
-logger.addHandler(handler)
-
+logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 
 
 class backEnd():

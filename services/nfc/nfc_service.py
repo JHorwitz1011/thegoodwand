@@ -5,10 +5,16 @@ from mfrc522 import SimpleMFRC522
 from paho.mqtt import client as mqtt
 import json
 import signal 
-import sys
+import sys, os
 import time
 import ndef
-import logging
+
+sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
+from log import log
+
+DEBUG_LEVEL = "DEBUG"
+LOGGER_NAME = __name__
+logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 
 SERVICE_TYPE = "UI_NFC"
 SERVICE_VERSION = "1"
@@ -17,23 +23,6 @@ MQTT_BROKER = 'localhost'
 MQTT_PORT = 1883
 MQTT_TOPIC = 'goodwand/ui/controller/nfc'
 MQTT_CLIENT_ID = 'TGW_NFC_SERVICE'
-
-## Logger configuration
-## Change level by changing DEBUG_LEVEL variable to ["DEBUG", "INFO", "WARNING", "ERROR"]
-DEBUG_LEVEL = "INFO"
-LOGGER_HANDLER=sys.stdout
-LOGGER_NAME = __name__
-LOGGER_FORMAT = '[%(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
-
-logger = logging.getLogger(LOGGER_NAME)
-logger.setLevel(logging.getLevelName(DEBUG_LEVEL))
-
-handler = logging.StreamHandler(LOGGER_HANDLER)
-handler.setLevel(logging.getLevelName(DEBUG_LEVEL))
-format = logging.Formatter(LOGGER_FORMAT)
-handler.setFormatter(format)
-logger.addHandler(handler)
-
 
 def mqtt_on_connect(client, userdata, flags, rc):
     if rc == 0:

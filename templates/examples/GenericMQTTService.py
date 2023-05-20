@@ -1,7 +1,6 @@
 import time
+import sys, os
 
-import sys
-import os
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
 from MQTTObject import MQTTObject
 

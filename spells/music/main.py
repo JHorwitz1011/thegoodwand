@@ -4,26 +4,14 @@ import json
 import sys
 import math
 import os
-import logging 
 from paho.mqtt import client as mqtt_client
 
-## Logger configuration
-## Change level by changing DEBUG_LEVEL variable to ["DEBUG", "INFO", "WARNING", "ERROR"]
+sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
+from log import log
 
-DEBUG_LEVEL = "DEBUG" #
-LOGGER_HANDLER=sys.stdout
+DEBUG_LEVEL = "DEBUG"
 LOGGER_NAME = __name__
-LOGGER_FORMAT = '[%(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
-
-logger = logging.getLogger(LOGGER_NAME)
-logger.setLevel(logging.getLevelName(DEBUG_LEVEL))
-
-handler = logging.StreamHandler(LOGGER_HANDLER)
-handler.setLevel(logging.getLevelName(DEBUG_LEVEL))
-format = logging.Formatter(LOGGER_FORMAT)
-handler.setFormatter(format)
-logger.addHandler(handler)
-
+logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 
 # orientation values
 # {-1: "unknown", 1: "X-", 2: "X+", 4: "Y-", 8: "Y+", 16: "Z-", 32: "Z+"}     

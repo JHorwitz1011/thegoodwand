@@ -1,26 +1,14 @@
 from paho.mqtt import client as mqtt_client
-import json
-import logging 
-import sys
+import sys, os
 DEFAULT_BROKER = 'localhost'
 DEFAULT_PORT = 1883
 
-## Logger configuration
-## Change level by changing DEBUG_LEVEL variable to ["DEBUG", "INFO", "WARNING", "ERROR"]
-DEBUG_LEVEL = "INFO"
-LOGGER_HANDLER=sys.stdout
+sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
+from log import log
+
+DEBUG_LEVEL = "DEBUG"
 LOGGER_NAME = __name__
-LOGGER_FORMAT = '[%(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
-
-logger = logging.getLogger(LOGGER_NAME)
-logger.setLevel(logging.getLevelName(DEBUG_LEVEL))
-
-handler = logging.StreamHandler(LOGGER_HANDLER)
-handler.setLevel(logging.getLevelName(DEBUG_LEVEL))
-format = logging.Formatter(LOGGER_FORMAT)
-handler.setFormatter(format)
-logger.addHandler(handler)
-
+logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 
 class MQTTObject():
     """Abstracts away irrelevavnt aspects of mqtt functionality for ease of programming"""

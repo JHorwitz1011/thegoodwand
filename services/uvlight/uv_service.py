@@ -5,10 +5,15 @@ import RPi.GPIO as GPIO
 import sys
 import os
 import signal
+import time
+
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
 from MQTTObject import MQTTObject
-import logging
-import time
+from log import log
+
+DEBUG_LEVEL = "DEBUG"
+LOGGER_NAME = __name__
+logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 
 port = 1883
 UV_TOPIC = "goodwand/ui/view/uv"
@@ -17,21 +22,6 @@ UV_CLIENT_ID = 'TGW_UVService'
 
 UV_PIN = 27
 
-## Logger configuration
-## Change level by changing DEBUG_LEVEL variable to ["DEBUG", "INFO", "WARNING", "ERROR"]
-DEBUG_LEVEL = "DEBUG"
-LOGGER_HANDLER=sys.stdout
-LOGGER_NAME = __name__
-LOGGER_FORMAT = '[%(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
-
-logger = logging.getLogger(LOGGER_NAME)
-logger.setLevel(logging.getLevelName(DEBUG_LEVEL))
-
-handler = logging.StreamHandler(LOGGER_HANDLER)
-handler.setLevel(logging.getLevelName(DEBUG_LEVEL))
-format = logging.Formatter(LOGGER_FORMAT)
-handler.setFormatter(format)
-logger.addHandler(handler)
 
 class FWUVService(MQTTObject):
     #set constants and the such

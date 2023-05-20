@@ -11,7 +11,13 @@ import os
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
 
 from MQTTObject import MQTTObject
+from log import log
 import helper
+
+DEBUG_LEVEL = "DEBUG"
+LOGGER_NAME = __name__
+logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
+
 
 NFC_TOPIC = "goodwand/ui/controller/nfc"
 BUTTON_TOPIC = "goodwand/ui/controller/button"
@@ -19,23 +25,6 @@ LIGHT_TOPIC = "goodwand/ui/view/lightbar"
 AUDIO_TOPIC = "goodwand/ui/view/audio_playback"
 
 CONDUCTOR_CLIENT_ID = "TGWConductor"
-
-## Logger configuration
-## Change level by changing DEBUG_LEVEL variable to ["DEBUG", "INFO", "WARNING", "ERROR"]
-DEBUG_LEVEL = "INFO"
-LOGGER_HANDLER=sys.stdout
-LOGGER_NAME = __name__
-LOGGER_FORMAT = '[%(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
-
-logger = logging.getLogger(LOGGER_NAME)
-logger.setLevel(logging.getLevelName(DEBUG_LEVEL))
-
-handler = logging.StreamHandler(LOGGER_HANDLER)
-handler.setLevel(logging.getLevelName(DEBUG_LEVEL))
-format = logging.Formatter(LOGGER_FORMAT)
-handler.setFormatter(format)
-logger.addHandler(handler)
-
 
 audio_pkt = {
     "header": { "type": "UI_AUDIO", "version": 1},
