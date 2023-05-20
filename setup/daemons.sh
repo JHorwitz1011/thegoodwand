@@ -24,7 +24,7 @@ command=python3 -u FWLightService.py
 directory=home/"$path"/lights
 autostart=true
 autorestart=true
-priority=50
+priority=25
 user=root
 "  > /etc/supervisor/conf.d/lightbar.conf
 if [ $? != 0 ]
@@ -112,7 +112,7 @@ command=python3 -u TGWConductor.py
 directory=home/"$path"/conductor 
 autostart=true 
 autorestart=true
-priority=50
+priority=999
 user=$user
 " > /etc/supervisor/conf.d/conductor.conf
 if [ $? != 0 ]

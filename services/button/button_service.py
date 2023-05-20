@@ -3,9 +3,10 @@ import json
 import time
 import signal
 import threading
-import logging
 import sys
 import os
+
+# GoodWand Libraries
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
 from MQTTObject import MQTTObject
 from log import log

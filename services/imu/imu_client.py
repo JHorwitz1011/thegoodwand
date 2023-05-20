@@ -53,7 +53,7 @@ class imu_client:
     ## USE THIS TO TURN ON AND OFF RAW DATA STREAM. PASS True OR False TO TURN ON AND OFF EVENTS
     def mqtt_publish_command(self, client, raw_en, wake_en, orientation_en):
         events =   {"raw":raw_en, "wake": wake_en, "orientation": orientation_en}
-        msg = {"type": "command", "data": events}
+        msg = {"type": "event_command", "data": events}
         client.publish(MQTT_TOPIC_COMMAND, json.dumps(msg))
 
     ## Publish raw Accel + Gyro data

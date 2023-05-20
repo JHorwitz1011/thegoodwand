@@ -194,6 +194,7 @@ class TGWConductor(MQTTObject):
     def run(self):
         #logger.debug ("Conductor Running self")
         self.start_mqtt(CONDUCTOR_CLIENT_ID, self.callbacks)
+        time.sleep(1) # Just in case the light service is not running. 
         self.play_light ('power_on.csv')
         #logger.debug("Done with init animation")
         signal.pause()

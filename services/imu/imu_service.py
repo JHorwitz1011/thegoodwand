@@ -31,6 +31,8 @@ MQTT_TOPIC_BASE = 'goodwand/ui/controller/gesture'
 MQTT_TOPIC_GUESTURE = MQTT_TOPIC_BASE
 MQTT_TOPIC_DATA = MQTT_TOPIC_BASE  +'/data'
 MQTT_TOPIC_COMMAND = MQTT_TOPIC_BASE + '/command'
+MQTT_TOPIC_IS_ACTIVE = MQTT_TOPIC_BASE + '/is_active'
+MQTT_TOPIC_ON_WAKE = MQTT_TOPIC_BASE + '/on_wake'
 MQTT_TOPIC = MQTT_TOPIC_BASE + '/#'  
 MQTT_CLIENT_ID = 'TGW_IMU_SERVICE'
 
@@ -43,9 +45,21 @@ D6D_ENABLED = True
 WAKE_STATUS_ENABLED = True
 RAW_DATA_ENABLED = False
 
-DEBUG_LEVEL = "DEBUG"
+## Logger configuration
+## Change level by changing DEBUG_LEVEL variable to ["DEBUG", "INFO", "WARNING", "ERROR"]
+DEBUG_LEVEL = "INFO"
+LOGGER_HANDLER=sys.stdout
 LOGGER_NAME = __name__
-logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
+LOGGER_FORMAT = '[%(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
+
+logger = logging.getLogger(LOGGER_NAME)
+logger.setLevel(logging.getLevelName(DEBUG_LEVEL))
+
+handler = logging.StreamHandler(LOGGER_HANDLER)
+handler.setLevel(logging.getLevelName(DEBUG_LEVEL))
+format = logging.Formatter(LOGGER_FORMAT)
+handler.setFormatter(format)
+logger.addHandler(handler)
 
 
 def is_awake(val):
@@ -136,11 +150,16 @@ class imu_service:
         msg = json.loads(message.payload)
         logger.debug(f"Command {msg}")
         try: 
-            if 'type' in msg and msg['type'] == 'command':
+            if 'type' in msg and msg['type'] == 'event_command':
                 logger.debug(f'command : {msg}')
 
                 self.set_events(msg['data']['raw'], msg['data']['orientation'], msg['data']['wake'])
         
+            
+            elif 'type' in msg and msg['type'] == 'is_active':
+                logger.debug(f"Active Command {self.wake_status}")
+                self.mqtt_publish_active(mqtt_client, self.wake_status)
+            
             else:
                 logger.debug(f"Unknown command: {msg}")
 
@@ -156,9 +175,9 @@ class imu_service:
         pass
 
     ## Publish guesture events 
-    def mqtt_publish_guesture(self, client,type, version, gesture, xyz, imu_status):
+    def mqtt_publish_guesture(self, client,type, version, gesture, xyz):
         header = {"type":type, "version":version}
-        data =   {"gesture":gesture, "orientation": xyz, "active": imu_status}
+        data =   {"gesture":gesture, "orientation": xyz}
         msg = {"header": header, "data": data}
         client.publish(MQTT_TOPIC_GUESTURE, json.dumps(msg))
 
@@ -173,11 +192,20 @@ class imu_service:
         logger.debug(f"[RAW] {accel_data} {gyro_data}")
 
 
+    def mqtt_publish_on_wake(self, client, message):
+        # Sends a bool not Json
+        msg = {"status":message }
+        client.publish(MQTT_TOPIC_ON_WAKE, json.dumps(msg))
+    
+    def mqtt_publish_active(self,client, message):
+        client.publish(MQTT_TOPIC_IS_ACTIVE, json.dumps(message))
+    
+
     def mqtt_start(self):
         mqtt_client.on_message = self.mqtt_on_command
         
         self.mqtt_publish_guesture(mqtt_client, SERVICE_TYPE, SERVICE_VERSION, imu_gesture, \
-                    self.orientaion, self.wake_status)
+                    self.orientaion)
         
         mqtt_client.subscribe(MQTT_TOPIC_COMMAND)
         mqtt_client.enable_logger()
@@ -188,12 +216,13 @@ class imu_service:
         logger.debug(f"Position Change {IMU_6D_LABLES[val&0x3F]}")
         self.orientaion = val&0x3F
         self.mqtt_publish_guesture(mqtt_client,SERVICE_TYPE, SERVICE_VERSION, imu_gesture, \
-                    self.orientaion, self.wake_status)
+                    self.orientaion)
         
     def imu_on_wakeup(self, val):  
         self.wake_status = is_awake(val)
-        self.mqtt_publish_guesture(mqtt_client,SERVICE_TYPE, SERVICE_VERSION, imu_gesture, \
-                    self.orientaion, self.wake_status)
+        logger.debug(f"On Wake {self.wake_status}")
+        self.mqtt_publish_on_wake(mqtt_client, self.wake_status)
+
 
     # Call back for accelerometer and gyrometer new data sample ready 
     # Publishes xyz data to the raw topic 
