@@ -8,8 +8,11 @@ import os
 
 # GoodWand Libraries
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
-from MQTTObject import MQTTObject
+#from MQTTObject import MQTTObject
 from log import log
+from Services import LightService
+from Services import AudioService
+from Services import MQTTClient
 
 DEBUG_LEVEL = "DEBUG"
 LOGGER_NAME = __name__
@@ -42,6 +45,8 @@ class Button_timer():
         self._kwargs = kwargs
         self.timer = None
         self.timer_name = name
+        self.lights = None
+        self.audio = None
 
     def start_timer(self):
         self.timer = threading.Timer(self._interval, self._function, self._args, self._kwargs)
@@ -67,14 +72,12 @@ class Button_timer():
             logger.warning(f"is alive exception {e}")
             return False 
         
-class TGWButtonService(MQTTObject):
+class TGWButtonService():
     """
     Handles button info!
     """
     def __init__(self) -> None:
-        super().__init__()
-
-        self.client = None
+        self.mqtt_client = None
         self.medium_timer = Button_timer(MEDIUM_PRESS_DURATION, self.medium_press_callback, name="medium timer")
         self.long_timer = Button_timer(LONG_PRESS_DURATION, self.long_press_callback, name="long timer")
         self.press = SHORT_PRESS_ID
@@ -89,7 +92,7 @@ class TGWButtonService(MQTTObject):
         header = {"type": MQTT_TYPE, "version": MQTT_VERSION}
         data = {"event": id}
         msg = {"header": header, "data": data}
-        self.publish(BUTTON_TOPIC, json.dumps(msg))
+        self.mqtt_client.publish(BUTTON_TOPIC, json.dumps(msg))
 
     # Called if the timer defined by MEDIUM_PRESS_DURATION expires 
     def medium_press_callback(self):
@@ -107,8 +110,9 @@ class TGWButtonService(MQTTObject):
         self.publish_button_press(self.press)
         logger.debug("Long Press timer expired")
         logger.info("Powering down")
-
-        time.sleep(.5)
+        self.lights.play_lb_csv_animation("power_off.csv")
+        self.audio.play_foreground("power_off.wav")
+        time.sleep(3)
         #TODO Play power down animation
         os.system("sudo python3 " + os.path.expanduser(BATTERY_SERVICE_PATH) +'/charger_cli.py --power_off')
 
@@ -144,9 +148,15 @@ class TGWButtonService(MQTTObject):
 
     def run(self):
         """main loop"""
+        
+        self.mqtt_object = MQTTClient()
+        self.mqtt_client = self.mqtt_object.start_mqtt(BUTTON_CLIENTID)
+        self.lights = LightService(self.mqtt_client, path = os.getcwd())
+        self.audio = AudioService(mqtt_client = self.mqtt_client, path = os.getcwd())
+
         self.gpio_init()
-        self.start_mqtt(BUTTON_CLIENTID)
         GPIO.add_event_detect(BUTTON_PIN, GPIO.BOTH, callback=self.trigger)
+
         signal.pause()
 
 if __name__ == '__main__':
