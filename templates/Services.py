@@ -371,6 +371,8 @@ class MQTTClient():
 
         return self.client
 
+    def publish(self, topic, message):
+        self.client.publish(topic, message)
 
     def stop_mqtt(self):
         """
