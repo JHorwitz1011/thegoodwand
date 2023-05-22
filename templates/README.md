@@ -179,7 +179,7 @@ audio.play_foreground(file = "2SPLfltup-horn.wav", path = None)
 audio.play_background(file = "2SPLfltup-horn.wav", path = None)
 
 # Stop all audio
-audio.stop_audio()
+audio.stop()
 ```
 
 ### NFC Service ### 

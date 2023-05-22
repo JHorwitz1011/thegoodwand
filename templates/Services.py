@@ -143,11 +143,10 @@ class NFCService():
 
     def __on_message(self,client, userdata, message):
         """Parse data and call subscriber callback"""
-        logger.debug(f"NFC {message.payload}")
+        
         msg = json.loads(message.payload)
-
+        logger.debug(f"NFC {msg}")
         if self.callback:
-            pass
             try:
                 self.callback(msg)
             except Exception as e:
@@ -191,7 +190,7 @@ class AudioService():
     def play_system(self, animation):
         pass
 
-    def stop_audio(self):
+    def stop(self):
         data = {"action":"STOP", "path": None, "file":None, "mode":None }
         self.__publish_message({"header": self.MQTT_HEADER, "data": data})
         

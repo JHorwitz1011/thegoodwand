@@ -20,35 +20,6 @@ DEBUG_LEVEL = "DEBUG"
 LOGGER_NAME = __name__
 logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 
-
-
-# NFC_TOPIC = "goodwand/ui/controller/nfc"
-# BUTTON_TOPIC = "goodwand/ui/controller/button"
-# LIGHT_TOPIC = "goodwand/ui/view/lightbar"
-# AUDIO_TOPIC = "goodwand/ui/view/audio_playback"
-
-
-
-# audio_pkt = {
-#     "header": { "type": "UI_AUDIO", "version": 1},
-#     "data": {
-#      	"action": "START", 
-# 	 	"path": os.getcwd(),
-# 	 	"file": "",
-#         "mode": "background"
-#         }
-# }
-
-# light_pkt = {
-#             "header": {"type": "UI_LIGHTBAR","version": 1},
-#             "data": {
-#                 "granularity": 1,
-#                 "animation": "power_off",
-# 				"path": os.getcwd(),
-#         		"crossfade": 0
-#             }
-#         }
-
 class TGWConductor():
     """
     starts and stops games off of NFC commands
@@ -74,7 +45,7 @@ class TGWConductor():
 
         self.audio = AudioService(self.mqtt_client, os.getcwd())
 
-        self.lights = LigherService(self.mqtt_client, os.getcwd())
+        self.lights = LightService(self.mqtt_client, os.getcwd())
 
         self.button = ButtonService(self.mqtt_client)
         self.button.subscribe(self.on_button_press)
@@ -128,12 +99,10 @@ class TGWConductor():
         """
         handles logic for starting games
         """
-        logger.debug("[NFC SCAN] Scan event")
-        payload = json.loads(msg.payload)
-        
+        logger.debug(f"[NFC SCAN] records: {records}")
         try:
-            if len(records) > 0:
-                cardRecord0 = payload_url = records[0]
+            if len(records['card_data']['records']) > 0:
+                cardRecord0 = payload_url = records['card_data']['records'][0]
                 game_on_card = ""
                 game_args = ""
                 # ADD here to past rest of URL to launch the game with so Yoto can play the card
@@ -141,7 +110,7 @@ class TGWConductor():
                 
                 if recordString == "https://www.thegoodwand.com":
                     logger.debug("[NFC SCAN] The Good Wand Card")
-                    cardData = payload['card_data']['records'][1]["data"]
+                    cardData = records['card_data']['records'][1]["data"]
                     card_dict = json.loads(cardData)
                     game_on_card = card_dict ["spell"]
                     logger.debug (f"[SPELL] {game_on_card}      [RUNNING] {self.runningSpell}")
