@@ -332,6 +332,7 @@ class ButtonService():
     def __on_subscribe(self, client, userdata, mid, granted_qos):
         pass 
 
+
 class MQTTClient():
     """Abstracts away irrelevavnt aspects of mqtt functionality for ease of programming"""
 
@@ -346,7 +347,7 @@ class MQTTClient():
         self.client_id = ''
         self.client = None
 
-    def start_mqtt(self, client_id):
+    def start(self, client_id):
         """
         Parameters:
             client_id (str): name to identify as 

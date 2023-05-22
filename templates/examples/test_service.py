@@ -87,7 +87,7 @@ if __name__ == '__main__':
     
     # Connect to MQTT and get client instance 
     mqtt_object = MQTTClient()
-    mqtt_client = mqtt_object.start_mqtt(MQTT_CLIENT_ID)
+    mqtt_client = mqtt_object.start(MQTT_CLIENT_ID)
 
     logger.debug("Button setup, Press button.")
     button = init_button(mqtt_client, button_callback)

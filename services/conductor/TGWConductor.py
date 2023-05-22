@@ -10,8 +10,10 @@ import sys
 import os
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
 
-from MQTTObject import MQTTObject
+#from MQTTObject import MQTTObject
+from Services import *
 from log import log
+
 import helper
 
 DEBUG_LEVEL = "DEBUG"
@@ -19,37 +21,35 @@ LOGGER_NAME = __name__
 logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 
 
-NFC_TOPIC = "goodwand/ui/controller/nfc"
-BUTTON_TOPIC = "goodwand/ui/controller/button"
-LIGHT_TOPIC = "goodwand/ui/view/lightbar"
-AUDIO_TOPIC = "goodwand/ui/view/audio_playback"
 
-CONDUCTOR_CLIENT_ID = "TGWConductor"
+# NFC_TOPIC = "goodwand/ui/controller/nfc"
+# BUTTON_TOPIC = "goodwand/ui/controller/button"
+# LIGHT_TOPIC = "goodwand/ui/view/lightbar"
+# AUDIO_TOPIC = "goodwand/ui/view/audio_playback"
 
-audio_pkt = {
-    "header": { "type": "UI_AUDIO", "version": 1},
-    "data": {
-     	"action": "START", 
-	 	"path": os.getcwd(),
-	 	"file": "",
-        "mode": "background"
-        }
-}
 
-light_pkt = {
-            "header": {"type": "UI_LIGHTBAR","version": 1},
-            "data": {
-                "granularity": 1,
-                "animation": "power_off",
-				"path": os.getcwd(),
-        		"crossfade": 0
-            }
-        }
 
-#maximum allowed time a button event can register upon nfc tag scan
-MAX_BUTTON_LAG = .5 # seconds
+# audio_pkt = {
+#     "header": { "type": "UI_AUDIO", "version": 1},
+#     "data": {
+#      	"action": "START", 
+# 	 	"path": os.getcwd(),
+# 	 	"file": "",
+#         "mode": "background"
+#         }
+# }
 
-class TGWConductor(MQTTObject):
+# light_pkt = {
+#             "header": {"type": "UI_LIGHTBAR","version": 1},
+#             "data": {
+#                 "granularity": 1,
+#                 "animation": "power_off",
+# 				"path": os.getcwd(),
+#         		"crossfade": 0
+#             }
+#         }
+
+class TGWConductor():
     """
     starts and stops games off of NFC commands
     currently details:
@@ -59,58 +59,44 @@ class TGWConductor(MQTTObject):
     data: data realted to game
 
     """
+
+    CONDUCTOR_CLIENT_ID = "TGWConductor"
+
     def __init__(self):
-        super().__init__()
+        #super().__init__()
         
         self.runningSpell = "" 
-
         self.child_process = None
-        self.time_since_short_press = time.time()
-        self.time_since_long_press = time.time()
         self.current_game = ""
-        self.sub = None
 
-        self.callbacks = {
-            NFC_TOPIC : self.on_nfc_scan,
-            BUTTON_TOPIC: self.on_button_press,
-        }
-        
-	
-    def play_light(self, lightEffect):
-        light_pkt ['data']['animation'] = lightEffect
-        light_pkt ['data']['path'] = os.getcwd() 
-        logger.debug(f"Playing Light Effect {lightEffect}  in {light_pkt['data']['path']}" )
-        self.publish(LIGHT_TOPIC, json.dumps(light_pkt))
-    
-    def play_audio(self, file):
-        logger.debug ("Playing" , file)
-        audio_pkt ['data']['action'] = "START"
-        audio_pkt ['data']['file'] = file
-        audio_pkt ['data']['path'] = os.getcwd()
-        self.publish(AUDIO_TOPIC, json.dumps(audio_pkt))
-    
-    def stop_audio(self):
-        logger.info(f"[Audio] stop all")
-        audio_pkt ['data']['action'] = "STOP"
-        self.publish(AUDIO_TOPIC, json.dumps(audio_pkt))
+        self.mqtt_obj = MQTTClient()
+        self.mqtt_client = self.mqtt_obj.start(self.CONDUCTOR_CLIENT_ID)
 
+        self.audio = AudioService(self.mqtt_client, os.getcwd())
+
+        self.lights = LigherService(self.mqtt_client, os.getcwd())
+
+        self.button = ButtonService(self.mqtt_client)
+        self.button.subscribe(self.on_button_press)
+
+        self.nfc = NFCService(self.mqtt_client)
+        self.nfc.subscribe(self.on_nfc_scan)
 
     def _kill_game(self):
         # kills current game
         logger.info("Killing Process")
         self.child_process.kill()
         self.child_process = None
-        self.stop_audio ()
-        self.play_light ('app_stopped.csv')
-        self.play_audio ('app_stopped.wav')
+        self.audio.stop()
+        self.lights.play_lb_csv_animation('app_stopped.csv')
+        self.audio.play_background('app_stopped.wav')
         self.runningSpell = ""
         
 
     #Handles button events
-    def on_button_press(self, client, userdata, msg):
-        payload = json.loads(msg.payload)
-        keyPressType = payload['data']['event'] 
-        if keyPressType == 'medium':
+    def on_button_press(self, press):
+
+        if press == 'medium':
             if self.child_process is not None:
                 logger.info("Medium button press")
                 self._kill_game() 
@@ -130,7 +116,7 @@ class TGWConductor(MQTTObject):
         
         if filePath is not None:
             logger.debug(f"Playing app start animation")
-            self.play_light ('app_launch.csv')
+            self.lights.play_lb_csv_animation('app_launch.csv')
             logger.debug(f"Launching spell: {game} : {filePath} : {game_args}")
             self.child_process = subprocess.Popen(['python3', filePathandMain, filePath, game_args ] )
             logger.debug(f"[SUBPROCESS ID] {self.child_process.pid}")
@@ -138,7 +124,7 @@ class TGWConductor(MQTTObject):
         else:
             logger.debug("invalid game found...")
 
-    def on_nfc_scan(self, client, userdata, msg):
+    def on_nfc_scan(self, records):
         """
         handles logic for starting games
         """
@@ -146,8 +132,8 @@ class TGWConductor(MQTTObject):
         payload = json.loads(msg.payload)
         
         try:
-            if len(payload['card_data']['records']) > 0:
-                cardRecord0 = payload_url = payload['card_data']['records'][0]
+            if len(records) > 0:
+                cardRecord0 = payload_url = records[0]
                 game_on_card = ""
                 game_args = ""
                 # ADD here to past rest of URL to launch the game with so Yoto can play the card
@@ -192,11 +178,10 @@ class TGWConductor(MQTTObject):
             logger.warning('[NFC SCAN] JSON parsing error')
 
     def run(self):
-        #logger.debug ("Conductor Running self")
-        self.start_mqtt(CONDUCTOR_CLIENT_ID, self.callbacks)
         time.sleep(1) # Just in case the light service is not running. 
-        self.play_light ('power_on.csv')
-        #logger.debug("Done with init animation")
+        self.lights.play_lb_csv_animation('power_on.csv')
+        #TODO Get power on audio
+        # self.audio.play_background('power_on.wav')
         signal.pause()
 
 
