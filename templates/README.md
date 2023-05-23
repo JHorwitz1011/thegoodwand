@@ -123,7 +123,7 @@ mqtt_object = MQTTClient() # Initialize the MQTT Class
 # Connect to MQTT broker. Returns instance of the MQTT Client that can be 
 # Pass to service callses when initializing.
 # @param:  client_id, a unique client ID  
-mqtt_client = mqtt_object.start_mqtt(MQTT_CLIENT_ID) 
+mqtt_client = mqtt_object.start(MQTT_CLIENT_ID) 
 ```
 
 ### Light service ###
@@ -179,7 +179,7 @@ audio.play_foreground(file = "2SPLfltup-horn.wav", path = None)
 audio.play_background(file = "2SPLfltup-horn.wav", path = None)
 
 # Stop all audio
-audio.stop_audio()
+audio.stop()
 ```
 
 ### NFC Service ### 

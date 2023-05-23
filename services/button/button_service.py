@@ -150,7 +150,7 @@ class TGWButtonService():
         """main loop"""
         
         self.mqtt_object = MQTTClient()
-        self.mqtt_client = self.mqtt_object.start_mqtt(BUTTON_CLIENTID)
+        self.mqtt_client = self.mqtt_object.start(BUTTON_CLIENTID)
         self.lights = LightService(self.mqtt_client, path = os.getcwd())
         self.audio = AudioService(mqtt_client = self.mqtt_client, path = os.getcwd())
 

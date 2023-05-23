@@ -87,7 +87,7 @@ if __name__ == '__main__':
     
     # Connect to MQTT and get client instance 
     mqtt_object = MQTTClient()
-    mqtt_client = mqtt_object.start_mqtt(MQTT_CLIENT_ID)
+    mqtt_client = mqtt_object.start(MQTT_CLIENT_ID)
 
     logger.debug("Button setup, Press button.")
     button = init_button(mqtt_client, button_callback)
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     audio.play_foreground("2SPLfltup-drum.wav")
 
     time.sleep(2)
-    audio.stop_audio()
+    audio.stop()
 
     logger.debug("NFC setup, tap nfc card")
     init_nfc(mqtt_client, nfc_callback)
