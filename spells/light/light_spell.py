@@ -13,7 +13,7 @@ DEBUG_LEVEL = "DEBUG"
 LOGGER_NAME = __name__
 logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 
-MQTT_CLIENT_ID = "LIGHT_S"
+MQTT_CLIENT_ID = "LIGHT_SPELL"
 
 
 
@@ -35,13 +35,28 @@ def orientation_callback(orientation):
 def get_vector(data) -> "vector[3]":
     return [data['x'], data['y'], data['z']]
 
+def tilt_angle(vector,  mag):
+    x_norm = vector['x']/mag
+    y_norm = vector['y']/mag
+    z_norm = vector['z']/mag
+
+    pitch = math.atan2(x_norm, magnitude([y_norm, z_norm]))
+    roll= math.atan2(y_norm, magnitude[x_norm,y_norm])
+    yaw = math.atan2(magnitude([x_norm,y_norm]), z_norm)
+    return roll, pitch, yaw
+
 def imu_stream_callback(stream):
     #logger.debug(f"IMU stream {stream}")
     start = time.time()
     accel_mag = magnitude(get_vector(stream['accel']))
     gyro_mag  = magnitude(get_vector(stream['gyro']))
+    roll, pitch, yaw = tilt_angle(stream['accel'])
     end = time.time()
+
+
+    
     logger.debug(f"Magnitudes Accel : {accel_mag}  Gyro: {gyro_mag}   Time: {end-start}")
+
 
 def imu_on_wake_callback(wake_status:'bool'):
 
