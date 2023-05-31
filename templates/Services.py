@@ -108,10 +108,8 @@ class IMUService():
         msg = json.loads(message.payload)
 
         if self.stream_callback:
-            try:
-                self.stream_callback(msg)
-            except Exception as e:
-                logger.warning(f"Json Paring error {e}")
+             self.stream_callback(msg)
+
         else: 
             logger.warning(f"NFC callback not set")
     def __on_subscribe(self, client, userdata, mid, granted_qos):
@@ -272,6 +270,11 @@ class LightService():
     def play_lb_system_animation(self, animation):
         pass
 
+    
+    def block(self, r, g, b): 
+        header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
+        data = {"format" : "block", "r": r, "g": g, "b": b}
+        self.__publish_message({"header": header, "data": data})
 
     ### Private Methods ### 
 
