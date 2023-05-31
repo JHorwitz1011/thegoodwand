@@ -101,6 +101,7 @@ class FWLightService():
         self.pixels = neopixel.NeoPixel(pin, NUM_LEDS)
         self.animation_queue = []
         self.empty = True
+        self.block_color = None
         self.indicatorColor = (255,255,255)
         self.indicatorAnimation = 'pulse'
         logger.debug("Lightbar Finished __init")
@@ -122,27 +123,29 @@ class FWLightService():
         self.empty = False
         payload = json.loads(msg.payload)
         logger.debug(f"Lightbar message rcvd")
-        try:
-            animationName = payload['data']['animation']
-            anomationPath = payload['data']['path']
+        if payload['data'].get('format') != None and payload['data']['format'] == 'block':
+            self.animation_queue.clear()
+            self.block_color = (payload['data']['r'], payload['data']['g'], payload['data']['b'])
+        else:
             try:
-                animationFile = systemAnimations[animationName]
-            except KeyError: 
-                animationFile = anomationPath + "/" + animationName  
-  
-            if os.path.isfile(animationFile):
-                self.animation_queue.append(grab_animation_from_csv(animationFile))
-                logger.info(f'Lightbar animation added: {animationFile}')
-            else:
-                logger.error(f'animation file not found {animationFile}')
+                animationName = payload['data']['animation']
+                anomationPath = payload['data']['path']
+                try:
+                    animationFile = systemAnimations[animationName]
+                except KeyError: 
+                    animationFile = anomationPath + "/" + animationName  
     
-       
-        except KeyError:
-            logger.warning("ERROR: Invalid Animation file key error:",msg)
+                if os.path.isfile(animationFile):
+                    self.animation_queue.append(grab_animation_from_csv(animationFile))
+                    logger.info(f'Lightbar animation added: {animationFile}')
+                else:
+                    logger.error(f'animation file not found {animationFile}')       
+            except KeyError:
+                logger.warning("ERROR: Invalid Animation file key error:",msg)
 
     def on_main_led_message(self, client, userdata, msg):
         payload = json.loads(msg.payload)
-        logger.debug(f"Lightbar System LED message rcvd with {str(paylod)}")
+        logger.debug(f"Lightbar System LED message rcvd with {str(payload)}")
         try:
             self.pixels[0] = tuple(payload["data"]["color1"])
         except KeyError:
@@ -167,6 +170,8 @@ class FWLightService():
                     self.animate_blocking(animation[1], animation[0])
                 except:
                     logger.warning(f"Frame not played")
+            elif self.block_color is not None:
+                self.update_strip([self.block_color]*20)
             elif not self.empty:
                 self.current_frame = EMPTY_LIGHTS
                 self.update_strip(EMPTY_LIGHTS)
