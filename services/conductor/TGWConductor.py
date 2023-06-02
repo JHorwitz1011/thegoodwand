@@ -55,14 +55,14 @@ class TGWConductor():
 
     def _kill_game(self):
         # kills current game
-        logger.info("Killing Process")
-        self.child_process.kill()
+        logger.info(f"Killing Process {self.child_process.pid}")
+        #self.child_process.kill()
+        os.kill(self.child_process.pid, signal.SIGTERM)
         self.child_process = None
         self.audio.stop()
         self.lights.play_lb_csv_animation('app_stopped.csv')
         self.audio.play_background('app_stopped.wav')
         self.runningSpell = ""
-        
 
     #Handles button events
     def on_button_press(self, press):
@@ -80,7 +80,7 @@ class TGWConductor():
         """
         starts game. assumes path is valid per helper.fetch_game checking
         """
-        logger.debug("Start game called")
+        logger.debug(f"Start game called {game}  args {game_args}")
         
         filePath = helper.fetch_game(game)
         filePathandMain = filePath + "/main.py"
@@ -143,8 +143,8 @@ class TGWConductor():
                     logger.debug (f"Not a TGW or Yoto cards. Do nothing")
             else:
                 logger.debug('[NFC SCAN] No records')
-        except:
-            logger.warning('[NFC SCAN] JSON parsing error')
+        except Exception as e:
+            logger.warning(f'[NFC SCAN] JSON parsing error: {e}')
 
     def run(self):
         time.sleep(1) # Just in case the light service is not running. 
