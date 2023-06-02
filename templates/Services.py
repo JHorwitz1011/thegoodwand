@@ -54,9 +54,11 @@ class IMUService():
 
     def enable_stream(self):
         self.__set_stream(True)
+        return True
 
     def disable_stream(self):
-        self.__set_stream(False)   
+        self.__set_stream(False)  
+        return False 
 
     def unsubscribe(self):
         """Unsubscribe from button service callbacks"""
