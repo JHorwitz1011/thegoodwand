@@ -28,7 +28,7 @@ class FaultStrings:
     OTG_FAULT = ["Normal", "VBUS overloaded in OTG, or VBUS OVP, or battery is too low"]
     CHRG_FAULT = ["Normal", "Input fault","Thermal Shutdown", "Charge timer expired"]
     BAT_FAULT = ["Normal", "Battery OVP"]
-    NTC_FAULT = ["Normal", "Cold", "Hot", "hot cold"]
+    NTC_FAULT = ["Normal", "Hot", "Cold", "hot cold"]
 
 
 
