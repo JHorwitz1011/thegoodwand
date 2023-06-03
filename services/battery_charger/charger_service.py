@@ -2,7 +2,7 @@ import threading
 import RPi.GPIO as GPIO
 from bq24296M import bq24296M
 import signal
-import sys
+import sys, os
 import time
 
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
@@ -18,6 +18,24 @@ LOGGER_NAME = __name__
 logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 
 
+# System status strings
+
+VBUS_STATUS_STR = ["Unknown", "USB Host", "Adapter Port", "OTG"]
+CHRG_STATUS_STR = ["Not Charging", "Pre Charge", "Fast Charging", "Charge Done"]
+DPM_STATUS_STR = ["Not DPM", "In dynamic power management. Source Overloaded"]
+PG_STATUS_STR = ["Not Good Power", "Power Good"]
+THERM_STATUS_STR = ["Normal", "In Thermal Regulation"]
+VSYS_STATUS_STR = ["Not in VSYSMIN regulation (BAT > VSYSMIN)", "In VSYSMIN regulation (BAT < VSYSMIN)"]
+
+
+
+WATCHDOG_FAULT = ["Normal", "Watchdog timer expired"]
+OTG_FAULT = ["Normal", "VBUS overloaded in OTG, or VBUS OVP, or battery is too low"]
+CHRG_FAULT = ["Normal", "Input fault","Thermal Shutdown", "Charge timer expired"]
+BAT_FAULT = ["Normal", "Battery OVP"]
+NTC_FAULT = ["Normal", "Hot", "Cold", "hot cold"]
+
+
 MQTT_CLIENT_ID = "charger_services"
 
 def charger_init():
@@ -30,6 +48,10 @@ def charger_init():
 
 def button_callback(press):
     logger.debug(f"button callback {press} ")
+
+def print_faults(faults):
+    logger.debug(f"Charger {faults}")
+
 
 
 def signal_handler(sig, frame):
@@ -57,7 +79,12 @@ if __name__ == "__main__":
     while(1):
 
         faults = charger.getNewFaults()
-        logger.debug(f"faults {faults}")        
+        status = charger.getSystemStatus()
+        logger.debug(f"Charge status {CHRG_STATUS_STR[(status & charger.CHRG_STAT_MASK) >> charger.CHRG_STAT_SHIFT]}")
+        if faults :
+            print_faults(faults)
+        
+
         time.sleep(60) 
 
 
