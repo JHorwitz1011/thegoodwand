@@ -4,7 +4,7 @@ import logging, sys
 
 DEBUG_LEVEL = "INFO"
 LOGGER_HANDLER=sys.stdout
-LOGGER_FORMAT = '[%(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
+LOGGER_FORMAT = '[%(asctime)s %(filename)s:%(lineno)d] %(levelname)s:  %(message)s'
 
 
 def log(name, level = DEBUG_LEVEL, handler = LOGGER_HANDLER, format = LOGGER_FORMAT, ):

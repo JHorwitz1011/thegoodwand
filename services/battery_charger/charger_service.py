@@ -50,7 +50,7 @@ def button_callback(press):
     logger.debug(f"button callback {press} ")
 
 def print_faults(faults):
-    logger.debug(f"Charger {faults}")
+    logger.debug(f"Charger faults {faults}")
 
 
 
