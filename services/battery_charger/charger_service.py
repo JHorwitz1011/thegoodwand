@@ -42,7 +42,7 @@ NTC_FAULT = ["Normal", "Hot", "Cold", "hot cold"]
 
 MQTT_CLIENT_ID = "charger_services"
 
-SYSTEM_ANIMATION_PATH = "~/thegoodwand/system_files"
+SYSTEM_ANIMATION_PATH = os.path.expanduser("~/thegoodwand/system_files")
 POWER_OFF_LIGHT = "power_off.csv"
 POWER_OFF_AUDIO = "power_off.wav"
 
@@ -61,6 +61,8 @@ class PowerManagement():
         self.charger = charger
 
     def idle(self):
+        lights.play_lb_csv_animation(POWER_OFF_LIGHT, path = SYSTEM_ANIMATION_PATH )
+        audio.play_foreground(POWER_OFF_AUDIO, path = SYSTEM_ANIMATION_PATH)
         if self.is_usb_power():
             logger.debug("System State  Running > Idle")
             self.system_state = self.SYSTEM_IDLE
@@ -82,8 +84,7 @@ class PowerManagement():
         pass
 
     def __power_down(self):
-        lights.play_lb_csv_animation(POWER_OFF_LIGHT, path = SYSTEM_ANIMATION_PATH )
-        audio.play_foreground(POWER_OFF_AUDIO, path = SYSTEM_ANIMATION_PATH)
+
         logger.debug("Power down system")
         
     def is_usb_power(self) -> bool:  
@@ -162,6 +163,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGTERM, signal_handler)
     
     logger.info("Charger service started")
+    logger.debug(f"Path {SYSTEM_ANIMATION_PATH}")
     charger = bq24296M()
     power_management = PowerManagement(charger)
     mqtt_object = MQTTClient()
