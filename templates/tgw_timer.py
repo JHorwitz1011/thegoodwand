@@ -13,9 +13,10 @@ class tgw_timer():
         self.audio = None
 
     def start(self):
-        self.timer = threading.Timer(self._interval, self._function, self._args, self._kwargs)
-        self.timer.setName(self.timer_name)
-        self.timer.start()
+        if self._interval != 0:
+            self.timer = threading.Timer(self._interval, self._function, self._args, self._kwargs)
+            self.timer.setName(self.timer_name)
+            self.timer.start()
         pass
 
     def stop(self):

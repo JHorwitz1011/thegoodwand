@@ -13,6 +13,7 @@ from Services import MQTTClient
 from Services import ButtonService
 from Services import LightService
 from Services import IMUService
+from Services import AudioService
 from log import log
 from tgw_timer import tgw_timer
 
@@ -41,22 +42,27 @@ NTC_FAULT = ["Normal", "Hot", "Cold", "hot cold"]
 
 MQTT_CLIENT_ID = "charger_services"
 
-INACTIVITY_TIME = 10
+SYSTEM_ANIMATION_PATH = "~/thegoodwand/system_files"
+POWER_OFF_LIGHT = "power_off.csv"
+POWER_OFF_AUDIO = "power_off.wav"
+
+# set to 0 to dissable 
+# disavle is done in the timer file
+INACTIVITY_TIME = 0
 
 class PowerManagement():
 
-    SYSTEM_READY = 2
-    SYSTEM_IDLE = 1
-    SYSTEM_PD = 0
+    SYSTEM_RUNNING = 1
+    SYSTEM_IDLE = 0
 
     def __init__(self, charger) -> None:
         
-        self.system_state = self.SYSTEM_READY
+        self.system_state = self.SYSTEM_RUNNING
         self.charger = charger
 
     def idle(self):
-        if self.is_usb_power:
-            logger.debug("System State Idle > Running")
+        if self.is_usb_power():
+            logger.debug("System State  Running > Idle")
             self.system_state = self.SYSTEM_IDLE
             self.__disable_wifi()
             self.__disable_service()
@@ -68,17 +74,22 @@ class PowerManagement():
             
     def run(self):
         logger.debug("System State Idle > Running")
+        self.system_state = self.SYSTEM_RUNNING
+
         self.__enable_wifi()
         self.__enable_service()
         # TODO Power up services.
         pass
 
     def __power_down(self):
-
+        lights.play_lb_csv_animation(POWER_OFF_LIGHT, path = SYSTEM_ANIMATION_PATH )
+        audio.play_foreground(POWER_OFF_AUDIO, path = SYSTEM_ANIMATION_PATH)
         logger.debug("Power down system")
         
-    def is_usb_power(self) -> bool:     
-        return True if self.charger.getVbusStatus() else False
+    def is_usb_power(self) -> bool:  
+        status = self.charger.getVbusStatus() 
+        logger.debug(f"USB Status {status}") 
+        return True if status else False
     
     def __enable_wifi(self):
         logger.debug("Turning on wifi")
@@ -94,9 +105,7 @@ class PowerManagement():
     def __enable_service(self):
         logger.debug("Turning on TGW services")
 
-
-            
-
+           
 def charger_init():
     #set 500mA charge current limit
     charger.setICHG(charger.ICHRG_512MA)
@@ -118,7 +127,8 @@ def button_callback(press):
     logger.debug(f"button callback {press} ")
 
     if press == "long":
-        power_management.idle()
+        if power_management.system_state == power_management.SYSTEM_RUNNING:
+            power_management.idle()
     
     elif power_management.system_state == power_management.SYSTEM_IDLE:
         power_management.run()
@@ -129,12 +139,14 @@ def imu_on_wake_callback(wake_status:'bool'):
         stop Inactiviy time if not expired on wake 
         Do nothing if system is idle. Button press needed to wake.
     '''
+    # TODO Known edge condition if the wand wakes up and is inactive it wont go to the idle state.
+    logger.debug(f"Wand active state: {wake_status} SYSTEM STATE { power_management.system_state}")
     if wake_status == True: 
-        logger.debug(f"Wand is active {wake_status}")
-        inactivity_timer.stop()
+        if inactivity_timer.is_alive():
+            inactivity_timer.stop()
     elif wake_status == False: 
-        logger.debug(f"Wand is inactive {wake_status}")
-        inactivity_timer.start()
+        if power_management.system_state == power_management.SYSTEM_RUNNING:
+            inactivity_timer.start()
     else:    
         logger.debug(f"Unknown active state {wake_status}")
         inactivity_timer.stop()
@@ -158,7 +170,10 @@ if __name__ == "__main__":
     button.subscribe(button_callback)
     imu = IMUService(mqtt_client)
     imu.subscribe_on_wake(imu_on_wake_callback)
-    inactivity_timer = tgw_timer(60, inactivity_timer_cb, name = "inactivity")
+    lights = LightService(mqtt_client)
+    audio = AudioService(mqtt_client)
+
+    inactivity_timer = tgw_timer(INACTIVITY_TIME, inactivity_timer_cb, name = "inactivity")
 
     charger_init()
 
