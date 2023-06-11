@@ -106,6 +106,22 @@ then
     echo "ERROR: Adding ACCEL service";
 fi
 
+echo "Creating Backend Service"
+echo "[program:backend]
+command=python3 -u TGWBackend.py
+directory=home/"$path"/backend
+autostart=true
+autorestart=true
+priority=50
+user=$user
+" > /etc/supervisor/conf.d/backend.conf
+if [ $? != 0 ]
+then 
+    echo "ERROR: Adding BACKEND service";
+fi
+
+
+
 echo "Creating Conductor Service"
 echo "[program:conductor] 
 command=python3 -u TGWConductor.py 
