@@ -83,11 +83,9 @@ class IMUService():
         
         logger.debug(f"On Wake {message.payload}") 
         msg = json.loads(message.payload)
-        if self.on_wake_callback:       
-            try:
-                self.on_wake_callback(msg["status"])
-            except Exception as e:
-                logger.warning(f"Json Paring error {e}")
+
+        if self.on_wake_callback: 
+            self.on_wake_callback(msg["status"])
         else: 
             logger.warning(f"IMU Orientation callback not set")        
 
@@ -97,10 +95,7 @@ class IMUService():
         msg = json.loads(message.payload)
 
         if self.orientation_callback:       
-            try:
-                self.orientation_callback(msg["data"]["orientation"])
-            except Exception as e:
-                logger.warning(f"Json Paring error {e}")
+            self.orientation_callback(msg["data"]["orientation"])
         else: 
             logger.warning(f"IMU Orientation callback not set")
      
@@ -147,10 +142,7 @@ class NFCService():
         msg = json.loads(message.payload)
         logger.debug(f"NFC {msg}")
         if self.callback:
-            try:
-                self.callback(msg)
-            except Exception as e:
-                logger.warning(f"Json Paring error {e}")
+            self.callback(msg)
         else: 
             logger.warning(f"NFC callback not set")
  
@@ -219,10 +211,7 @@ class AudioService():
         
         msg = json.loads(message.payload)
         if self.callback:
-            try:
-                self.callback(msg["data"]["event"])
-            except Exception as e:
-                logger.warning(f"Json Paring error {e}")
+            self.callback(msg["data"]["event"])
         else: 
             logger.warning(f"Button callback not set")
  
@@ -284,21 +273,6 @@ class LightService():
 
         self.client.publish(self.LIGHT_BAR_TOPIC, json.dumps(msg))
 
-    def __on_message(self,client, userdata, message):
-        """Parse data and call subscriber callback"""
-        
-        msg = json.loads(message.payload)
-        if self.callback:
-            try:
-                self.callback(msg["data"]["event"])
-            except Exception as e:
-                logger.warning(f"Json Paring error {e}")
-        else: 
-            logger.warning(f"Button callback not set")
- 
-    def __on_subscribe(self, client, userdata, mid, granted_qos):
-        pass 
-
 
 class ButtonService():
 
@@ -326,10 +300,7 @@ class ButtonService():
         
         msg = json.loads(message.payload)
         if self.callback:
-            try:
-                self.callback(msg["data"]["event"])
-            except Exception as e:
-                logger.warning(f"Json Paring error {e}")
+            self.callback(msg["data"]["event"])
         else: 
             logger.warning(f"Button callback not set")
  
