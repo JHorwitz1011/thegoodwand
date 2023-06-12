@@ -108,13 +108,13 @@ class TGWButtonService():
         self.press = LONG_PRESS_ID
         self.press_mutex.release()
         self.publish_button_press(self.press)
-        # logger.debug("Long Press timer expired")
-        # logger.info("Powering down")
-        # self.lights.play_lb_csv_animation("power_off.csv")
-        # self.audio.play_foreground("power_off.wav")
-        #time.sleep(3)
+        logger.debug("Long Press timer expired")
+        logger.info("Powering down")
+        self.lights.play_lb_csv_animation("power_off.csv")
+        self.audio.play_foreground("power_off.wav")
+        time.sleep(3)
         #TODO Play power down animation
-        #os.system("sudo python3 " + os.path.expanduser(BATTERY_SERVICE_PATH) +'/charger_cli.py --power_off')
+        os.system("sudo python3 " + os.path.expanduser(BATTERY_SERVICE_PATH) +'/charger_cli.py --power_off')
 
 
     def trigger_event_down(self):
