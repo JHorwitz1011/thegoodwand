@@ -132,16 +132,8 @@ else
     rm temp
 fi
 
-if grep -Fq "enable_uart=1" /boot/config.txt
-then
-        echo "Uart Already enabled"
-else
-    echo "enable_uart=1" | sudo tee -a /boot/config.txt
-fi
-
-echo "Updating IR Pins"
-sudo sed -i 's/#dtoverlay=gpio-ir,gpio_pin=17/dtoverlay=gpio-ir,gpio_pin=23/g' /boot/config.txt
-sudo sed -i 's/#dtoverlay=gpio-ir-tx,gpio_pin=18/dtoverlay=gpio-ir,gpio_pin=22/g' /boot/config.txt
+echo "editing the boot config"
+sudo ./boot_config.sh
 
 #Pass path to the all the services to daemon script.
 echo "Step 3: Setting up system daemons script"
