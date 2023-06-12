@@ -16,7 +16,7 @@ Options:
 # System status strings
 class StatusStrings:
     VBUS_STATUS_STR = ["Unknown", "USB Host", "Adapter Port", "OTG"]
-    CHRG_STATUS_STR = ["Not Charging", "Pre Charge", "Fast Charging", "Charge Termination Done"]
+    CHRG_STATUS_STR = ["Not Charging", "Pre Charge", "Fast Charging", "Charge Done"]
     DPM_STATUS_STR = ["Not DPM", "In dynamic power management. Source Overloaded"]
     PG_STATUS_STR = ["Not Good Power", "Power Good"]
     THERM_STATUS_STR = ["Normal", "In Thermal Regulation"]

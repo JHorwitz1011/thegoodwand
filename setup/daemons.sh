@@ -136,5 +136,20 @@ then
     echo "ERROR: Adding Conductor service";
 fi
 
+echo "Creating Charger Service"
+echo "[program:charger] 
+command=python3 -u charger_service.py 
+directory=home/"$path"/battery_charger 
+autostart=true 
+autorestart=true
+priority=25
+user=$user
+" > /etc/supervisor/conf.d/charger.conf
+if [ $? != 0 ]
+then 
+    echo "ERROR: Adding Conductor service";
+fi
+
+
 sudo supervisorctl update
 sudo supervisorctl restart all

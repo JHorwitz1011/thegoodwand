@@ -1,14 +1,21 @@
 [defaults]
-system_colour=
+#system_colour=
 
 [light]
-
 lb_topic="goodwand/ui/view/lightbar"
 button_topic="goodwand/ui/view/main_led"
 
+[charger]
+# 0 = 512mA
+charge_current = 0
+
+# Input current limit 2 = 500mA, 5 = 1.5A, 6 = 2A
+input_current = 5 
+
+
 [button]
 
-gpio=
+#gpio=
 
 [imu]
 
