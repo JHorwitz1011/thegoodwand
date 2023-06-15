@@ -16,7 +16,7 @@ logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 
 MQTT_CLIENT_ID = "COLOS_SPELL"
 
-NORMALIZE = int(255/90)
+NORMALIZE = float(255/90)
 
 def magnitude(vector):
     return math.sqrt(sum(pow(element, 2) for element in vector))
