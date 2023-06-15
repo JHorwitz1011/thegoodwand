@@ -1,6 +1,6 @@
 """ Unit tests for Service Files """
 import sys, os, time, signal, math
-#from collections import deque
+from collections import deque
 
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
 from Services import MQTTClient
@@ -26,8 +26,8 @@ def button_callback(press):
     # User Code Here
     logger.debug(f"Recieved Press {press}")
     
-    # What should we do with short button press
-    # if press == "short":
+    if press == "short":
+        pass
         
 def orientation_callback(orientation):
     logger.debug(f"IMU orientation {orientation}")
@@ -43,22 +43,22 @@ def tilt_angle(vector,  mag):
 
 
 def display_lights(x,y,z):
-    red = abs(x*NORMALIZE)
-    green = abs(y*NORMALIZE)
-    blue = abs(z*NORMALIZE)
+    x_buffer.append(abs(x*NORMALIZE))
+    y_buffer.append(abs(y*NORMALIZE))
+    z_buffer.append(abs(z*NORMALIZE))
+    red = int(sum(x_buffer) / buffer_size)
+    green = int(sum(y_buffer) / buffer_size)
+    blue = int(sum(z_buffer) / buffer_size)
     lights.block(red, green, blue)
-    logger.debug(f"r: {red} g: {green}  b: {blue}")
+    logger.debug(f"r: {red} g: {green}  b: {blue}  {z*NORMALIZE} {NORMALIZE}")
 
 
 def imu_stream_callback(stream):
     start = time.time()
-    #logger.debug(stream)
     accel_mag = magnitude(get_vector(stream['accel']))
     gyro_mag  = int(magnitude(get_vector(stream['gyro'])))
     x, y, z = tilt_angle(get_vector(stream['accel']), accel_mag )
     display_lights(x,y,z)
-    #timer = (time.time() - start) * math.pow(10,6)
-    #logger.debug(f"x : {x}, y: {y}, z: {z} gm: {gyro_mag} t: {timer:.2f}us ")
 
 
 def imu_on_wake_callback(wake_status:'bool'):
@@ -134,6 +134,14 @@ if __name__ == '__main__':
    
     audio.play_foreground("activatingColos.wav")
     audio.play_background("colosBkgrnd.wav")
+
+    # Buffer size = smoothing effect 
+    # The higher the value the slower the colors will change 
+    # Dont make it too high or the color will be white most the time. 
+    buffer_size = 6
+    x_buffer = deque(maxlen=buffer_size)
+    y_buffer = deque(maxlen=buffer_size)
+    z_buffer = deque(maxlen=buffer_size)
     
     
     signal.signal(signal.SIGINT, signal_handler)
