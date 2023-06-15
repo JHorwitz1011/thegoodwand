@@ -1,3 +1,15 @@
+'''
+Single Click types    
+    short
+    medium 
+    long 
+
+Multiple clicks Types
+    short_multi 
+    short_medium 
+    short_long 
+'''
+
 import RPi.GPIO as GPIO
 import json 
 import time
@@ -13,8 +25,9 @@ from log import log
 from Services import LightService
 from Services import AudioService
 from Services import MQTTClient
+from tgw_timer import tgw_timer as Button_Timer
 
-DEBUG_LEVEL = "DEBUG"
+DEBUG_LEVEL = "INFO"
 LOGGER_NAME = __name__
 logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 
@@ -29,48 +42,19 @@ BUTTON_PIN = 26
 BUTTON_TOPIC = "goodwand/ui/controller/button"
 BUTTON_CLIENTID = 'TGW-ButtonService'
 
+SHORT_PRESS_TIMER = 0.20
 MEDIUM_PRESS_DURATION = 1.5
 LONG_PRESS_DURATION = 5.0
 
-SHORT_PRESS_ID = 'short'
-MEDIUM_PRESS_ID = 'medium'
-LONG_PRESS_ID = 'long'
+# Single click IDS
+SHORT_ID = 'short'
+MEDIUM_ID = 'medium'
+LONG_ID = 'long'
 
-class Button_timer():
+# Multi click IDS
+SHORT_MULTI_ID = 'short_multi'
+SHORT_MEDIUM_ID = 'short_medium'
 
-    def __init__(self, interval, function, args=[], kwargs={}, name=""):
-        self._interval = interval
-        self._function = function
-        self._args = args
-        self._kwargs = kwargs
-        self.timer = None
-        self.timer_name = name
-        self.lights = None
-        self.audio = None
-
-    def start_timer(self):
-        self.timer = threading.Timer(self._interval, self._function, self._args, self._kwargs)
-        self.timer.setName(self.timer_name)
-        self.timer.start()
-        pass
-
-    def cancel_timer(self):
-        try:
-            logger.debug(f"Timer Canceled {self.timer.getName()}")
-            self.timer.cancel()
-        except Exception as e:
-            logger.warning(f"cancel timer error {e}")
- 
-
-    def is_alive(self):
-        try: 
-            if self.timer.is_alive():
-                return True
-            else:
-                return False
-        except Exception as e:
-            logger.warning(f"is alive exception {e}")
-            return False 
         
 class TGWButtonService():
     """
@@ -78,64 +62,86 @@ class TGWButtonService():
     """
     def __init__(self) -> None:
         self.mqtt_client = None
-        self.medium_timer = Button_timer(MEDIUM_PRESS_DURATION, self.medium_press_callback, name="medium timer")
-        self.long_timer = Button_timer(LONG_PRESS_DURATION, self.long_press_callback, name="long timer")
-        self.press = SHORT_PRESS_ID
-        self.press_mutex = threading.Lock()
+        self.click_count = 0
+        self.short_timer = Button_Timer(SHORT_PRESS_TIMER, self.short_press_callback, name ="short timer") # Used for multi click 
+        self.medium_timer = Button_Timer(MEDIUM_PRESS_DURATION, self.medium_press_callback, name="medium timer")
+        self.long_timer = Button_Timer(LONG_PRESS_DURATION, self.long_press_callback, name="long timer")
+        self.press_id = SHORT_ID
+
 
     def gpio_init(self):
         """RPi.GPIO config"""
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
+
     def publish_button_press(self, id):     
+        logger.debug(f"Publish press id:{id} count:{self.click_count}")
         header = {"type": MQTT_TYPE, "version": MQTT_VERSION}
-        data = {"event": id}
+        data = {"event": id, "count": self.click_count}
         msg = {"header": header, "data": data}
+        self.click_count = 0
         self.mqtt_client.publish(BUTTON_TOPIC, json.dumps(msg))
+      
 
-    # Called if the timer defined by MEDIUM_PRESS_DURATION expires 
+    def short_press_callback(self):
+        if self.click_count > 1:
+            self.press_id = SHORT_MULTI_ID
+        else:
+            self.press_id = SHORT_ID
+
+        self.publish_button_press(self.press_id)
+        logger.debug(f"Short timer expired id:{self.press_id} count:{self.click_count}")
+        
+
     def medium_press_callback(self):
-        logger.debug("Medium Press timer expired")
-        self.press_mutex.acquire()
-        self.press = MEDIUM_PRESS_ID
-        self.press_mutex.release()
-        self.publish_button_press(self.press)
+        # Has the button been click before the short timer expiry?
+        if self.click_count > 1: 
+            self.press_id = SHORT_MEDIUM_ID
+        else:
+            self.press_id = MEDIUM_ID
+        logger.debug(f"Medium Press expired. ID: {self.press_id}")
+        self.publish_button_press(self.press_id)
 
-    # Called if the timer defined by LONG_PRESS_DURATION expires 
+
     def long_press_callback(self):
-        self.press_mutex.acquire()
-        self.press = LONG_PRESS_ID
-        self.press_mutex.release()
-        self.publish_button_press(self.press)
-        logger.debug("Long Press timer expired")
+        # Has the button been click before the short timer expiry?
+
+        self.press_id = LONG_ID
+
+        self.publish_button_press(self.press_id)
+        logger.debug(F"Long timer expired. ID {self.press_id}")
         logger.info("Powering down")
         self.lights.play_lb_csv_animation("power_off.csv")
         self.audio.play_foreground("power_off.wav")
         time.sleep(3)
-        #TODO Play power down animation
         os.system("sudo python3 " + os.path.expanduser(BATTERY_SERVICE_PATH) +'/charger_cli.py --power_off')
 
 
     def trigger_event_down(self):
         """Start timers """
-        #Reset press state
-        self.press_mutex.acquire()
-        self.press = SHORT_PRESS_ID
-        self.press_mutex.release()
-        self.medium_timer.start_timer()
-        self.long_timer.start_timer()
+        self.click_count += 1
+        logger.debug(f"Click Count {self.click_count}")
+        self.press_id = SHORT_ID
+        self.short_timer.stop()
+        self.medium_timer.start()
+        self.long_timer.start()
 
 
     def trigger_event_up(self):
-        """Stops timers for medium and long presses"""
-        self.medium_timer.cancel_timer()
-        self.long_timer.cancel_timer()
-        logger.info(f"Button Released: {self.press} press detected")
+        """
+        Stops timers for medium and long presses
+        Start short press timer
+        All publishing happens in the timer callbacks when one expires. 
+        """
+        self.medium_timer.stop()
+        self.long_timer.stop()
         
-        ## Medium and long presses handled in the timer callbacks. Only publish short press
-        if self.press == SHORT_PRESS_ID:
-            self.publish_button_press(SHORT_PRESS_ID) 
+        if self.press_id == SHORT_ID:
+            self.short_timer.start() 
+            
+        logger.info(f"Button Released: {self.press_id} press detected")
+        
 
 
     def trigger(self, *args):

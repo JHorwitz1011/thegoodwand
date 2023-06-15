@@ -1,5 +1,5 @@
 from paho.mqtt import client as mqtt_client
-import sys, os
+import sys, os, inspect
 import json
 
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
@@ -277,6 +277,15 @@ class LightService():
 class ButtonService():
 
     BUTTON_TOPIC = "goodwand/ui/controller/button"
+        # Single click IDS
+    SHORT_ID = 'short'
+    MEDIUM_ID = 'medium'
+    LONG_ID = 'long'
+
+    # Multi click IDS
+    SHORT_MULTI_ID = 'short_multi'
+    SHORT_MEDIUM_ID = 'short_medium'
+
 
     def __init__(self, mqtt_client) -> None:
         self.client = mqtt_client
@@ -299,8 +308,17 @@ class ButtonService():
         """Parse data and call subscriber callback"""
         
         msg = json.loads(message.payload)
+        press_id = msg["data"]["event"]
+        count = int(msg["data"]["count"])              
+
         if self.callback:
-            self.callback(msg["data"]["event"])
+            num_args = len(inspect.signature(self.callback).parameters) #backwards compadibility
+            if num_args == 1:
+                self.callback(press_id)
+            elif num_args == 2:
+                self.callback(press_id, count)
+            else: 
+                logger.warning(f"callback incorrect number of args {num_args}")    
         else: 
             logger.warning(f"Button callback not set")
  

@@ -16,14 +16,27 @@ logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 
 MQTT_CLIENT_ID = "unit_test"
 
-# Receives "short", "medium", "long"
-def button_callback(press):
+
+def button_callback(press, count):
     # User Code Here
-    logger.debug(f"Recieved Press {press}")
+    #logger.debug(f"Recieved Press id:{press} count:{count}")
     
-    #Example medium button press
-    if press == "medium":
-        lights.play_lb_csv_animation("yipee.csv")
+    # Supported button types 
+    # Note some of these will be reserved for system actions
+    # Follow development guides when using 
+    if press == button.SHORT_ID:
+        logger.debug("short press")
+    elif press == button.MEDIUM_ID:
+        logger.debug("medium press")
+    elif press == button.LONG_ID:
+        logger.debug("long press")
+    elif press == button.SHORT_MULTI_ID:
+        logger.debug(f"Multiple short presses {count}")
+    elif press == button.SHORT_MEDIUM_ID:
+        logger.debug(f"A short followed by a medium press {count}")
+    else:
+        logger.debug("Unknown ID")
+        
 
 def nfc_callback(records):
     logger.debug(f"NFC Callback {records}")
@@ -97,24 +110,24 @@ if __name__ == '__main__':
     lights.play_lb_csv_animation("yipee.csv")
 
     
-    logger.debug("Audio Test")
-    time.sleep(1)
-    audio = init_audio(mqtt_client)
-    audio.play_background("2SPLfltup-horn.wav")
-    audio.play_foreground("2SPLfltup-drum.wav")
+    # logger.debug("Audio Test")
+    # time.sleep(1)
+    # audio = init_audio(mqtt_client)
+    # audio.play_background("2SPLfltup-horn.wav")
+    # audio.play_foreground("2SPLfltup-drum.wav")
 
-    time.sleep(2)
-    audio.stop()
+    # time.sleep(2)
+    # audio.stop()
 
-    logger.debug("NFC setup, tap nfc card")
-    init_nfc(mqtt_client, nfc_callback)
+    # logger.debug("NFC setup, tap nfc card")
+    # init_nfc(mqtt_client, nfc_callback)
 
-    logger.debug("IMU setup, Move Wand")
-    imu =init_imu(mqtt_client,  orientation_cb= orientation_callback,\
-                   imu_stream_cb= imu_stream_callback, on_wake_cb = imu_on_wake_callback)
-    imu.enable_stream()
-    time.sleep(5)
-    imu.disable_stream()
+    # logger.debug("IMU setup, Move Wand")
+    # imu =init_imu(mqtt_client,  orientation_cb= orientation_callback,\
+    #                imu_stream_cb= imu_stream_callback, on_wake_cb = imu_on_wake_callback)
+    # imu.enable_stream()
+    # time.sleep(5)
+    # imu.disable_stream()
     
     signal.signal(signal.SIGINT, signal_handler)
     signal.pause()
