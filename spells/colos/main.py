@@ -84,9 +84,8 @@ def init_lights(mqtt_client, path):
 def init_audio(mqtt_client, path):
     return AudioService(mqtt_client = mqtt_client, path = path)
 
-def init_imu(mqtt_client, orientation_cb, imu_stream_cb, on_wake_cb):
+def init_imu(mqtt_client, imu_stream_cb, on_wake_cb):
     imu = IMUService(mqtt_client)
-    #imu.subscribe_orientation(orientation_cb)
     imu.subscribe_stream(imu_stream_cb)
     imu.subscribe_on_wake(on_wake_cb)
     return imu
@@ -110,13 +109,9 @@ if __name__ == '__main__':
     mqtt_client = mqtt_object.start(MQTT_CLIENT_ID)
 
     # Get out path
-    param_1 = ""
-    param_2 = ""
-	
-    
-    param_1= sys.argv[1] 
-    param_2= sys.argv[2] 
-    
+    param_1 = sys.argv[1]
+    param_2 = sys.argv[2] 
+	    
     # if started by conductor, param1 is the path,
 	# otherwise use cwd
     
@@ -128,8 +123,7 @@ if __name__ == '__main__':
     audio   = init_audio(mqtt_client, spellPath)
     button  = init_button(mqtt_client, button_callback)
     lights  = init_lights(mqtt_client, spellPath)
-    imu     = init_imu(mqtt_client,  orientation_cb= orientation_callback,\
-                imu_stream_cb= imu_stream_callback, on_wake_cb = imu_on_wake_callback)
+    imu     = init_imu(mqtt_client, imu_stream_cb= imu_stream_callback, on_wake_cb = imu_on_wake_callback)
     imu.enable_stream()
    
     audio.play_foreground("activatingColos.wav")
