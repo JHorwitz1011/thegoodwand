@@ -69,7 +69,7 @@ class TGWConductor():
 
         if press == 'medium':
             if self.child_process is not None:
-                logger.info("Medium button press")
+                logger.info("Medium button press. Killing Spell")
                 self._kill_game() 
             else:
                 #Long press while idle - what should the behavior be?

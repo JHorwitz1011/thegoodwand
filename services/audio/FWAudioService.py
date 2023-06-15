@@ -12,6 +12,7 @@ import json
 import os
 import sys
 import logging
+import signal
 
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
 from log import log
@@ -93,18 +94,7 @@ class FWAudioService():
         client.enable_logger()
         client.loop_start()
         size = 20
-        while True:
-            if self.file_queue:
-                 try:
-                    logger.debug (f"playing audio")
-                    self.play(self.file_queue.pop(0))
-                 except:
-                     logger.debug (f"ERROR playing audio")
-
-    def play(self, filename):
-	                    logger.debug (f"Popping from queue")
-                            #os.system("aplay " + filename)
-
+        signal.pause()
 
 
 if __name__ == '__main__':

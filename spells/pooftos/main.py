@@ -82,7 +82,7 @@ class Pooftos(MQTTObject):
         self.publish(AUDIO_TOPIC, json.dumps(audio_pkt))
 
     def play_light(self, lightEffect):
-	    light_pkt['data']['animation'] = lightEffect
+        light_pkt['data']['animation'] = lightEffect
         logger.info(f"Light Effect {lightEffect}")
         self.publish(LIGHT_TOPIC, json.dumps(light_pkt))
 
