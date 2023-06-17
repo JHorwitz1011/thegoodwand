@@ -55,7 +55,7 @@ def idle_timer_callback():
     else: 
         logger.debug(f"Last idle step. Terminating")
         lights.play_lb_csv_animation ("idleDrumsLong.csv")
-        sys.exit(0)
+        os._exit(0)
     
 
 
