@@ -143,7 +143,7 @@ if __name__ == '__main__':
     mqtt_object = MQTTClient()
     mqtt_client = mqtt_object.start(MQTT_CLIENT_ID)
 
-    # Get out path
+    # Get spell activation args
     param_1 = ""
     param_2 = ""
 	
