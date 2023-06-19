@@ -19,7 +19,7 @@ MQTT_CLIENT_ID = "idle_SPELL"
 
 idleStep = 1
 IDLE_NUMBER_STEPS = 4
-IDLE_DELAY = 120
+IDLE_DELAY = 120 # 2 min
 idleLightRed = 255    #Gold
 idleLightGreen = 215  #Gold
 idleLightBlue = 0     #Gold
@@ -62,8 +62,8 @@ def idle_timer_callback():
 def imu_on_wake_callback(wake_status:'bool'):
     if wake_status == True: 
         logger.debug(f"Wand is active, terminate idle spell")
+        time.sleep(10)
         lights.block(0,0,0)
-        time.sleep(.1)
         os._exit(0)
 
     elif wake_status == False: 
