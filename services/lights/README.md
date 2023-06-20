@@ -1,121 +1,199 @@
-# Lighting Architecture #
+# Lights Service
 
-More info about ws2812 LEDs can be found here:
+listens for packets on topics:
 
-* [Datasheet](https://cdn-shop.adafruit.com/datasheets/WS2812.pdf)
-* [Adafruit Tutorial 1](https://learn.adafruit.com/neopixels-on-raspberry-pi/python-usage)
-* [Adafruit Neopixel Uber Guide](https://learn.adafruit.com/adafruit-neopixel-uberguide/the-magic-of-neopixels)
-
-Important points:
-
-* They're powered by 5v logic so you need a level shifter somewhere to convert b/ 3.3v logic on the pi
-
-I use some advanced-ish python stuff here. so if you're confused check out these links:
-
-* [default params](https://www.geeksforgeeks.org/default-arguments-in-python/)
-* [soft typing in python](https://docs.python.org/3/library/typing.html)
-
-## Modularization Goal ##
-We need a quick way to create animations in a reproducable pattern that doesn't clog up the code in other aspects of the project. Ideally, its a one-liner that initializes the lights, and one line to change the color. 
-
-Here's my proposed solution:
-
-## Lights Architecture v0 ##
-Implemented in Python. relies on:
-
-* [queue](https://docs.python.org/3/library/queue.html)
-* [threading](https://docs.python.org/3/library/threading.html)
-* [neopixel](https://docs.circuitpython.org/projects/neopixel/en/latest/)
-* [Adafruit-Blinka](https://docs.circuitpython.org/projects/blinka/en/latest/)
-
-### 1. FWLights ###
-
-> overall system that manages and runs animations.
-
-public members:
-
-```python
-__init__(pin, order='RGB' numLEDS=10) -> bool
+```
+goodwand/ui/view/lightbar
+goodwand/ui/view/main_led
 ```
 
-||initializes light module and resets all color to none|
-|--|--|
-|**pin**| gpio pin to send data|
-|**order**|order of lights. important bc if we switch light manufacturer sometimes its backwards.|
-|**numLEDS**|number of LEDs on the chain. important for scrolling animation speed. also allows us to change density of lights without breaking the code.|
-|**spacing:**| distance in mm spacing between lights? for scrolling animation speed, etc.. idk we'd have to think about it.|
-|return|false if something fails true otherwise|
+## LIGHTBAR API
 
-```python
-run_and_loop_forever(queue: queue, fs=60) -> None
+Send the following packets on `goodwand/ui/view/main_led`
+
+### Solid Lightbar Control
+
+To set the entire lightbar to one color:
+
+```json
+{
+    "header": {
+        "type": "UI_LIGHTBAR",
+        "version": 1,
+    },
+    "data": {
+        "format": "solid",
+        "color": 0x00FF00
+    }
+}
 ```
 
-||blocks on a new thread, listening for new animation objects on the queue at the given sample rate.|
-|--|--|
-|**queue**| pointer to queue object (allows animations to be passed in between |
-|**fs**|maximum sampling rate at which LEDs are updated and queue is checked.|
+### Raw Lightbar Control
 
-private members:
+for raw control over the LEDs:
 
-```python
-update_leds(animation: FWLightAnimation) -> bool
+```json
+{
+    "header": {
+        "type": "UI_LIGHTBAR",
+        "version": 1,
+    },
+    "data": {
+        "format": "raw",
+        "raw": [0xFFFFFF, 0xFF0000, 0xFFFFFF, 0xFF0000, 0xFFFFFF, 0xFF0000, 0xFFFFFF, 0xFFFFFF, 0xFF0000, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0x00FF00, 0x00FF00, 0x00FF00, 0x00FF00]
+    }
+}
 ```
 
-||attempts to update LEDs based on given annimation object |
-|--|--|
-|**animation**| custom object described below... holds timing info regarding when animation should be played and pointer to animation object |
-|return | true if animation was valid and able to play, false otherwise|
+### Heartbeat Lightbar Control
 
-### 2. FWLightAnimation ###
+To set the entire lightbar to heartbeat:
 
->super class for animation data. allows us and developers to easily create custom animations.
->
->basic functionality is that  `__init__` describes when the animation can be played, and `update` describes how the lights update. FWLightAnimation acts as a superclass. Developers or us will override `update(t)` w/ the animation data.
-
-```python
-__init__(numLEDS: int, spacing: float, loop: int, startTime: float, endTime: float) -> None
+```json
+{
+    "header": {
+        "type": "UI_LIGHTBAR",
+        "version": 1,
+    },
+    "data": {
+        "format": "heartbeat",
+        "color": 0x00FF00,
+        "min_brightness": 0, (uint8_t)
+        "max_brightness": 255, (uint8_t)
+        "ramp_time": 500000,
+        "delay_time": 500000
+    }
+}
 ```
 
-||creates an animation object |
-|--|--|
-|**numLEDS** | leds on the strip|
-|**spacing** | spacing between lights on the strip |
-|**loop**| how many times animation repeats|
-|**startTime** | time (type still unsure maybe since epoch idk) animation starts |
-|**endTime** | time (type still unsure maybe since epoch idk) animation ends |
+### Fire Lightbar Control
 
-```python
-@abstractmethod
-update(t: float) -> tuple(tuple(int,int,int))
+To set the entire lightbar to flames:
+
+```json
+{
+    "header": {
+        "type": "UI_LIGHTBAR",
+        "version": 1,
+    },
+    "data": {
+        "format": "fire",
+        "color": 0x00FF00
+    }
+}
 ```
 
-||calculates light value output based on arbitrary time value t |
-|--|--|
-|**t** | current time as float (type still needs work. float is bad) |
-|return | tuple of length `self.numLEDS`, each element is a tuple w/ 3 ints for color value |
+### System Default CSV
 
+To play a system default animation, "animation" must be a valid name of default system animations of format `___.csv` in `thegoodwand/services/lights/assets`:
 
+```json
+{
+    "header": {
+        "type": "UI_LIGHTBAR",
+        "version": 1,
+    },
+    "data": {
+        "format": "animation",
+        "animation": "no_failed"
+    }
+}
+```
 
+### Custom CSV
 
-### V0 Thoughts ###
+To play a custom animation, "animation" can also be a valid filepath pointing to a file of format `___.csv`:
 
-Pros:
+```json
+{
+    "header": {
+        "type": "UI_LIGHTBAR",
+        "version": 1,
+    },
+    "data": {
+        "format": "animation",
+        "animation": "thegoodwand/spells/pooftos/assets/poof.csv"
+    }
+}
+```
 
-* easy to implement
-* animations are modularized
+### Clear Lightbar
 
-Cons:
+To erase current lightbar format and turn off all lightbar LEDs:
 
-* only one application can control light animations at a time. If we're running multiple scripts in different languages it just doesn't work...
-* applicataion HAS to be coded in python
+```json
+{
+    "header": {
+        "type": "UI_LIGHTBAR",
+        "version": 1,
+    },
+    "data": {
+        "format": "none",
+    }
+}
+```
 
-### V1 Brainstorming ###
+## BUTTON LED API
 
-* Socket-based C++ implementation is probably the ultimate solution
-    * sockets allow the animation side of it all to be very fast and efficient
-    * all animation classes could be developed in C++
-    * master file for all animation data, need some kind of identifier for all animations (especially when we get devlopers making and implementing their own... install process required?)
-    * script would listen on a port locally for a packet we would design - allowing ANY application in ANY language to write animations.
+Send the following packets on `goodwand/ui/view/main_led`
 
+### Clear Button
 
-    I didn't want to bother writing it out bc V0 will work for now.
+To erase current button format and turn off the button LED:
+
+```json
+{
+    "header": {
+        "type": "UI_MAINLED",
+        "version": 1,
+    },
+    "data": {
+        "format": "none",
+    }
+}
+```
+
+### Solid Button LED Control
+
+To set the button led to one color:
+
+```json
+{
+    "header": {
+        "type": "UI_MAINLED",
+        "version": 1,
+    },
+    "data": {
+        "format": "solid",
+        "color": 0x00FF00
+    }
+}
+```
+
+### Heartbeat Button LED Control
+
+To set the button led to heartbeat:
+
+```json
+{
+    "header": {
+        "type": "UI_MAINLED",
+        "version": 1,
+    },
+    "data": {
+        "format": "heartbeat",
+        "color": 0x00FF00
+    }
+}
+```
+
+## Color Spaces (optional)
+
+Every packet can have an optional field `color_space` appended inside the `data` dictionary of a light service packet. `color_spaces` modifies how the `color` field is interpreted. If `color_space` is not present, the service defaults to the `rgb` color space.
+
+Valid color spaces are as follows:
+
+| Name | Description |
+| - | - |
+`rgb` | Red, Green, Blue color space of format `0xRRGGBB`
+`hsv` | Hue, Saturation, Value color space of format `0xHHSSVV`
