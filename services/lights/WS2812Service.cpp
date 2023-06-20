@@ -139,11 +139,6 @@ void WS2812Service::run() {
 			<< SERVER_ADDRESS << "'" << exc << std::endl;
 	}
 
-    std::string filepath = ASSETS;
-    filepath += "/";
-    filepath += "yes_confirmed.csv";
-    loadCSVAnimation(filepath);
-
     while (WS2812Service::running) {
         timeFramePreRender = micros();
 

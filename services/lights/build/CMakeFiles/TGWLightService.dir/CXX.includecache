@@ -1260,6 +1260,18 @@ nlohmann/json.hpp
 WS2812Service.hpp
 /home/tgw/thegoodwand/services/lights/WS2812Service.hpp
 
+/home/tgw/thegoodwand/services/lights/csv.h
+
+/home/tgw/thegoodwand/services/lights/main.cpp
+iostream
+-
+string
+-
+csv.h
+/home/tgw/thegoodwand/services/lights/csv.h
+WS2812Service.hpp
+/home/tgw/thegoodwand/services/lights/WS2812Service.hpp
+
 /home/tgw/thegoodwand/services/lights/rpi_ws281x/clk.h
 stdint.h
 -
