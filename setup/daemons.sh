@@ -20,11 +20,12 @@ fi
 echo "Creating Lightbar service"
 #supervisor config files: ONLY SERVICE THAT NEEDS ROOT user
 echo "[program:lightbar]
-command=python3 -u FWLightService.py
-directory=home/"$path"/lights
+[program:lightbar]
+command=/home/tgw/thegoodwand/services/lights/build/TGWLightService
+directory=home/tgw/thegoodwand/services/lights/build
 autostart=true
 autorestart=true
-priority=25
+priority=50
 user=root
 "  > /etc/supervisor/conf.d/lightbar.conf
 if [ $? != 0 ]
