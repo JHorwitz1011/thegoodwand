@@ -112,7 +112,6 @@ class IMUService():
     def __on_subscribe(self, client, userdata, mid, granted_qos):
         pass 
 
-
 # TODO Determine correct behavior for callback to support Yoto cards
 # Maybe have a differnt callback for Yoto and TGW tags
 class NFCService():
@@ -272,6 +271,32 @@ class LightService():
     def __publish_message(self, msg):
 
         self.client.publish(self.LIGHT_BAR_TOPIC, json.dumps(msg))
+
+class UVService():
+
+    UV_TOPIC = "goodwand/ui/view/uv"
+
+    SERVICE_TYPE = "UI_UV"
+    SERVICE_VERSION ="1"
+
+    def __init__(self, mqtt_client) -> None:
+        self.client = mqtt_client
+            
+    def on(self, on_time : int):
+              
+        header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
+        data = {"timeOn":on_time}
+
+        self.__publish_message({"header": header, "data": data})
+
+    # TODO, UV service needs an off function
+    def off(self):
+        pass 
+    ### Private Methods ### 
+
+    def __publish_message(self, msg):
+
+        self.client.publish(self.UV_TOPIC, json.dumps(msg))
 
 
 class ButtonService():

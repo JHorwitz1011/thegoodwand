@@ -2,108 +2,87 @@
 import time
 import signal
 import json
-from multiprocessing import Process
-import subprocess
-import sys
-import os
-
+import sys, os
 
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
-from MQTTObject import MQTTObject
-import helper
+from Services import MQTTClient
+from Services import ButtonService
+from Services import LightService
+from Services import AudioService
+from Services import NFCService
+from Services import UVService
 from log import log
 
 DEBUG_LEVEL = "DEBUG"
 LOGGER_NAME = __name__
 logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 
+MQTT_CLIENT_ID = "secretica"
 
-NFC_TOPIC = "goodwand/ui/controller/nfc"
-BUTTON_TOPIC = "goodwand/ui/controller/button"
-LIGHT_TOPIC = "goodwand/ui/view/lightbar"
-AUDIO_TOPIC = "goodwand/ui/view/audio_playback"
-UV_TOPIC = "goodwand/ui/view/uv"
+UV_BUTTON_TIME = 8 
+UV_NFC_TIME = 15
 
-SPELL_CLIENT_ID = "Secretica"
-
-audio_pkt = {
-    "header": {
-      "type": "UI_AUDIO", "version": 1
-    },
-    "data": {
-     	"action": " ", 
-	 	"path": " ",
-	 	"file": " ",
-		"mode": " "
-    }
-}
-
-light_pkt = {
-            "header": {"type": "UI_LIGHTBAR","version": 1},
-            "data": {
-                "granularity": 1,
-                "animation": "power_off",
-				"path": os.getcwd(),
-        		"crossfade": 0
-            }
-        }
-
-uv_pkt = {
-            "header": {"type": "UI_UV","version": 1},
-            "data": {
-                "timeOn": 5,
-            }
-        }
-
-class Secretica(MQTTObject):
+class Secretica():
 
     def __init__(self):
-        super().__init__()
+        self.currentPath = self.get_path()
 
-        self.callbacks = {
-            NFC_TOPIC : self.on_nfc_scan,
-            BUTTON_TOPIC: self.on_button_press,
-        }
+        self.mqtt_object = MQTTClient()
+        self.mqtt_client = self.mqtt_object.start(MQTT_CLIENT_ID)
+        
+        self.button = ButtonService(self.mqtt_client)
+        self.button.subscribe(self.on_button_press)
+        
+        self.nfc = NFCService(self.mqtt_client)
+        self.nfc.subscribe(self.on_nfc_scan)
+        
+        self.audio = AudioService(self.mqtt_client, self.currentPath)
+        
+        self.lights = LightService(self.mqtt_client, self.currentPath)
+
+        self.uv = UVService(self.mqtt_client)
+
 
     def play_audio(self, file, playMode):
         logger.info(f"Play audio file {file}")
-        audio_pkt ['data']['action'] = "START"
-        audio_pkt ['data']['file'] = file
-        audio_pkt ["data"]["mode"] = playMode 
-        self.publish(AUDIO_TOPIC, json.dumps(audio_pkt))
+        
+        if playMode == "background": 
+            self.audio.play_background(file)
+        elif playMode == "foreground":
+            self.audio.play_foreground(file)
+        else:
+            logger.warning(f"unknown play mode {playMode}")
     
     def stop_audio(self):
         logger.info(f"[Audio] stop all")
-        audio_pkt ['data']['action'] = "STOP"
-        self.publish(AUDIO_TOPIC, json.dumps(audio_pkt))
+        self.audio.stop()
 
     def play_light(self, lightEffect):
-	    light_pkt ['data']['animation'] = lightEffect
-	    logger.info(f"Light Effect {lightEffect}")
-	    self.publish(LIGHT_TOPIC, json.dumps(light_pkt))
+        logger.info(f"Light Effect {lightEffect}")
+        self.lights.play_lb_csv_animation(lightEffect)
 
-    def activate_uv(self):
-        uvStartTime = time.strftime("%M:%S +000")
-        logger.info (f"Start  activate {uvStartTime}")
-        uv_pkt ['data']['timeOn'] = 8
-        self.publish(UV_TOPIC, json.dumps(uv_pkt))
+    def play_animations(self):
         self.play_audio ("uv_activated.wav", "background")
         self.play_light ("uv_activated.csv")
+
+    def activate_uv(self, on_time):
+        uvStartTime = time.strftime("%M:%S +000")
+        logger.info (f"Start  activate {uvStartTime}")
+        self.uv.on(on_time)
+
         
 
     #Handles button events
-    def on_button_press(self, client, userdata, msg):
-        payload = json.loads(msg.payload)
-        keyPressType = payload['data']['event'] 
-        
+    def on_button_press(self, keyPressType):   
         if keyPressType == 'short':
-            self.activate_uv()
+            self.activate_uv(UV_BUTTON_TIME)
+            self.play_animations()
 
-    def on_nfc_scan(self, client, userdata, msg):
+    def on_nfc_scan(self, payload):
         """
         handles logic for starting games
         """
-        payload = json.loads(msg.payload)
+        secretica = False
         if len(payload['card_data']['records']) > 0:
             cardRecord0 = payload_url = payload['card_data']['records'][0]
             if cardRecord0 ["data"] == "https://www.thegoodwand.com":
@@ -115,8 +94,8 @@ class Secretica(MQTTObject):
                     logger.debug (f"spell is: {game_on_card}")
                     # Need to add code that:
                     if game_on_card == "secretica":
+                        secretica = True
                         logger.info (f"re activating secretica through NFC")
-                        self.activate_uv() 
                         
                     # if the spell=secretica, then turn UV light on for 20 seconds
                     # LED effect of 20 seconds goes from all LEDs to none
@@ -128,32 +107,33 @@ class Secretica(MQTTObject):
 
         else:    
             logger.debug(f'No records found on NFC card')
+        
+        if secretica:
+            self.activate_uv(UV_NFC_TIME) 
+            self.play_animations()
+
+
+    def get_path(self):
+        param_1 = None
+        if len(sys.argv) < 2:
+            logger.debug("No arguments provided.")
+        else:
+            param_1 = sys.argv[1]
+            # Rest of your code using param_1
+        return param_1 if param_1 else os.getcwd()
+      
+    def signal_handler(self, sig, frame): 
+        logger.info("Exiting Secretica...")
+        self.stop_audio()
+        sys.exit(0)  
 
     def run(self):
         logger.debug(f'Secretica spell started')
-        self.start_mqtt(SPELL_CLIENT_ID, self.callbacks)
-        
-        param_1 = ""
-        param_2 = ""
-		
-		# TODO: Not the way to check for arguments
-        try:
-            param_1= sys.argv[1] 
-            param_2= sys.argv[2] 
-        except:
-            logger.error ("no args")
-
-		# if started by conductor, param1 is the path,
-		# otherwise use cwd
-        if param_1 !="":
-            currentPath = param_1
-        else:
-        	currentPath =os.getcwd() 
     
-        logger.debug(f'Secretica spell path is{currentPath}')
-        audio_pkt ['data']['path'] = currentPath
-        light_pkt ['data']['path'] = currentPath
+        logger.debug(f'Secretica spell path is{self.currentPath}')
         self.play_audio ("secretica.wav", "background")
+        signal.signal(signal.SIGINT, self.signal_handler)
+        signal.signal(signal.SIGTERM, self.signal_handler)
         signal.pause()
 
 

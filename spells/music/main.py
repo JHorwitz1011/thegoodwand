@@ -1,12 +1,12 @@
 #! /usr/bin/env python3
 import time
 import json
-import sys
+import sys, os
 import math
-import os
-from paho.mqtt import client as mqtt_client
+import signal
 
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
+from Services import *
 from log import log
 
 DEBUG_LEVEL = "DEBUG"
@@ -31,187 +31,118 @@ logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 #       
 # audio_effects =["2SPL1", "2SPL2","2SPL3","2SPL4","2SPL5","2SPL6"]
 orientationText = ["rit","lft","ptdn","ptup","fltdn","fltup"]
-instrumentName = 'drum'           
-
-broker = 'localhost'
-port = 1883
-light_topic = "goodwand/ui/view/lightbar"
-audio_topic = "goodwand/ui/view/audio_playback"
-gesture_topic = "goodwand/ui/controller/gesture"
-nfc_topic = "goodwand/ui/controller/nfc"
-
-# generate client ID with pub prefix randomly
-client_id = 'musicSpell'
-#client_id = 'musicSpell' + str(time.time())
-
-audio_pkt = {
-    "header": {
-      "type": "UI_AUDIO", "version": 1
-},
-    "data": {
-     	"action": " ", 
-	 	"path": " ",
-	 	"file": " ",
-		"mode": " "
-}
-}
-
-
-light_pkt = {
-            "header": {
-                "type": "UI_LIGHTBAR",
-                "version": 1,
-            },
-            "data": {
-                "granularity": 1,
-                "animation": "",
-				"path": "" ,
-        		"crossfade": 0
-            }
-        }
+           
+MQTT_CLIENT_ID = 'musicSpell'
 
 
 class musicSpell():
-	global old_orient
-	global instrumentName 
+	
+	old_orient = 0
+	
+	def __init__(self) -> None:
+		self.currentPath = self.get_path()
 
-	def play_audio(self, client, file, playMode):
-		global currentPath
+		self.mqtt_object = MQTTClient()
+		self.mqtt_client = self.mqtt_object.start(MQTT_CLIENT_ID)
+
+		# self.button = ButtonService(self.mqtt_client)
+		# self.button.subscribe(self.on_button_press)
+
+		self.nfc = NFCService(self.mqtt_client)
+		self.nfc.subscribe(self.on_nfc_scan)
+
+		self.imu = IMUService(self.mqtt_client)
+		self.imu.subscribe_orientation(self.on_gesture)
+
+		self.audio = AudioService(self.mqtt_client, self.currentPath)
+
+		self.lights = LightService(self.mqtt_client, self.currentPath)
+
+		self.instrumentName = 'drum'		
+
+	def play_audio(self, file, playMode):
 		logger.info(f"Play audio file {file}")
-		audio_pkt ['data']['action'] = "START"
-		audio_pkt ['data']['file'] = file
-		audio_pkt ["data"]["mode"] = playMode 
-		self.publish(client, audio_topic, audio_pkt)
-
-	def stop_audio(self, client):
-		logger.info(f"[Audio] stop all")
-		audio_pkt ['data']['action'] = "STOP"
-		self.publish(client, audio_topic, audio_pkt)
-
-	def play_light(self, client, lightEffect):
-		light_pkt ['data']['animation'] = lightEffect
-		logger.info(f"Light Effect" , lightEffect, " in ", light_pkt ['data']['path'] )
-		self.publish(client, light_topic, light_pkt)
-
-
-
-	def connect_mqtt(self):
-		def on_connect(client, userdata, flags, rc): ### FIXED INDENTATION ERROR
-			if rc == 0:
-				logger.debug(f"Music Spell Connected to MQTT Broker! PID= {os.getpid()}")
-			else:
-				logger.warning(f"Music Spell Failed to connect, return code {rc}")
-		client = mqtt_client.Client(client_id)
-		client.on_connect = on_connect
-		client.connect(broker, port)
-		logger.debug(f"Connecting to mqtt server...")
 		
-		return client
+		if playMode == "background": 
+			self.audio.play_background(file)
+		elif playMode == "foreground":
+			self.audio.play_foreground(file)
+		else:
+			logger.warning(f"unknown play mode {playMode}")
 
-	def on_message(self, client, userdate, msg):
-		global old_orient
-		global instrumentName 
+	def stop_audio(self):
+		logger.info(f"[Audio] stop all")
+		self.audio.stop()
 
-		logger.debug (f"MQTT Message from: {msg.topic}")
+	def play_light(self, lightEffect):
+		logger.info(f"Light Effect {lightEffect}")
+		self.lights.play_lb_csv_animation(lightEffect)
+
+	def on_nfc_scan(self, payload):
+
+		logger.debug (f"NFC Payload: {payload}")
 		
 		try:
-			payload = json.loads(msg.payload)
-			msgType = payload['header']['type']
-			logger.debug(f"MQTT message type: {msgType}")
+			for record in payload['card_data']['records']:
+				if record['type'] == "text":
+					cardData = json.loads(record['data'])
+					if cardData['spell']=='music':
+						if "instrument" in cardData: 
+							self.instrumentName = cardData['instrument']
+							logger.info(f"instrumentName set to {self.instrumentName}")
 
-			if msgType == 'UI_NFC':
-				for record in payload['card_data']['records']:
-					if record['type'] == "text":
-						cardData = json.loads(record['data'])
-						if cardData['spell']=='music':
+						if 'background' in cardData:
+							backTrack = cardData['background']
+							fileName = backTrack + '.wav'
+							logger.info(f"playing in background: {fileName}")
+							# we should stop the old background music - but thats tricky
+							self.stop_audio ()
+							self.play_audio (fileName, "background")
+						
+						self.play_light ('yes')	
 
-							if "instrument" in cardData: 
-								instrumentName = cardData['instrument']
-								logger.info(f"instrumentName set to {instrumentName}")
-
-							if 'background' in cardData:
-								backTrack = cardData['background']
-								fileName = backTrack + '.wav'
-								logger.info(f"playing in background: {fileName}")
-								# we should stop the old background music - but thats tricky
-								self.stop_audio (client)
-								self.play_audio (client, fileName, "background")
-							
-							self.play_light (client, 'yes')	
-
-			if msgType == "UI_GESTURE":
-				new_orientation =   payload['data']["orientation"]
-				new_orient = int(math.log(new_orientation,2))
-				logger.debug(f"orientation change. New: {new_orient}  Old: {old_orient}")
-				fileName = "2SPL" + orientationText[new_orient] + '-' + instrumentName
-				logger.debug(f"FileName is: {fileName}")
-				self.play_audio (client, fileName + '.wav', "background")
-				self.play_light (client, fileName + '.csv')	
-				old_orient = new_orient 
-		
 		except Exception as e:
 			logger.warning(f"JSON parsing excetion {e}")
 
+	def on_gesture(self, orientaion):
+		new_orientation =  orientaion
+		new_orient = int(math.log(new_orientation,2))
+		logger.debug(f"orientation change. New: {new_orient}  Old: {self.old_orient}")
+		fileName = "2SPL" + orientationText[new_orient] + '-' + self.instrumentName
+		logger.debug(f"FileName is: {fileName}")
+		self.play_audio (fileName + '.wav', "foreground")
+		self.play_light (fileName + '.csv')	
+		self.old_orient = new_orient 
 
-	def publish(self, client, topic, pkt):
-		try:
-			result = client.publish(topic, json.dumps(pkt))
-			# result: [0, 1]
-			status = result[0]
-			if status == 0:
-				logger.debug(f"published message: {topic}")
-			else:
-				logger.error(f"Failed to send message to topic {topic}")
-		except IndexError:
-			logger.warning("no argument given. please use format: python3 pub_client.py [animation code]")
-	
+	def get_path(self):
+		param_1 = None
+		if len(sys.argv) < 2:
+			logger.debug("No arguments provided.")
+		else:
+			param_1 = sys.argv[1]
+			# Rest of your code using param_1
+		return param_1 if param_1 else os.getcwd()
+    
+	def signal_handler(self, sig, frame): 
+		logger.info("Exiting Music...")
+		self.stop_audio()
+		sys.exit(0)
 
 	def run(self):
-		global old_orient
-		global currentPath
-		old_orient = 0
-		instrumentName = 'drum'
-		client = self.connect_mqtt()
-		client.on_message = self.on_message
-		client.subscribe(gesture_topic)
-		client.subscribe(nfc_topic)
-		client.enable_logger()
-		logger.debug('Music spell subscribed to mqtt!')
-		param_1 = ""
-		param_2 = ""
-		
-		# TODO: Not the way to check for arguments
-		try:
-			param_1= sys.argv[1] 
-			param_2= sys.argv[2] 
-		except:
-			logger.error ("no args")
-
-		# if started by conductor, param1 is the path,
-		# otherwise use cwd
-		if param_1 !="":
-			currentPath = param_1
-			
-		else:
-			currentPath =os.getcwd() 
-		logger.info(f"Setting path to: {currentPath}")	
-		audio_pkt ['data']['path'] = currentPath
-		light_pkt ['data']['path'] = currentPath
-		
-
+		logger.info(f"Starting Music {self.instrumentName}")	
 		# Need to put here code to arse the second argument which is a JSON f
 		# from the conductor with the startup info on the card
-
 		#Play the initial audio and light
 
 		#The spell plays audio of its own name
-		self.play_audio (client, "music.wav", "background")
+		self.play_audio ("music.wav", "background")
 		#But Dont play light - conductor plays spell startr light
-		
-		client.loop_forever()
+		signal.signal(signal.SIGINT, self.signal_handler)
+		signal.signal(signal.SIGTERM, self.signal_handler)
+		signal.pause()
 
+		
 
 if __name__ == '__main__':
 	service = musicSpell()
-	logger.info(f"Music spell running")
 	service.run()

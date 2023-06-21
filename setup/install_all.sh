@@ -57,6 +57,12 @@ then
     echo "[ERROR: install_all.sh $LINENO] Installing VLC"; exit 1
 fi
 
+sudo pip3 install python-vlc
+if [ $? != 0 ]
+then 
+    echo "[ERROR: install_all.sh $LINENO] Installing VLC python module"; exit 1
+fi
+
 sudo apt-get install alsa-base pulseaudio
 if [ $? != 0 ]
 then 

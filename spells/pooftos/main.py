@@ -1,170 +1,130 @@
-
-import time
 import signal
 import json
-from multiprocessing import Process
-import sys
-import os
+import sys, os
 import math
 
+# Import TGW libs
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
-from MQTTObject import MQTTObject
-import helper
+from Services import *
 from log import log
 
 DEBUG_LEVEL = "DEBUG"
 LOGGER_NAME = __name__
-logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
+logger = log(name=LOGGER_NAME, level=DEBUG_LEVEL)
 
-NFC_TOPIC = "goodwand/ui/controller/nfc"
-BUTTON_TOPIC = "goodwand/ui/controller/button"
-GESTURE_TOPIC = "goodwand/ui/controller/gesture"
-LIGHT_TOPIC = "goodwand/ui/view/lightbar"
-AUDIO_TOPIC = "goodwand/ui/view/audio_playback"
-UV_TOPIC = "goodwand/ui/view/uv"
+MQTT_CLIENT_ID = "pooftos"
 
-SPELL_CLIENT_ID = "Pooftos"
-
-
-
-audio_pkt = {
-    "header": {
-      "type": "UI_AUDIO", "version": 1
-    },
-    "data": {
-     	"action": " ", 
-	 	"path": " ",
-	 	"file": " ",
-		"mode": " "
-    }
-}
-
-light_pkt = {
-            "header": {"type": "UI_LIGHTBAR","version": 1},
-            "data": {
-                "granularity": 1,
-                "animation": "power_off",
-				"path": os.getcwd(),
-        		"crossfade": 0
-            }
-        }
-
-uv_pkt = {
-            "header": {"type": "UI_UV","version": 1},
-            "data": {
-                "timeOn": 5,
-            }
-        }
-
-class Pooftos(MQTTObject):
-    global oldOrient
-    global currentPath
+class Pooftos():
+    oldOrient : int 
 
     def __init__(self):
-        super().__init__()
+        self.currentPath = self.get_path()
+        self.mqtt_object = MQTTClient()
+        self.mqtt_client = self.mqtt_object.start(MQTT_CLIENT_ID)
+        
+        self.button = ButtonService(self.mqtt_client)
+        self.button.subscribe(self.on_button_press)
+        
+        # NFC not used as of now. 
+        # self.nfc = NFCService(self.mqtt_client)
+        # self.nfc.subscribe(self.on_nfc_scan)
+        
+        self.imu = IMUService(self.mqtt_client)
+        self.imu.subscribe_orientation(self.on_gesture)
 
-        self.callbacks = {
-            NFC_TOPIC : self.on_nfc_scan,
-            BUTTON_TOPIC: self.on_button_press,
-            GESTURE_TOPIC: self.on_gesture,
-        }
+        self.audio = AudioService(self.mqtt_client, self.currentPath)
+        
+        self.lights = LightService(self.mqtt_client, self.currentPath)
+
 
     def play_audio(self, file, playMode):
         logger.info(f"Play audio file {file}")
-        audio_pkt ['data']['action'] = "START"
-        audio_pkt ['data']['file'] = file
-        audio_pkt ["data"]["mode"] = playMode 
-        self.publish(AUDIO_TOPIC, json.dumps(audio_pkt))
-    
+        
+        if playMode == "background": 
+            self.audio.play_background(file)
+        elif playMode == "foreground":
+            self.audio.play_foreground(file)
+        else:
+            logger.warning(f"unknown play mode {playMode}")
+
+
     def stop_audio(self):
         logger.info(f"[Audio] stop all")
-        audio_pkt ['data']['action'] = "STOP"
-        self.publish(AUDIO_TOPIC, json.dumps(audio_pkt))
+        self.audio.stop()
+
 
     def play_light(self, lightEffect):
-        light_pkt['data']['animation'] = lightEffect
         logger.info(f"Light Effect {lightEffect}")
-        self.publish(LIGHT_TOPIC, json.dumps(light_pkt))
+        self.lights.play_lb_csv_animation(lightEffect)
 
-    def deactivate_tv (self):
-        global currentPath
-        self.play_audio ("deactive.wav", "background")
-        self.play_light ("deactive.csv")
-        os.system("sh "+currentPath + "/Pooftos.sh "+ currentPath )
 
-    #Handles Gesture events
-    def on_gesture(self, client, userdata, msg):
-        global oldOrient
-        payload = json.loads(msg.payload)
-        newOrientation =   payload['data']["orientation"]
-        newOrient = int(math.log(newOrientation,2))
+    def deactivate_tv(self):
+        self.play_audio("deactive.wav", "background")
+        self.play_light("deactive.csv")
+        os.system("sh "+ self.currentPath + "/Pooftos.sh " + self.currentPath)
 
-        if (newOrient == 5) and (oldOrient == 3): # 5=flt-up
+    # Handles Gesture events
+    def on_gesture(self, msg):
+        newOrientation = msg
+        newOrient = int(math.log(newOrientation, 2))
+        logger.debug(f"{newOrientation}  {newOrient}")
+
+        if (newOrient == 5) and (self.oldOrient == 3):  # 5=flt-up
             self.deactivate_tv()
-        
-        oldOrient = newOrient
 
-    def on_button_press(self, client, userdata, msg):
-        payload = json.loads(msg.payload)
-        keyPressType = payload['data']['event'] 
-        
+        self.oldOrient = newOrient
+
+    def on_button_press(self, keyPressType):
         if keyPressType == 'short':
             self.deactivate_tv()
 
-    def on_nfc_scan(self, client, userdata, msg):
-        """
-        handles logic for starting games
-        """
-        payload = json.loads(msg.payload)
-        if len(payload['card_data']['records']) > 0:
-            cardRecord0 = payload_url = payload['card_data']['records'][0]
-            if cardRecord0 ["data"] == "https://www.thegoodwand.com":
-                cardRecord1 = payload['card_data']['records'][1]
-                cardData = cardRecord1 ["data"]
-                card_dict = json.loads(cardData)
-                try:
-                    game_on_card = card_dict ["spell"]
-                    logger.debug (f"spell is: {game_on_card}")
-                    # Need to add code that:
-                    if game_on_card == "pooftos":
-                        logger.info (f"re activating pooftos through NFC")
-                        #What should we do here
-                                        
-                except:
-                    logger.debug (f"Not a spell")
+    # def on_nfc_scan(self, msg):
+    #     """
+    #     handles logic for starting games
+    #     """
+    #     payload = json.loads(msg.payload)
+    #     if len(payload['card_data']['records']) > 0:
+    #         cardRecord0 = payload_url = payload['card_data']['records'][0]
+    #         if cardRecord0["data"] == "https://www.thegoodwand.com":
+    #             cardRecord1 = payload['card_data']['records'][1]
+    #             cardData = cardRecord1["data"]
+    #             card_dict = json.loads(cardData)
+    #             try:
+    #                 game_on_card = card_dict["spell"]
+    #                 logger.debug(f"spell is: {game_on_card}")
+    #                 # Need to add code that:
+    #                 if game_on_card == "pooftos":
+    #                     logger.info(f"re activating pooftos through NFC")
+    #                     # What should we do here
 
-        else:    
-            logger.debug(f'No records found on NFC card')
+    #             except:
+    #                 logger.debug(f"Not a spell")
+
+    #     else:
+    #         logger.debug(f'No records found on NFC card')
+
+    def get_path(self):
+        param_1 = None
+        if len(sys.argv) < 2:
+            logger.debug("No arguments provided.")
+        else:
+            param_1 = sys.argv[1]
+            # Rest of your code using param_1
+        return param_1 if param_1 else os.getcwd()
+
+    def signal_handler(self, sig, frame): 
+        logger.info("Exiting Pooftos...")
+        self.stop_audio()
+        sys.exit(0)
 
     def run(self):
-        global currentPath
         logger.debug(f'Pooftos spell started')
-        self.start_mqtt(SPELL_CLIENT_ID, self.callbacks)
+        self.play_audio("activating-pooftos.wav", "background")
         
-        param_1 = ""
-        param_2 = ""
-		
-		# TODO: Not the way to check for arguments
-        try:
-            param_1= sys.argv[1] 
-            param_2= sys.argv[2] 
-        except:
-            logger.error ("no args")
-
-		# if started by conductor, param1 is the path,
-		# otherwise use cwd
-        if param_1 !="":
-            currentPath = param_1
-        else:
-        	currentPath =os.getcwd() 
-    
-        logger.debug(f'Pooftos spell path is{currentPath}')
-        audio_pkt ['data']['path'] = currentPath
-        light_pkt ['data']['path'] = currentPath
-        self.play_audio ("activating-pooftos.wav", "background")
+        signal.signal(signal.SIGINT, self.signal_handler)
+        signal.signal(signal.SIGTERM, self.signal_handler)
         signal.pause()
 
-
 if __name__ == '__main__':
-    service = Pooftos()  
-    service.run() 
+    service = Pooftos()
+    service.run()

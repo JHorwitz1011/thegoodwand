@@ -8,6 +8,7 @@ from Services import LightService
 from Services import AudioService
 from Services import NFCService
 from Services import IMUService
+from services import UVService
 from log import log
 
 DEBUG_LEVEL = "DEBUG"

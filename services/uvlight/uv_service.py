@@ -43,6 +43,7 @@ class FWUVService(MQTTObject):
 
     def on_uv_message(self, client, userdata, msg):
         payload = json.loads(msg.payload)
+        logger.debug(payload)
         try:
             timeOn = payload["data"].get("timeOn")
             GPIO.output(UV_PIN, 1) 
