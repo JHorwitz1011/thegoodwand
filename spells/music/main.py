@@ -145,7 +145,7 @@ class musicSpell():
 				logger.debug(f"orientation change. New: {new_orient}  Old: {old_orient}")
 				fileName = "2SPL" + orientationText[new_orient] + '-' + instrumentName
 				logger.debug(f"FileName is: {fileName}")
-				self.play_audio (client, fileName + '.wav', "foreground")
+				self.play_audio (client, fileName + '.wav', "background")
 				self.play_light (client, fileName + '.csv')	
 				old_orient = new_orient 
 		
