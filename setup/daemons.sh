@@ -21,8 +21,8 @@ echo "Creating Lightbar service"
 #supervisor config files: ONLY SERVICE THAT NEEDS ROOT user
 echo "[program:lightbar]
 [program:lightbar]
-command=/home/tgw/thegoodwand/services/lights/build/TGWLightService
-directory=home/tgw/thegoodwand/services/lights/build
+command=home/"$path"/lights/build/TGWLightService
+directory=home/"$path"/lights/build
 autostart=true
 autorestart=true
 priority=50
