@@ -1,7 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/common_obj_static.dir/Base64.c.o"
   "CMakeFiles/common_obj_static.dir/Clients.c.o"
-  "CMakeFiles/common_obj_static.dir/Heap.c.o"
   "CMakeFiles/common_obj_static.dir/LinkedList.c.o"
   "CMakeFiles/common_obj_static.dir/Log.c.o"
   "CMakeFiles/common_obj_static.dir/MQTTPacket.c.o"
@@ -18,7 +17,6 @@ file(REMOVE_RECURSE
   "CMakeFiles/common_obj_static.dir/SHA1.c.o"
   "CMakeFiles/common_obj_static.dir/Socket.c.o"
   "CMakeFiles/common_obj_static.dir/SocketBuffer.c.o"
-  "CMakeFiles/common_obj_static.dir/StackTrace.c.o"
   "CMakeFiles/common_obj_static.dir/Thread.c.o"
   "CMakeFiles/common_obj_static.dir/Tree.c.o"
   "CMakeFiles/common_obj_static.dir/WebSocket.c.o"

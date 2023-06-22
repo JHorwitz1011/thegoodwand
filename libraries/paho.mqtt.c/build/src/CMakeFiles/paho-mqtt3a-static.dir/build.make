@@ -130,9 +130,7 @@ paho__mqtt3a__static_EXTERNAL_OBJECTS = \
 "/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/CMakeFiles/common_obj_static.dir/Base64.c.o" \
 "/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/CMakeFiles/common_obj_static.dir/SHA1.c.o" \
 "/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/CMakeFiles/common_obj_static.dir/WebSocket.c.o" \
-"/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/CMakeFiles/common_obj_static.dir/Proxy.c.o" \
-"/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/CMakeFiles/common_obj_static.dir/StackTrace.c.o" \
-"/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/CMakeFiles/common_obj_static.dir/Heap.c.o"
+"/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/CMakeFiles/common_obj_static.dir/Proxy.c.o"
 
 src/libpaho-mqtt3a.a: src/CMakeFiles/paho-mqtt3a-static.dir/MQTTAsync.c.o
 src/libpaho-mqtt3a.a: src/CMakeFiles/paho-mqtt3a-static.dir/MQTTAsyncUtils.c.o
@@ -158,8 +156,6 @@ src/libpaho-mqtt3a.a: src/CMakeFiles/common_obj_static.dir/Base64.c.o
 src/libpaho-mqtt3a.a: src/CMakeFiles/common_obj_static.dir/SHA1.c.o
 src/libpaho-mqtt3a.a: src/CMakeFiles/common_obj_static.dir/WebSocket.c.o
 src/libpaho-mqtt3a.a: src/CMakeFiles/common_obj_static.dir/Proxy.c.o
-src/libpaho-mqtt3a.a: src/CMakeFiles/common_obj_static.dir/StackTrace.c.o
-src/libpaho-mqtt3a.a: src/CMakeFiles/common_obj_static.dir/Heap.c.o
 src/libpaho-mqtt3a.a: src/CMakeFiles/paho-mqtt3a-static.dir/build.make
 src/libpaho-mqtt3a.a: src/CMakeFiles/paho-mqtt3a-static.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking C static library libpaho-mqtt3a.a"

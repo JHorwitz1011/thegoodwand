@@ -10,6 +10,7 @@ set(CMAKE_C_COMPILER_ID "GNU")
 
 # Preprocessor definitions for this target.
 set(CMAKE_TARGET_DEFINITIONS_C
+  "HIGH_PERFORMANCE=1"
   "PAHO_MQTT_STATIC=1"
   "_GNU_SOURCE"
   )

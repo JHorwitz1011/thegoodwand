@@ -17,20 +17,6 @@ src/CMakeFiles/common_obj_static.dir/Clients.c.o: ../src/MQTTTime.h
 src/CMakeFiles/common_obj_static.dir/Clients.c.o: ../src/Socket.h
 src/CMakeFiles/common_obj_static.dir/Clients.c.o: ../src/mutex_type.h
 
-src/CMakeFiles/common_obj_static.dir/Heap.c.o: ../src/Heap.c
-src/CMakeFiles/common_obj_static.dir/Heap.c.o: ../src/Heap.h
-src/CMakeFiles/common_obj_static.dir/Heap.c.o: ../src/Log.h
-src/CMakeFiles/common_obj_static.dir/Heap.c.o: ../src/MQTTClient.h
-src/CMakeFiles/common_obj_static.dir/Heap.c.o: ../src/MQTTClientPersistence.h
-src/CMakeFiles/common_obj_static.dir/Heap.c.o: ../src/MQTTExportDeclarations.h
-src/CMakeFiles/common_obj_static.dir/Heap.c.o: ../src/MQTTProperties.h
-src/CMakeFiles/common_obj_static.dir/Heap.c.o: ../src/MQTTReasonCodes.h
-src/CMakeFiles/common_obj_static.dir/Heap.c.o: ../src/MQTTSubscribeOpts.h
-src/CMakeFiles/common_obj_static.dir/Heap.c.o: ../src/StackTrace.h
-src/CMakeFiles/common_obj_static.dir/Heap.c.o: ../src/Thread.h
-src/CMakeFiles/common_obj_static.dir/Heap.c.o: ../src/Tree.h
-src/CMakeFiles/common_obj_static.dir/Heap.c.o: ../src/mutex_type.h
-
 src/CMakeFiles/common_obj_static.dir/LinkedList.c.o: ../src/Heap.h
 src/CMakeFiles/common_obj_static.dir/LinkedList.c.o: ../src/LinkedList.c
 src/CMakeFiles/common_obj_static.dir/LinkedList.c.o: ../src/LinkedList.h
@@ -330,22 +316,6 @@ src/CMakeFiles/common_obj_static.dir/SocketBuffer.c.o: ../src/SocketBuffer.h
 src/CMakeFiles/common_obj_static.dir/SocketBuffer.c.o: ../src/StackTrace.h
 src/CMakeFiles/common_obj_static.dir/SocketBuffer.c.o: ../src/Thread.h
 src/CMakeFiles/common_obj_static.dir/SocketBuffer.c.o: ../src/mutex_type.h
-
-src/CMakeFiles/common_obj_static.dir/StackTrace.c.o: ../src/Clients.h
-src/CMakeFiles/common_obj_static.dir/StackTrace.c.o: ../src/LinkedList.h
-src/CMakeFiles/common_obj_static.dir/StackTrace.c.o: ../src/Log.h
-src/CMakeFiles/common_obj_static.dir/StackTrace.c.o: ../src/MQTTClient.h
-src/CMakeFiles/common_obj_static.dir/StackTrace.c.o: ../src/MQTTClientPersistence.h
-src/CMakeFiles/common_obj_static.dir/StackTrace.c.o: ../src/MQTTExportDeclarations.h
-src/CMakeFiles/common_obj_static.dir/StackTrace.c.o: ../src/MQTTProperties.h
-src/CMakeFiles/common_obj_static.dir/StackTrace.c.o: ../src/MQTTReasonCodes.h
-src/CMakeFiles/common_obj_static.dir/StackTrace.c.o: ../src/MQTTSubscribeOpts.h
-src/CMakeFiles/common_obj_static.dir/StackTrace.c.o: ../src/MQTTTime.h
-src/CMakeFiles/common_obj_static.dir/StackTrace.c.o: ../src/Socket.h
-src/CMakeFiles/common_obj_static.dir/StackTrace.c.o: ../src/StackTrace.c
-src/CMakeFiles/common_obj_static.dir/StackTrace.c.o: ../src/StackTrace.h
-src/CMakeFiles/common_obj_static.dir/StackTrace.c.o: ../src/Thread.h
-src/CMakeFiles/common_obj_static.dir/StackTrace.c.o: ../src/mutex_type.h
 
 src/CMakeFiles/common_obj_static.dir/Thread.c.o: ../src/Log.h
 src/CMakeFiles/common_obj_static.dir/Thread.c.o: ../src/MQTTClient.h

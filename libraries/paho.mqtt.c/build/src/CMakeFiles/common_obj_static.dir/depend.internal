@@ -17,20 +17,6 @@ src/CMakeFiles/common_obj_static.dir/Clients.c.o
  /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/MQTTTime.h
  /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Socket.h
  /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/mutex_type.h
-src/CMakeFiles/common_obj_static.dir/Heap.c.o
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Heap.c
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Heap.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Log.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/MQTTClient.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/MQTTClientPersistence.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/MQTTExportDeclarations.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/MQTTProperties.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/MQTTReasonCodes.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/MQTTSubscribeOpts.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/StackTrace.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Thread.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Tree.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/mutex_type.h
 src/CMakeFiles/common_obj_static.dir/LinkedList.c.o
  /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Heap.h
  /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/LinkedList.c
@@ -328,22 +314,6 @@ src/CMakeFiles/common_obj_static.dir/SocketBuffer.c.o
  /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Socket.h
  /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/SocketBuffer.c
  /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/SocketBuffer.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/StackTrace.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Thread.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/mutex_type.h
-src/CMakeFiles/common_obj_static.dir/StackTrace.c.o
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Clients.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/LinkedList.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Log.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/MQTTClient.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/MQTTClientPersistence.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/MQTTExportDeclarations.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/MQTTProperties.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/MQTTReasonCodes.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/MQTTSubscribeOpts.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/MQTTTime.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Socket.h
- /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/StackTrace.c
  /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/StackTrace.h
  /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Thread.h
  /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/mutex_type.h

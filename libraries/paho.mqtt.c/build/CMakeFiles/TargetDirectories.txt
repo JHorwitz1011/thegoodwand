@@ -28,7 +28,7 @@
 /home/tgw/thegoodwand/libraries/paho.mqtt.c/build/test/CMakeFiles/edit_cache.dir
 /home/tgw/thegoodwand/libraries/paho.mqtt.c/build/test/CMakeFiles/package_source.dir
 /home/tgw/thegoodwand/libraries/paho.mqtt.c/build/test/CMakeFiles/test_connect_destroy-static.dir
-/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/test/CMakeFiles/test_sync_session_present-static.dir
+/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/test/CMakeFiles/thread.dir
 /home/tgw/thegoodwand/libraries/paho.mqtt.c/build/test/CMakeFiles/test1-static.dir
 /home/tgw/thegoodwand/libraries/paho.mqtt.c/build/test/CMakeFiles/test95-static.dir
 /home/tgw/thegoodwand/libraries/paho.mqtt.c/build/test/CMakeFiles/test15-static.dir
@@ -40,8 +40,7 @@
 /home/tgw/thegoodwand/libraries/paho.mqtt.c/build/test/CMakeFiles/test4-static.dir
 /home/tgw/thegoodwand/libraries/paho.mqtt.c/build/test/CMakeFiles/test45-static.dir
 /home/tgw/thegoodwand/libraries/paho.mqtt.c/build/test/CMakeFiles/test8-static.dir
+/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/test/CMakeFiles/test_sync_session_present-static.dir
 /home/tgw/thegoodwand/libraries/paho.mqtt.c/build/test/CMakeFiles/test10-static.dir
 /home/tgw/thegoodwand/libraries/paho.mqtt.c/build/test/CMakeFiles/test9-static.dir
 /home/tgw/thegoodwand/libraries/paho.mqtt.c/build/test/CMakeFiles/test11-static.dir
-/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/test/CMakeFiles/thread.dir
-/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/test/CMakeFiles/test_issue373-static.dir

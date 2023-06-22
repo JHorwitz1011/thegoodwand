@@ -287,17 +287,17 @@ test_connect_destroy-static/fast:
 .PHONY : test_connect_destroy-static/fast
 
 #=============================================================================
-# Target rules for targets named test_sync_session_present-static
+# Target rules for targets named thread
 
 # Build rule for target.
-test_sync_session_present-static: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_sync_session_present-static
-.PHONY : test_sync_session_present-static
+thread: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 thread
+.PHONY : thread
 
 # fast build rule for target.
-test_sync_session_present-static/fast:
-	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/test_sync_session_present-static.dir/build.make test/CMakeFiles/test_sync_session_present-static.dir/build
-.PHONY : test_sync_session_present-static/fast
+thread/fast:
+	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/thread.dir/build.make test/CMakeFiles/thread.dir/build
+.PHONY : thread/fast
 
 #=============================================================================
 # Target rules for targets named test1-static
@@ -404,6 +404,19 @@ test8-static/fast:
 .PHONY : test8-static/fast
 
 #=============================================================================
+# Target rules for targets named test_sync_session_present-static
+
+# Build rule for target.
+test_sync_session_present-static: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_sync_session_present-static
+.PHONY : test_sync_session_present-static
+
+# fast build rule for target.
+test_sync_session_present-static/fast:
+	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/test_sync_session_present-static.dir/build.make test/CMakeFiles/test_sync_session_present-static.dir/build
+.PHONY : test_sync_session_present-static/fast
+
+#=============================================================================
 # Target rules for targets named test10-static
 
 # Build rule for target.
@@ -442,32 +455,6 @@ test11-static/fast:
 	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/test11-static.dir/build.make test/CMakeFiles/test11-static.dir/build
 .PHONY : test11-static/fast
 
-#=============================================================================
-# Target rules for targets named thread
-
-# Build rule for target.
-thread: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 thread
-.PHONY : thread
-
-# fast build rule for target.
-thread/fast:
-	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/thread.dir/build.make test/CMakeFiles/thread.dir/build
-.PHONY : thread/fast
-
-#=============================================================================
-# Target rules for targets named test_issue373-static
-
-# Build rule for target.
-test_issue373-static: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_issue373-static
-.PHONY : test_issue373-static
-
-# fast build rule for target.
-test_issue373-static/fast:
-	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/test_issue373-static.dir/build.make test/CMakeFiles/test_issue373-static.dir/build
-.PHONY : test_issue373-static/fast
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -500,7 +487,6 @@ help:
 	@echo "... test9-static"
 	@echo "... test95-static"
 	@echo "... test_connect_destroy-static"
-	@echo "... test_issue373-static"
 	@echo "... test_sync_session_present-static"
 	@echo "... thread"
 .PHONY : help

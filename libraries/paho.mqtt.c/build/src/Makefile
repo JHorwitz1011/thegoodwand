@@ -340,33 +340,6 @@ Clients.c.s:
 	cd /home/tgw/thegoodwand/libraries/paho.mqtt.c/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/common_obj_static.dir/build.make src/CMakeFiles/common_obj_static.dir/Clients.c.s
 .PHONY : Clients.c.s
 
-Heap.o: Heap.c.o
-
-.PHONY : Heap.o
-
-# target to build an object file
-Heap.c.o:
-	cd /home/tgw/thegoodwand/libraries/paho.mqtt.c/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/common_obj_static.dir/build.make src/CMakeFiles/common_obj_static.dir/Heap.c.o
-.PHONY : Heap.c.o
-
-Heap.i: Heap.c.i
-
-.PHONY : Heap.i
-
-# target to preprocess a source file
-Heap.c.i:
-	cd /home/tgw/thegoodwand/libraries/paho.mqtt.c/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/common_obj_static.dir/build.make src/CMakeFiles/common_obj_static.dir/Heap.c.i
-.PHONY : Heap.c.i
-
-Heap.s: Heap.c.s
-
-.PHONY : Heap.s
-
-# target to generate assembly for a file
-Heap.c.s:
-	cd /home/tgw/thegoodwand/libraries/paho.mqtt.c/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/common_obj_static.dir/build.make src/CMakeFiles/common_obj_static.dir/Heap.c.s
-.PHONY : Heap.c.s
-
 LinkedList.o: LinkedList.c.o
 
 .PHONY : LinkedList.o
@@ -883,33 +856,6 @@ SocketBuffer.c.s:
 	cd /home/tgw/thegoodwand/libraries/paho.mqtt.c/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/common_obj_static.dir/build.make src/CMakeFiles/common_obj_static.dir/SocketBuffer.c.s
 .PHONY : SocketBuffer.c.s
 
-StackTrace.o: StackTrace.c.o
-
-.PHONY : StackTrace.o
-
-# target to build an object file
-StackTrace.c.o:
-	cd /home/tgw/thegoodwand/libraries/paho.mqtt.c/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/common_obj_static.dir/build.make src/CMakeFiles/common_obj_static.dir/StackTrace.c.o
-.PHONY : StackTrace.c.o
-
-StackTrace.i: StackTrace.c.i
-
-.PHONY : StackTrace.i
-
-# target to preprocess a source file
-StackTrace.c.i:
-	cd /home/tgw/thegoodwand/libraries/paho.mqtt.c/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/common_obj_static.dir/build.make src/CMakeFiles/common_obj_static.dir/StackTrace.c.i
-.PHONY : StackTrace.c.i
-
-StackTrace.s: StackTrace.c.s
-
-.PHONY : StackTrace.s
-
-# target to generate assembly for a file
-StackTrace.c.s:
-	cd /home/tgw/thegoodwand/libraries/paho.mqtt.c/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/common_obj_static.dir/build.make src/CMakeFiles/common_obj_static.dir/StackTrace.c.s
-.PHONY : StackTrace.c.s
-
 Thread.o: Thread.c.o
 
 .PHONY : Thread.o
@@ -1044,9 +990,6 @@ help:
 	@echo "... Clients.o"
 	@echo "... Clients.i"
 	@echo "... Clients.s"
-	@echo "... Heap.o"
-	@echo "... Heap.i"
-	@echo "... Heap.s"
 	@echo "... LinkedList.o"
 	@echo "... LinkedList.i"
 	@echo "... LinkedList.s"
@@ -1104,9 +1047,6 @@ help:
 	@echo "... SocketBuffer.o"
 	@echo "... SocketBuffer.i"
 	@echo "... SocketBuffer.s"
-	@echo "... StackTrace.o"
-	@echo "... StackTrace.i"
-	@echo "... StackTrace.s"
 	@echo "... Thread.o"
 	@echo "... Thread.i"
 	@echo "... Thread.s"
