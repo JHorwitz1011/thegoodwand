@@ -6,7 +6,6 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_CHECK_C
   "/home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Base64.c" "/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/CMakeFiles/common_obj_static.dir/Base64.c.o"
   "/home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Clients.c" "/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/CMakeFiles/common_obj_static.dir/Clients.c.o"
-  "/home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Heap.c" "/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/CMakeFiles/common_obj_static.dir/Heap.c.o"
   "/home/tgw/thegoodwand/libraries/paho.mqtt.c/src/LinkedList.c" "/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/CMakeFiles/common_obj_static.dir/LinkedList.c.o"
   "/home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Log.c" "/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/CMakeFiles/common_obj_static.dir/Log.c.o"
   "/home/tgw/thegoodwand/libraries/paho.mqtt.c/src/MQTTPacket.c" "/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/CMakeFiles/common_obj_static.dir/MQTTPacket.c.o"
@@ -23,7 +22,6 @@ set(CMAKE_DEPENDS_CHECK_C
   "/home/tgw/thegoodwand/libraries/paho.mqtt.c/src/SHA1.c" "/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/CMakeFiles/common_obj_static.dir/SHA1.c.o"
   "/home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Socket.c" "/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/CMakeFiles/common_obj_static.dir/Socket.c.o"
   "/home/tgw/thegoodwand/libraries/paho.mqtt.c/src/SocketBuffer.c" "/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/CMakeFiles/common_obj_static.dir/SocketBuffer.c.o"
-  "/home/tgw/thegoodwand/libraries/paho.mqtt.c/src/StackTrace.c" "/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/CMakeFiles/common_obj_static.dir/StackTrace.c.o"
   "/home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Thread.c" "/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/CMakeFiles/common_obj_static.dir/Thread.c.o"
   "/home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Tree.c" "/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/CMakeFiles/common_obj_static.dir/Tree.c.o"
   "/home/tgw/thegoodwand/libraries/paho.mqtt.c/src/WebSocket.c" "/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/CMakeFiles/common_obj_static.dir/WebSocket.c.o"
@@ -33,6 +31,7 @@ set(CMAKE_C_COMPILER_ID "GNU")
 
 # Preprocessor definitions for this target.
 set(CMAKE_TARGET_DEFINITIONS_C
+  "HIGH_PERFORMANCE=1"
   "PAHO_MQTT_STATIC=1"
   "_GNU_SOURCE"
   )

@@ -305,12 +305,6 @@ JSON_MultipleHeaders:BOOL=ON
 //Include as system headers (skip for clang-tidy).
 JSON_SystemInclude:BOOL=OFF
 
-//Path to a library.
-PAHO_MQTT_C:FILEPATH=/usr/local/lib/arm-linux-gnueabihf/libpaho-mqtt3a.so
-
-//Path to a library.
-PAHO_MQTT_CPP:FILEPATH=PAHO_MQTT_CPP-NOTFOUND
-
 //Value Computed by CMake
 TGWLightService_BINARY_DIR:STATIC=/home/tgw/thegoodwand/services/lights/build
 

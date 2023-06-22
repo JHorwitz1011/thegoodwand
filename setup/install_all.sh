@@ -107,7 +107,6 @@ then
     echo "[ERROR: install_all.sh $LINENO] Installing python-vlc"; exit 1
 fi
 
-
 # Install Seed studio 
 # Seeed studio is added as a git submodule of this repo
 git submodule update --init
@@ -119,6 +118,9 @@ then
     echo "[ERROR: install_all.sh $LINENO] Installing SeedStudio voice card"; exit 1
 fi
 cd - #change directory back
+
+# build lights service
+./build_lights.sh
 
 # Add temp files to bashrc
 

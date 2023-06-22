@@ -362,32 +362,6 @@ src/CMakeFiles/common_obj_static.dir/Proxy.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/common_obj_static.dir/Proxy.c.s"
 	cd /home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Proxy.c -o CMakeFiles/common_obj_static.dir/Proxy.c.s
 
-src/CMakeFiles/common_obj_static.dir/StackTrace.c.o: src/CMakeFiles/common_obj_static.dir/flags.make
-src/CMakeFiles/common_obj_static.dir/StackTrace.c.o: ../src/StackTrace.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building C object src/CMakeFiles/common_obj_static.dir/StackTrace.c.o"
-	cd /home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/common_obj_static.dir/StackTrace.c.o -c /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/StackTrace.c
-
-src/CMakeFiles/common_obj_static.dir/StackTrace.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/common_obj_static.dir/StackTrace.c.i"
-	cd /home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/StackTrace.c > CMakeFiles/common_obj_static.dir/StackTrace.c.i
-
-src/CMakeFiles/common_obj_static.dir/StackTrace.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/common_obj_static.dir/StackTrace.c.s"
-	cd /home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/StackTrace.c -o CMakeFiles/common_obj_static.dir/StackTrace.c.s
-
-src/CMakeFiles/common_obj_static.dir/Heap.c.o: src/CMakeFiles/common_obj_static.dir/flags.make
-src/CMakeFiles/common_obj_static.dir/Heap.c.o: ../src/Heap.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tgw/thegoodwand/libraries/paho.mqtt.c/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building C object src/CMakeFiles/common_obj_static.dir/Heap.c.o"
-	cd /home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/common_obj_static.dir/Heap.c.o -c /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Heap.c
-
-src/CMakeFiles/common_obj_static.dir/Heap.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/common_obj_static.dir/Heap.c.i"
-	cd /home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Heap.c > CMakeFiles/common_obj_static.dir/Heap.c.i
-
-src/CMakeFiles/common_obj_static.dir/Heap.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/common_obj_static.dir/Heap.c.s"
-	cd /home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/tgw/thegoodwand/libraries/paho.mqtt.c/src/Heap.c -o CMakeFiles/common_obj_static.dir/Heap.c.s
-
 common_obj_static: src/CMakeFiles/common_obj_static.dir/MQTTTime.c.o
 common_obj_static: src/CMakeFiles/common_obj_static.dir/MQTTProtocolClient.c.o
 common_obj_static: src/CMakeFiles/common_obj_static.dir/Clients.c.o
@@ -410,8 +384,6 @@ common_obj_static: src/CMakeFiles/common_obj_static.dir/Base64.c.o
 common_obj_static: src/CMakeFiles/common_obj_static.dir/SHA1.c.o
 common_obj_static: src/CMakeFiles/common_obj_static.dir/WebSocket.c.o
 common_obj_static: src/CMakeFiles/common_obj_static.dir/Proxy.c.o
-common_obj_static: src/CMakeFiles/common_obj_static.dir/StackTrace.c.o
-common_obj_static: src/CMakeFiles/common_obj_static.dir/Heap.c.o
 common_obj_static: src/CMakeFiles/common_obj_static.dir/build.make
 
 .PHONY : common_obj_static

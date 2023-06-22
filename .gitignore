@@ -48,3 +48,11 @@ Thumbs.db
 *.mov
 *.wmv
 
+
+# Ignore build directories
+build/
+**/build/
+
+# Ignore .vscode directory
+.vscode/
+**/.vscode/
