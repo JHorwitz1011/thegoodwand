@@ -1,4 +1,5 @@
 import os
+from socketserver import ThreadingUnixStreamServer
 import sys
 import signal
 import time
@@ -32,14 +33,17 @@ KEYWORD_TOPIC = "goodwand/ui/controller/keyword"
 KEYWORD_CLIENT_ID = "keyword-classifier"
 
 # EI constants
-MODEL = "modelfile.eim"
+MODEL = "model.eim"
 MODEL_DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 MODEL_PATH = os.path.join(MODEL_DIR_PATH, MODEL)
 AUDIO_DEVICE_ID = 0
 
+# service constants
+KEYWORD_THRESHOLD = 0.9
+
 class TGWKeywordClassifier(MQTTObject):
 
-    def __init__(self, fs=10):
+    def __init__(self, fs=5):
         super().__init__()
         self.fs = fs
 
@@ -53,8 +57,20 @@ class TGWKeywordClassifier(MQTTObject):
                 print("Device ID "+ str(AUDIO_DEVICE_ID) + " has been provided as an argument.")
 
                 for res, audio in runner.classifier(device_id=AUDIO_DEVICE_ID): # loops forever
-                    KEYWORD_TEMP_PKT['data'] = res['result']['classification']
-                    self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
+                    result = res['result']['classification']
+                    if result["colos"] > KEYWORD_THRESHOLD:
+                        KEYWORD_TEMP_PKT["data"] = {"keyword":"colos"}
+                        self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
+                    elif result["extivious"] > KEYWORD_THRESHOLD:
+                        KEYWORD_TEMP_PKT["data"] = {"keyword":"extivious"}
+                        self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
+                    elif result["lumos"] > KEYWORD_THRESHOLD:
+                        KEYWORD_TEMP_PKT["data"] = {"keyword":"lumos"}
+                        self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
+                    elif result["mousike"] > KEYWORD_THRESHOLD:
+                        KEYWORD_TEMP_PKT["data"] = {"keyword":"mousike"}
+                        self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
+
                     time.sleep(1/self.fs)
 
             finally:
