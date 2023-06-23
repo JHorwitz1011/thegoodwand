@@ -58,7 +58,7 @@ class TGWConductor():
         self.charger.on_status(self.charger_on_status)
 
 
-    def charger_on_fault(fault):
+    def charger_on_fault(self,fault):
         if fault == 0: 
             logger.debug("Temperature Normal")
         elif fault == 1:
@@ -68,7 +68,7 @@ class TGWConductor():
         else:
             logger.debug("Unknown Fault")
     
-    def charger_on_status(status):
+    def charger_on_status(self, status):
         if status == 0: 
             logger.debug("Not charging")
         elif status == 0x10:
@@ -79,7 +79,6 @@ class TGWConductor():
             logger.debug("Charge Complete")
         else:
             logger.debug("Unknown Status")
-
 
     def _kill_game(self):
         # kills current game
