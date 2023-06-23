@@ -20,8 +20,7 @@ fi
 echo "Creating Lightbar service"
 #supervisor config files: ONLY SERVICE THAT NEEDS ROOT user
 echo "[program:lightbar]
-[program:lightbar]
-command=home/"$path"/lights/build/TGWLightService
+command=/home/"$path"/lights/build/TGWLightService
 directory=home/"$path"/lights/build
 autostart=true
 autorestart=true

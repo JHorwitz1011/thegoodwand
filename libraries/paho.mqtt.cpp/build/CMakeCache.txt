@@ -289,7 +289,7 @@ PAHO_HIGH_PERFORMANCE:UNINITIALIZED=TRUE
 PAHO_MQTT_C_INCLUDE_DIRS:PATH=/usr/local/include
 
 //Path to a library.
-PAHO_MQTT_C_LIBRARIES:FILEPATH=/usr/local/lib/arm-linux-gnueabihf/libpaho-mqtt3a.so
+PAHO_MQTT_C_LIBRARIES:FILEPATH=/usr/local/lib/arm-linux-gnueabihf/libpaho-mqtt3a.a
 
 //Build SSL-enabled library
 PAHO_WITH_SSL:BOOL=FALSE
@@ -486,7 +486,7 @@ CPACK_SOURCE_TZ-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CPACK_SOURCE_ZIP
 CPACK_SOURCE_ZIP-ADVANCED:INTERNAL=1
 //Details about finding PahoMqttC
-FIND_PACKAGE_MESSAGE_DETAILS_PahoMqttC:INTERNAL=[/usr/local/lib/arm-linux-gnueabihf/libpaho-mqtt3a.so][/usr/local/include][v()]
+FIND_PACKAGE_MESSAGE_DETAILS_PahoMqttC:INTERNAL=[/usr/local/lib/arm-linux-gnueabihf/libpaho-mqtt3a.a][/usr/local/include][v()]
 //Details about finding Threads
 FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
 //Result of TRY_COMPILE
