@@ -1,1 +1,0 @@
-/usr/bin/c++ -g CMakeFiles/TGWLightService.dir/main.cpp.o CMakeFiles/TGWLightService.dir/WS2812Service.cpp.o -o TGWLightService  rpi_ws281x/libws2811.a -lpthread -ldl /home/tgw/thegoodwand/libraries/paho.mqtt.cpp/build/src/libpaho-mqttpp3.a /home/tgw/thegoodwand/libraries/paho.mqtt.c/build/src/libpaho-mqtt3a.a -lm 
