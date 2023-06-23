@@ -15,6 +15,66 @@ DEBUG_LEVEL = "WARNING"
 LOGGER_NAME = __name__
 logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 
+class ChargerService():
+
+    SERVICE_TYPE = "UI_CHARGER"
+    SERVICE_VERSION = "1"
+    
+    STATUS_TOPIC = "goodwand/battery/status"
+    FAULT_TOPIC = "goodwand/battery/faults"
+
+    def __init__(self, mqtt_client) -> None:
+        self.client = mqtt_client
+        self.fault_callback = None
+        self.status_callback = None
+
+
+    def on_fault(self, callback, qos=0):
+        
+        self.client.message_callback_add(self.FAULT_TOPIC, self.__on_fault_message)
+        self.client.subscribe(self.FAULT_TOPIC, qos)
+        self.fault_callback = callback   
+    
+    def on_status(self, callback, qos=0):
+        
+        self.client.message_callback_add(self.STATUS_TOPIC, self.__on_status_message)
+        self.client.subscribe(self.STATUS_TOPIC, qos)
+        self.status_callback = callback   
+
+    def unsubscribe(self):
+        """Unsubscribe from button service callbacks"""
+        pass
+
+    def is_active(self)->'bool':
+        """TODO send command to IMU to query if the wand is active"""
+        pass
+
+    ### Private Methods ### 
+
+    def __on_status_message(self, client, userdata, message): 
+        
+        logger.debug(f"On status {message.payload}") 
+        msg = json.loads(message.payload)
+
+        if self.status_callback: 
+            self.status_callback(msg["data"]["status"])
+        else: 
+            logger.warning(f"status callback not set")        
+
+    def __on_fault_message(self,client, userdata, message):
+        """Parse data and call subscriber callback"""
+        logger.debug(f"On fault {message.payload}")
+        msg = json.loads(message.payload)
+
+        if self.fault_callback:       
+            self.fault_callback(msg["data"]["faults"])
+        else: 
+            logger.warning(f"Fault callback not set")
+     
+    def __on_subscribe(self, client, userdata, mid, granted_qos):
+        pass 
+
+
 # TODO Add is active and wake up callback
 class IMUService():
 
