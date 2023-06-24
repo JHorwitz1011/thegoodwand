@@ -117,6 +117,7 @@ class TGWConductor():
             self.keyword_turn_off()
 
     def charger_on_fault(self,fault):
+        logger.debug("on fault callback")
         if fault == 0: 
             #logger.debug("Temperature Normal")
             self.bat_current_fault = None
@@ -133,6 +134,7 @@ class TGWConductor():
         self.update_buttonled()    
     
     def charger_on_status(self, status):
+        logger.debug("on status callback")
         if status == 0: 
             logger.debug("Not charging")
             self.bat_current_status = None
