@@ -99,3 +99,6 @@ idk if theres a better word than "state" but its the best i got now... - jim
 
 - segmentation fault on ctrl-c
     - not rly sure what to do
+
+## other misc notes
+- at fs=10, the model consumes 22% cpu and the python script consumes 15% cpu

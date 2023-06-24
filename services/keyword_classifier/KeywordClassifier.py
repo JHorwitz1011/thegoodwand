@@ -35,7 +35,7 @@ AUDIO_DEVICE_ID = 0 # seeed studio device
 KEYWORD_THRESHOLD = 0.9 # minimum confidence rating for keyword to publish
 
 class TGWKeywordClassifier(MQTTObject):
-    def __init__(self, fs=5):
+    def __init__(self, fs=10):
         super().__init__()
 
         self.active = threading.Event()                                                         # thread based boolean (defaults false thus service is paused on startup)
