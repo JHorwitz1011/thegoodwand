@@ -98,7 +98,7 @@ def terminate_spell(sig, frame):
     lights.lb_block(0,0,0)
     time.sleep(.1)
     os._exit(0)
-
+    
 
 if __name__ == '__main__':
     # Connect to MQTT and get client instance 

@@ -84,7 +84,7 @@ class TGWConductor():
     def imu_on_orientation(self, orientation):
 
         self.current_orientation = orientation
-        logger.info("imu orientation update:", self.current_orientation)
+        logger.info(f"imu orientation update:{self.current_orientation}")
         if self.current_orientation == 8: # upright
             self.listening_check()
         elif self.current_orientation != 8 and self.prev_orientation == 8:
@@ -110,7 +110,7 @@ class TGWConductor():
             self.lights.lb_heartbeat(255, 0, 255)
         
     def listening_check(self):
-        logger.info("LISTENING CALL:", self.current_orientation, self.runningSpell)
+        logger.info(f"LISTENING CALL:{self.current_orientation}, {self.runningSpell}")
         if self.current_orientation == 8 and not self.runningSpell:
             self.keyword_turn_on()
         elif self.listening:
