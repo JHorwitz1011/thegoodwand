@@ -55,7 +55,7 @@ class Pooftos():
 
     def play_light(self, lightEffect):
         logger.info(f"Light Effect {lightEffect}")
-        self.lights.play_lb_csv_animation(lightEffect)
+        self.lights.lb_csv_animation(lightEffect)
 
 
     def deactivate_tv(self):

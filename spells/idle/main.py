@@ -36,7 +36,7 @@ def orientation_callback(orientation):
 
 
 def display_lights(red,green,blue):
-    lights.block(red,green,blue)
+    lights.lb_block(red,green,blue)
 
 def idle_timer_callback():
     global idleStep
@@ -48,13 +48,13 @@ def idle_timer_callback():
 
     idleStep += 1
     if idleStep < IDLE_NUMBER_STEPS:
-        lights.play_lb_csv_animation ("idleDrumsShort.csv")
+        lights.lb_csv_animation("idleDrumsShort.csv")
         idle_timer.stop()
         idle_timer.start()
         logger.debug(f"restarting idle time for next step")
     else: 
         logger.debug(f"Last idle step. Terminating")
-        lights.play_lb_csv_animation ("idleDrumsLong.csv")
+        lights.lb_csv_animation("idleDrumsLong.csv")
         os._exit(0)
     
 
@@ -63,7 +63,7 @@ def imu_on_wake_callback(wake_status:'bool'):
     if wake_status == True: 
         logger.debug(f"Wand is active, terminate idle spell")
         time.sleep(10)
-        lights.block(0,0,0)
+        lights.lb_block(0,0,0)
         os._exit(0)
 
     elif wake_status == False: 
@@ -95,7 +95,7 @@ def init_imu(mqtt_client, on_wake_cb):
 # Cleanup 
 def terminate_spell(sig, frame): 
     logger.debug("Terminating Idle Spell")
-    lights.block(0,0,0)
+    lights.lb_block(0,0,0)
     time.sleep(.1)
     os._exit(0)
 

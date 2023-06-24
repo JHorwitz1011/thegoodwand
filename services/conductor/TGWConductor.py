@@ -156,7 +156,7 @@ class TGWConductor():
         os.kill(self.child_process.pid, signal.SIGTERM)
         self.child_process = None
         self.audio.stop()
-        self.lights.play_lb_csv_animation('app_stopped.csv')
+        self.lights.lb_csv_animation('app_stopped.csv')
         self.audio.play_background('app_stopped.wav')
         self.runningSpell = ""
         self.listening_check()
@@ -185,7 +185,7 @@ class TGWConductor():
         
         if filePath is not None:
             logger.debug(f"Playing app start animation")
-            self.lights.play_lb_csv_animation('app_launch.csv')
+            self.lights.lb_csv_animation('app_launch.csv')
             logger.debug(f"Launching spell: {game} : {filePath} : {game_args}")
             self.child_process = subprocess.Popen(['python3', filePathandMain, filePath, game_args ] )
             logger.debug(f"[SUBPROCESS ID] {self.child_process.pid}")
@@ -250,7 +250,7 @@ class TGWConductor():
 
     def run(self):
         time.sleep(1) # Just in case the light service is not running. 
-        self.lights.play_lb_csv_animation('power_on.csv')
+        self.lights.lb_csv_animation('power_on.csv')
         #TODO Get power on audio
         # self.audio.play_background('power_on.wav')
         signal.pause()
