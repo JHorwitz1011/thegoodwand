@@ -101,6 +101,8 @@ class TGWKeywordClassifier(MQTTObject):
                         KEYWORD_TEMP_PKT["data"] = {"keyword":"mousike"}
                         self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
                         print("recognized mousike")
+                    else:
+                        print(result)
                     
                     if not self.active.is_set():
                         print('execution PAUSE')

@@ -443,7 +443,7 @@ class KeywordService():
 
     ### Private Methods ### 
     def __publish_message(self, msg):
-        self.client.publish(self.UV_TOPIC, json.dumps(msg))
+        self.client.publish(self.KEYWORD_CMD_TOPIC, json.dumps(msg))
 
     def __on_message(self,client, userdata, message):
         """Parse data and call subscriber callback"""

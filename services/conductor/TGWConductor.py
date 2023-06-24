@@ -79,7 +79,8 @@ class TGWConductor():
         elif self.bat_current_status == "complete":
             self.lights.bl_heartbeat(0x3c, 0x78, 0xd8) # blue 3c78d8
         else:
-            self.lights.bl_heartbeat(0x1f, 0xff, 0xe1) # light blue 1fffe1
+            logger.info("else")
+            self.lights.bl_heartbeat(0, 0, 0xFF) # light blue 1fffe1
 
     def imu_on_orientation(self, orientation):
 
@@ -91,16 +92,18 @@ class TGWConductor():
             self.listening_check()
         self.prev_orientation = orientation
 
-    def keyword_turn_on():
+    def keyword_turn_on(self):
         logger.info("turn on call keyword")
         if not self.listening:
+            logger.info("inside conditional")
             self.listening = True
             self.update_buttonled()
             self.keyword.enable()
 
-    def keyword_turn_off():
+    def keyword_turn_off(self):
         logger.info("turn off call keyword")
         if self.listening:
+            logger.info("inside conditional")
             self.listening = False
             self.update_buttonled()
             self.keyword.disable()
@@ -110,10 +113,12 @@ class TGWConductor():
             self.lights.lb_heartbeat(255, 0, 255)
         
     def listening_check(self):
-        logger.info(f"LISTENING CALL:{self.current_orientation}, {self.runningSpell}")
+        logger.info(f"LISTENING CALL:{self.current_orientation}, 1{self.runningSpell}1")
         if self.current_orientation == 8 and not self.runningSpell:
+            logger.info("start keyword")
             self.keyword_turn_on()
         elif self.listening:
+            logger.info("stop keyword")
             self.keyword_turn_off()
 
     def charger_on_fault(self,fault):
