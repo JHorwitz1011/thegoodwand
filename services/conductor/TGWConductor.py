@@ -69,6 +69,7 @@ class TGWConductor():
         self.imu.subscribe_orientation(self.imu_on_orientation)
 
     def update_buttonled(self):
+        logger.info("update buttonled call")
         if self.listening:
             self.lights.bl_heartbeat(0xa0, 0x20, 0xf0) # purple a020f0
         elif self.bat_current_fault == "hot":
@@ -81,7 +82,9 @@ class TGWConductor():
             self.lights.bl_heartbeat(0x1f, 0xff, 0xe1) # light blue 1fffe1
 
     def imu_on_orientation(self, orientation):
+
         self.current_orientation = orientation
+        logger.info("imu orientation update:", self.current_orientation)
         if self.current_orientation == 8: # upright
             self.listening_check()
         elif self.current_orientation != 8 and self.prev_orientation == 8:
@@ -89,12 +92,14 @@ class TGWConductor():
         self.prev_orientation = orientation
 
     def keyword_turn_on():
+        logger.info("turn on call keyword")
         if not self.listening:
             self.listening = True
             self.update_buttonled()
             self.keyword.enable()
 
     def keyword_turn_off():
+        logger.info("turn off call keyword")
         if self.listening:
             self.listening = False
             self.update_buttonled()
@@ -105,29 +110,26 @@ class TGWConductor():
             self.lights.lb_heartbeat(255, 0, 255)
         
     def listening_check(self):
+        logger.info("LISTENING CALL:", self.current_orientation, self.runningSpell)
         if self.current_orientation == 8 and not self.runningSpell:
             self.keyword_turn_on()
         elif self.listening:
             self.keyword_turn_off()
 
-    def imu_on_message(self, msg):
-        # do stuff
-        self.update_state()
-
     def charger_on_fault(self,fault):
         if fault == 0: 
-            logger.debug("Temperature Normal")
+            #logger.debug("Temperature Normal")
             self.bat_current_fault = None
         elif fault == 1:
-            logger.debug("Temperature Hot")
+            #logger.debug("Temperature Hot")
             self.bat_current_fault = "hot"
         elif fault == 2:
-            logger.debug("Temperature Cold")
+            #logger.debug("Temperature Cold")
             self.bat_current_fault = "cold"
         else:
-            logger.debug("Unknown Fault")
+            #logger.debug("Unknown Fault")
             self.bat_current_fault = "unknown"
-        
+        logger.info(f"FAULT CALL: {self.bat_current_status}")
         self.update_buttonled()    
     
     def charger_on_status(self, status):
@@ -146,6 +148,8 @@ class TGWConductor():
         else:
             logger.debug("Unknown Status")
             self.bat_current_status = "unknown"
+        
+        logger.info(f"FAULT CALL: {self.bat_current_status}")
 
         self.update_buttonled()
     
@@ -251,6 +255,7 @@ class TGWConductor():
     def run(self):
         time.sleep(1) # Just in case the light service is not running. 
         self.lights.lb_csv_animation('power_on.csv')
+        self.update_buttonled()
         #TODO Get power on audio
         # self.audio.play_background('power_on.wav')
         signal.pause()
