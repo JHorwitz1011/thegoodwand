@@ -1,4 +1,3 @@
-
 import time
 import signal
 import json
@@ -40,6 +39,10 @@ class TGWConductor():
         self.child_process = None
         self.current_game = ""
 
+        self.bat_current_fault = None
+        self.bat_current_status = None
+        self.listening = False
+
         self.mqtt_obj = MQTTClient()
         self.mqtt_client = self.mqtt_obj.start(self.CONDUCTOR_CLIENT_ID)
 
@@ -57,28 +60,60 @@ class TGWConductor():
         self.charger.on_fault(self.charger_on_fault)
         self.charger.on_status(self.charger_on_status)
 
+    def update_state(self):
+        if self.listening:
+            pass
+        elif self.bat_current_fault == "hot":
+            pass
+        elif self.bat_current_status == "fast charging":
+            pass
+        elif self.bat_current_status == "complete":
+            pass
+        else:
+            pass
+
+    def keyword_on_message(self, keyword):
+        # start game
+        pass
+
+    def imu_on_message(self, msg):
+        # do stuff
+        self.update_state()
 
     def charger_on_fault(self,fault):
         if fault == 0: 
             logger.debug("Temperature Normal")
+            self.bat_current_fault = None
         elif fault == 1:
             logger.debug("Temperature Hot")
+            self.bat_current_fault = "hot"
         elif fault == 2:
             logger.debug("Temperature Cold")
+            self.bat_current_fault = "cold"
         else:
             logger.debug("Unknown Fault")
+            self.bat_current_fault = "unknown"
+        
+        self.update_button_led()
     
     def charger_on_status(self, status):
         if status == 0: 
             logger.debug("Not charging")
+            self.bat_current_status = None
         elif status == 0x10:
             logger.debug("Pre Charge")
+            self.bat_current_status = "pre charge"
         elif status == 0x20:
             logger.debug("Fast Charging")
+            self.bat_current_status = "fast charging"
         elif status == 0x30:
             logger.debug("Charge Complete")
+            self.bat_current_status = "complete"
         else:
             logger.debug("Unknown Status")
+            self.bat_current_status = "unknown"
+
+        self.update_button_led()
 
     def _kill_game(self):
         # kills current game
@@ -90,6 +125,7 @@ class TGWConductor():
         self.lights.play_lb_csv_animation('app_stopped.csv')
         self.audio.play_background('app_stopped.wav')
         self.runningSpell = ""
+        self.update_state()
 
     #Handles button events
     def on_button_press(self, press):
@@ -121,6 +157,9 @@ class TGWConductor():
             
         else:
             logger.debug("invalid game found...")
+            self.runningSpell = ""
+        
+        self.update_state()
 
     def on_nfc_scan(self, records):
         """
