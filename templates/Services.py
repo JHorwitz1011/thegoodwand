@@ -74,7 +74,6 @@ class ChargerService():
     def __on_subscribe(self, client, userdata, mid, granted_qos):
         pass 
 
-
 # TODO Add is active and wake up callback
 class IMUService():
 
@@ -208,7 +207,6 @@ class NFCService():
     def __on_subscribe(self, client, userdata, mid, granted_qos):
         pass 
 
-
 class AudioService():
 
     AUDIO_TOPIC = "goodwand/ui/view/audio_playback"
@@ -276,7 +274,6 @@ class AudioService():
  
     def __on_subscribe(self, client, userdata, mid, granted_qos):
         pass 
-
 
 # TODO System animations and Button Animations
 # TODO hsv control
@@ -384,7 +381,7 @@ class LightService():
 
     ### Private Methods ### 
     def __color_cast(c1,c2,c3) -> int:
-        return (((int)c1)&MASK_C1)<<MASK_C1 | (((int)c2)&MASK_C2)<<MASK_C2 | (((int)c3)&MASK_C3)<<MASK_C3
+        return ((int(c1))&self.MASK_C1)<<self.MASK_C1 | ((int(c2))&self.MASK_C2)<<self.MASK_C2 | ((int(c3))&self.MASK_C3)<<self.MASK_C3
 
     def __publish_message_lightbar(self, msg):
         self.client.publish(self.LIGHT_BAR_TOPIC, json.dumps(msg))
@@ -418,9 +415,7 @@ class UVService():
 
         self.client.publish(self.UV_TOPIC, json.dumps(msg))
 
-
 class KeywordService():
-
     KEYWORD_TOPIC = "goodwand/ui/controller/keyword"
     KEYWORD_CMD_TOPIC = "goodwand/ui/controller/keyword/command"
 
@@ -444,7 +439,7 @@ class KeywordService():
 
     def subscribe(self, callback, qos=0):
         self.callback = callback
-        self.client.message_callback_add(self.KEYWORD_TOPIC, self.callback)
+        self.client.message_callback_add(self.KEYWORD_TOPIC, self.__on_message)
         self.client.subscribe(self.KEYWORD_TOPIC, qos)
 
     def unsubscribe(self):
@@ -454,6 +449,17 @@ class KeywordService():
     ### Private Methods ### 
     def __publish_message(self, msg):
         self.client.publish(self.UV_TOPIC, json.dumps(msg))
+
+    def __on_message(self,client, userdata, message):
+        """Parse data and call subscriber callback"""
+        
+        msg = json.loads(message.payload)
+        keyword = msg["data"]["keyword"]
+
+        if self.callback:
+            self.callback(keyword)
+        else: 
+            logger.warning(f"Button callback not set")
 
 class ButtonService():
 
@@ -505,7 +511,6 @@ class ButtonService():
  
     def __on_subscribe(self, client, userdata, mid, granted_qos):
         pass 
-
 
 class MQTTClient():
     """Abstracts away irrelevavnt aspects of mqtt functionality for ease of programming"""

@@ -37,10 +37,12 @@ class TGWConductor():
         
         self.runningSpell = "" 
         self.child_process = None
-        self.current_game = ""
 
         self.bat_current_fault = None
         self.bat_current_status = None
+        
+        self.current_orientation = 0
+        self.prev_orientation = 0
         self.listening = False
 
         self.mqtt_obj = MQTTClient()
@@ -60,21 +62,53 @@ class TGWConductor():
         self.charger.on_fault(self.charger_on_fault)
         self.charger.on_status(self.charger_on_status)
 
-    def update_state(self):
+        self.keyword = KeywordService(self.mqtt_client)
+        self.keyword.subscribe(self.keyword_on_message)
+
+        self.imu = IMUService(self.mqtt_client)
+        self.imu.subscribe_orientation(self.imu_on_orientation)
+
+    def update_buttonled(self):
         if self.listening:
-            pass
+            self.lights.bl_heartbeat(0xa0, 0x20, 0xf0) # purple a020f0
         elif self.bat_current_fault == "hot":
-            pass
+            self.lights.bl_heartbeat(0xFF, 0xa0, 0x00) # orange ffa000
         elif self.bat_current_status == "fast charging":
-            pass
+            self.lights.bl_heartbeat(0x93, 0xc4, 0x7d) # green 93c47d
         elif self.bat_current_status == "complete":
-            pass
+            self.lights.bl_heartbeat(0x3c, 0x78, 0xd8) # blue 3c78d8
         else:
-            pass
+            self.lights.bl_heartbeat(0x1f, 0xff, 0xe1) # light blue 1fffe1
+
+    def imu_on_orientation(self, orientation):
+        self.current_orientation = orientation
+        if self.current_orientation == 8: # upright
+            self.listening_check()
+        elif self.current_orientation != 8 and self.prev_orientation == 8:
+            self.listening_check()
+        self.prev_orientation = orientation
+
+    def keyword_turn_on():
+        if not self.listening:
+            self.listening = True
+            self.update_buttonled()
+            self.keyword.enable()
+
+    def keyword_turn_off():
+        if self.listening:
+            self.listening = False
+            self.update_buttonled()
+            self.keyword.disable()
 
     def keyword_on_message(self, keyword):
-        # start game
-        pass
+        if keyword == 'lumos':
+            self.lights.lb_heartbeat(255, 0, 255)
+        
+    def listening_check(self):
+        if self.current_orientation == 8 and not self.runningSpell:
+            self.keyword_turn_on()
+        elif self.listening:
+            self.keyword_turn_off()
 
     def imu_on_message(self, msg):
         # do stuff
@@ -94,7 +128,7 @@ class TGWConductor():
             logger.debug("Unknown Fault")
             self.bat_current_fault = "unknown"
         
-        self.update_button_led()
+        self.update_buttonled()    
     
     def charger_on_status(self, status):
         if status == 0: 
@@ -113,8 +147,8 @@ class TGWConductor():
             logger.debug("Unknown Status")
             self.bat_current_status = "unknown"
 
-        self.update_button_led()
-
+        self.update_buttonled()
+    
     def _kill_game(self):
         # kills current game
         logger.info(f"Killing Process {self.child_process.pid}")
@@ -125,7 +159,8 @@ class TGWConductor():
         self.lights.play_lb_csv_animation('app_stopped.csv')
         self.audio.play_background('app_stopped.wav')
         self.runningSpell = ""
-        self.update_state()
+        self.listening_check()
+        self.update_buttonled()
 
     #Handles button events
     def on_button_press(self, press):
@@ -159,7 +194,8 @@ class TGWConductor():
             logger.debug("invalid game found...")
             self.runningSpell = ""
         
-        self.update_state()
+        self.update_buttonled()
+        self.listening_check()
 
     def on_nfc_scan(self, records):
         """
