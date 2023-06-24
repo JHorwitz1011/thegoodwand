@@ -343,7 +343,7 @@ class LightService():
         data = {"format" : "block", "color": self.__color_cast(r,g,b)}
         self.__publish_message_lightbar({"header": header, "data": data})
 
-    def lb_raw(self, raw: list(tuple(int,int,int)) ):
+    def lb_raw(self, raw):
         header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
         data = {"format" : "raw", "raw": raw}
         self.__publish_message_lightbar({"header": header, "data": data})
