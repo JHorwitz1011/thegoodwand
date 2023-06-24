@@ -364,11 +364,6 @@ class LightService():
         data = {"format" : "block", "color": self.__color_cast(r,g,b)}
         self.__publish_message_buttonled({"header": header, "data": data})
 
-    def bl_raw(self, raw: list(tuple(int,int,int)) ):
-        header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
-        data = {"format" : "raw", "raw": raw}
-        self.__publish_message_buttonled({"header": header, "data": data})
-
     def bl_heartbeat(self, r,g,b, min_brightness=DEFAULT_MIN_BRIGHTNESS, max_brightness=DEFAULT_MAX_BRIGHTNESS, ramp_time=DEFAULT_RAMP_TIME, delay_time=DEFAULT_DELAY):
         header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
         data = {"format" : "heartbeat", "min_brightness": min_brightness, "max_brightness":max_brightness, "color": self.__color_cast(r,g,b), "delay_time":delay_time, "ramp_time":ramp_time}
