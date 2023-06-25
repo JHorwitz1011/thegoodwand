@@ -1,3 +1,5 @@
+import sys
+import os
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
 from Services import *
 
