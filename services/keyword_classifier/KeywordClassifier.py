@@ -96,19 +96,19 @@ class TGWKeywordClassifier(MQTTObject):
                     if result["colos"] > KEYWORD_THRESHOLD:
                         KEYWORD_TEMP_PKT["data"] = {"keyword":"colos"}
                         self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
-                        logger.debug(f"recognized colos")
+                        logger.debug(f"\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!recognized colos!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
                     elif result["extivious"] > KEYWORD_THRESHOLD:
                         KEYWORD_TEMP_PKT["data"] = {"keyword":"extivious"}
                         self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
-                        logger.debug(f"recognized extivious")
+                        logger.debug(f"\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!recognized extivious!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
                     elif result["lumos"] > KEYWORD_THRESHOLD:
                         KEYWORD_TEMP_PKT["data"] = {"keyword":"lumos"}
                         self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
-                        logger.debug(f"recognized lumos")
+                        logger.debug(f"\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!recognized lumos!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
                     elif result["mousike"] > KEYWORD_THRESHOLD:
                         KEYWORD_TEMP_PKT["data"] = {"keyword":"mousike"}
                         self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
-                        logger.debug(f"recognized mousike")
+                        logger.debug(f"\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!recognized mousike!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
                     else:
                         logger.debug(f"{result}")
                     
