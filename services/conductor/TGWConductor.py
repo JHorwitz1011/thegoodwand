@@ -123,8 +123,8 @@ class TGWConductor():
             logger.debug(f"[VOICEREC: Attempting to Start Spell {keyword}") 
             game = helper.fetch_game(translator[keyword])
             if game is not None:
-                self._start_game(game)
                 self.runningSpell = game
+                self._start_game(game)
             else:
                 logger.debug(f"{keyword} game not found")
 
@@ -135,7 +135,7 @@ class TGWConductor():
 
         
     def listening_check(self):
-        logger.info(f"LISTENING CALL:{self.current_orientation}, 1{self.runningSpell}1")
+        logger.info(f"LISTENING CALL:{self.current_orientation}, >{self.runningSpell}<")
         if self.current_orientation == 8 and not self.runningSpell:
             logger.info("start keyword")
             self.keyword_turn_on()
