@@ -124,13 +124,13 @@ class TGWConductor():
         if self.runningSpell != keyword:
             # This is a different spell then running spell, so start it:
             if self.child_process is None: #no game is running so just start new game
-                logger.debug("[VOICEREC: Attempting to Start Spell {keyword}") 
-                self._start_game(keyword, game_args)
+                logger.debug(f"[VOICEREC: Attempting to Start Spell {keyword}") 
+                self._start_game(keyword)
             else:
                 # Stop currently running game
-                logger.debug("[VOICEREC: Another spell is running. Killing and starting {keyword}") 
+                logger.debug(f"[VOICEREC: Another spell is running. Killing and starting {keyword}") 
                 self._kill_game ()
-                self._start_game(keyword, game_args)                        
+                self._start_game(keyword)                        
 
             # Update runningSpell. NOT HANDLING edge condition of spells failing to start
             self.runningSpell = keyword
@@ -212,7 +212,7 @@ class TGWConductor():
                 logger.info("Medium press while idle")
             
 
-    def _start_game(self, game: str, game_args):
+    def _start_game(self, game: str, game_args=""):
         """
         starts game. assumes path is valid per helper.fetch_game checking
         """
