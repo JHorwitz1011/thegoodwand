@@ -73,7 +73,6 @@ class TGWKeywordClassifier(MQTTObject):
             elif state == 1 and not self.running:
                 self.running = True
                 logger.debug('starting keyword info')
-                self.recognize()
             elif state == 1:
                 logger.debug(f'service already running, ignoring...')
 
