@@ -376,7 +376,7 @@ class LightService():
 
     ### Private Methods ### 
     def __color_cast(self, c1,c2,c3) -> int:
-        return ((int(c1))&self.MASK_C1)<<self.MASK_C1 | ((int(c2))&self.MASK_C2)<<self.MASK_C2 | ((int(c3))&self.MASK_C3)<<self.MASK_C3
+        return (int(c1)<<self.SHIFT_C1)&self.MASK_C1 | (int(c2)<<self.SHIFT_C2)&self.MASK_C2 | (int(c3)<<self.SHIFT_C3)&self.MASK_C3
 
     def __publish_message_lightbar(self, msg):
         self.client.publish(self.LIGHT_BAR_TOPIC, json.dumps(msg))
