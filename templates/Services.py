@@ -338,7 +338,7 @@ class LightService():
     
     def lb_block(self, r, g, b): 
         header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
-        data = {"format" : "block", "color": self.__color_cast(r,g,b)}
+        data = {"format" : "solid", "color": self.__color_cast(r,g,b)}
         self.__publish_message_lightbar({"header": header, "data": data})
 
     def lb_fire(self, r, g, b): 
@@ -364,7 +364,7 @@ class LightService():
     ### BUTTON
     def bl_block(self, r, g, b): 
         header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
-        data = {"format" : "block", "color": self.__color_cast(r,g,b)}
+        data = {"format" : "solid", "color": self.__color_cast(r,g,b)}
         self.__publish_message_buttonled({"header": header, "data": data})
 
     def bl_heartbeat(self, r,g,b, min_brightness=DEFAULT_MIN_BRIGHTNESS, max_brightness=DEFAULT_MAX_BRIGHTNESS, ramp_time=DEFAULT_RAMP_TIME, delay_time=DEFAULT_DELAY):
