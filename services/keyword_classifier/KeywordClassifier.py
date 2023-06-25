@@ -73,6 +73,7 @@ class TGWKeywordClassifier(MQTTObject):
             elif state == 1 and not self.running:
                 self.running = True
                 logger.debug('starting keyword info')
+                self.recognize()
             elif state == 1:
                 logger.debug(f'service already running, ignoring...')
 
@@ -80,7 +81,7 @@ class TGWKeywordClassifier(MQTTObject):
         self.start_mqtt(KEYWORD_CLIENT_ID,self.topics_and_callbacks)
         signal.pause()
         
-    def recognize(self, event):
+    def recognize(self):
         with AudioImpulseRunner(MODEL_PATH) as self.runner:
             try:
                 model_info = self.runner.init()
