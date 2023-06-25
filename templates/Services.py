@@ -295,10 +295,10 @@ class LightService():
     SHIFT_C3 = 0
 
     #HB defaults
-    DEFAULT_MIN_BRIGHTNESS  = 0
-    DEFAULT_MAX_BRIGHTNESS  = 255
-    DEFAULT_RAMP_TIME       = 500000
-    DEFAULT_DELAY           = 500000
+    DEFAULT_MIN_BRIGHTNESS  = 100
+    DEFAULT_MAX_BRIGHTNESS  = 200
+    DEFAULT_RAMP_TIME       = 250000
+    DEFAULT_DELAY           = 750000
 
     def __init__(self, mqtt_client, path = None) -> None:
         self.client = mqtt_client
