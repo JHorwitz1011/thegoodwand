@@ -12,6 +12,23 @@ def callback(keyword):
     print(f"callback, recognized {keyword}")
 
 keyword.subscribe(callback)
+keyword.enable()
+keyword.disable()
+keyword.enable()
+keyword.disable()
+keyword.enable()
+keyword.disable()
+keyword.enable()
+keyword.disable()
+keyword.enable()
+keyword.disable()
+keyword.enable()
+keyword.disable()
+keyword.enable()
+keyword.disable()
+keyword.enable()
+keyword.disable()
+
 while(1):
     print("enabling service... say some keywords! (enter to continue)")
     keyword.enable()
@@ -21,6 +38,6 @@ while(1):
 
     print("disabling service... try and say some keywords again nothing should show (enter to continue)")
     keyword.disable()
-    # time.sleep(sys.argv[1])
+    time.sleep(sys.argv[1])
     input()
 
