@@ -66,4 +66,5 @@ class MQTTObject():
 
     def publish(self, topic: str, payload: str, qos: int = 0):
         """Publish packet to topic"""
+        logger.debug(f"PUBLISHING {payload} to {topic}, with client {self.client}")
         self.client.publish(topic, payload, qos)
