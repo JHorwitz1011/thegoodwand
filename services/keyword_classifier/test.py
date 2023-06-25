@@ -5,7 +5,7 @@ from Services import *
 
 mqtt_obj = MQTTClient()
 mqtt_client = mqtt_obj.start("CONDUCTOR_CLIENT_ID")
-keyword = KeywordService()
+keyword = KeywordService(mqtt_client)
 
 def callback(keyword):
     print(f"callback, recognized {keyword}")
