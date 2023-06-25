@@ -42,14 +42,12 @@ AUDIO_DEVICE_ID = 0 # seeed studio device
 KEYWORD_THRESHOLD = 0.4 # minimum confidence rating for keyword to publish
 
 class TGWKeywordClassifier(MQTTObject):
-    def __init__(self, fs=10):
+    def __init__(self):
         super().__init__()
 
-        self.active = threading.Event()                                                         # thread based boolean (defaults false thus service is paused on startup)
-        self.exit = threading.Event()                                                           # exit var to leave execution (default false)
+        self.running = False
         self.runner = None                                                                      # ensures runner stops on edge cases
         signal.signal(signal.SIGINT, self.signal_handler)
-        self.fs = fs                                                                            
         self.keyword_thread = threading.Thread(target=self.recognize, args=(self.active,))       
         self.topics_and_callbacks = {
             KEYWORD_CMD_TOPIC : self._on_cmd_recv
@@ -75,16 +73,16 @@ class TGWKeywordClassifier(MQTTObject):
             state = data['state']
             
             if state == 0:
-                self.active.clear()
-                logger.debug(f"rcvd Cmd to stop voicerec")
-
+                self.running = False
+            elif state == 1 and not self.running:
+                self.running = True
+                logger.debug('starting keyword info')
             elif state == 1:
-                self.active.set()
-                logger.debug(f"rcvd Cmd to start voicerec")
+                logger.debug(f'service already running, ignoring...')
 
     def run(self):
         self.start_mqtt(KEYWORD_CLIENT_ID,self.topics_and_callbacks)
-        self.keyword_thread.start()
+        signal.pause()
         
     def recognize(self, event):
         with AudioImpulseRunner(MODEL_PATH) as self.runner:
@@ -117,22 +115,12 @@ class TGWKeywordClassifier(MQTTObject):
                     else:
                         logger.debug(f"{result}")
                     
-                    if not self.active.is_set():
-                        logger.debug(f'model execution PAUSE')
-                        event.wait()
-                        logger.debug(f"model execution RESUME")
-                    if self.exit.is_set():
-                        logger.debug(f"model execution Breaking!")
+                    if not self.running:
                         break
                         
-
-                    # time.sleep(1/self.fs)
-            
-            #logger.debug(f"Out of recognize forever loop")
-            
             finally:
                 if (self.runner):
-                    logger.debug(f"finally stopping execution")
+                    logger.debug(f"exeting...")
                     self.runner.stop()
 
 
