@@ -48,7 +48,6 @@ class TGWKeywordClassifier(MQTTObject):
         self.running = False
         self.runner = None                                                                      # ensures runner stops on edge cases
         signal.signal(signal.SIGINT, self.signal_handler)
-        self.keyword_thread = threading.Thread(target=self.recognize, args=(self.active,))       
         self.topics_and_callbacks = {
             KEYWORD_CMD_TOPIC : self._on_cmd_recv
         }
@@ -56,9 +55,6 @@ class TGWKeywordClassifier(MQTTObject):
     
     def signal_handler(self, sig, frame):
         logger.debug(f'Keyword Classifier Interrupted')
-        self.active.set()
-        self.exit.set()
-        self.keyword_thread.join()
         if (self.runner):
             logger.debug(f'Stopping self')
             self.runner.stop()
