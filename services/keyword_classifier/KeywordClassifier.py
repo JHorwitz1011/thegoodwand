@@ -126,7 +126,7 @@ class TGWKeywordClassifier(MQTTObject):
                         break
                         
 
-                    time.sleep(1/self.fs)
+                    # time.sleep(1/self.fs)
             
             #logger.debug(f"Out of recognize forever loop")
             
