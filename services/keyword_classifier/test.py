@@ -4,7 +4,7 @@ sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
 from Services import *
 
 mqtt_obj = MQTTClient()
-mqtt_client = mqtt_obj.start(CONDUCTOR_CLIENT_ID)
+mqtt_client = mqtt_obj.start("CONDUCTOR_CLIENT_ID")
 keyword = KeywordService()
 
 def callback(keyword):
