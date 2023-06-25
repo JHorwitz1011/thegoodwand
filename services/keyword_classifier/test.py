@@ -15,12 +15,12 @@ keyword.subscribe(callback)
 while(1):
     print("enabling service... say some keywords! (enter to continue)")
     keyword.enable()
-    time.sleep(sys.argv[1])
+    # time.sleep(sys.argv[1])
     input()
 
 
     print("disabling service... try and say some keywords again nothing should show (enter to continue)")
     keyword.disable()
-    time.sleep(sys.argv[1])
+    # time.sleep(sys.argv[1])
     input()
 
