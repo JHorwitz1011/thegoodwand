@@ -39,7 +39,7 @@ MODEL_PATH = os.path.join(MODEL_DIR_PATH, MODEL)
 AUDIO_DEVICE_ID = 0 # seeed studio device
 
 # service constants
-KEYWORD_THRESHOLD = 0.8 # minimum confidence rating for keyword to publish
+KEYWORD_THRESHOLD = 0.4 # minimum confidence rating for keyword to publish
 
 class TGWKeywordClassifier(MQTTObject):
     def __init__(self, fs=10):
