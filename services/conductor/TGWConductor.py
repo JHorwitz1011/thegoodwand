@@ -190,12 +190,13 @@ class TGWConductor():
         self.child_process = None
         self.audio.stop()
         self.lights.lb_clear()
+
+        time.sleep(2)
+        self.listening_check()
+        self.update_buttonled()
         self.lights.lb_csv_animation('app_stopped.csv')
         self.audio.play_background('app_stopped.wav')
         self.runningSpell = ""
-        time.sleep(.5)
-        self.listening_check()
-        self.update_buttonled()
 
     #Handles button events
     def on_button_press(self, press):
