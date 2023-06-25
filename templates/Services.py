@@ -341,6 +341,7 @@ class LightService():
     def lb_block(self, r, g, b): 
         header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
         data = {"format" : "block", "color": self.__color_cast(r,g,b)}
+        logger.info("????")
         self.__publish_message_lightbar({"header": header, "data": data})
 
     def lb_raw(self, raw):

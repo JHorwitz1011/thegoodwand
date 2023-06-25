@@ -110,7 +110,16 @@ class TGWConductor():
 
     def keyword_on_message(self, keyword):
         if keyword == 'lumos':
-            self.lights.lb_heartbeat(255, 0, 255)
+            logger.debug('lumos recognized!')
+            self.lights.lb_block(0, 255, 255)
+        elif keyword == 'extivious':
+            logger.debug('extivious recognized!')
+            self.lights.lb_clear()
+        elif keyword == 'mousike':
+            logger.debug('mousike recognized!')
+        elif keyword == 'colos':
+            logger.debug('colos recognized!')
+
         
     def listening_check(self):
         logger.info(f"LISTENING CALL:{self.current_orientation}, 1{self.runningSpell}1")

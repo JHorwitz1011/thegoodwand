@@ -39,7 +39,7 @@ MODEL_PATH = os.path.join(MODEL_DIR_PATH, MODEL)
 AUDIO_DEVICE_ID = 0 # seeed studio device
 
 # service constants
-KEYWORD_THRESHOLD = 0.9 # minimum confidence rating for keyword to publish
+KEYWORD_THRESHOLD = 0.8 # minimum confidence rating for keyword to publish
 
 class TGWKeywordClassifier(MQTTObject):
     def __init__(self, fs=10):
@@ -96,7 +96,7 @@ class TGWKeywordClassifier(MQTTObject):
                 for res, audio in self.runner.classifier(device_id=AUDIO_DEVICE_ID): # loops forever
                     result = res['result']['classification']
                     
-                    #logger.debug(f"rcvd classification event with Lumos: {result['''lumos''']} Extvs: {result['''extivious''']}  colos: {result['''colos''']} mousike: {result['''mousike''']}   ")
+                    # logger.debug(f"rcvd classification event with Lumos: {result['''lumos''']} Extvs: {result['''extivious''']}  colos: {result['''colos''']} mousike: {result['''mousike''']}   ")
 
                     if result["colos"] > KEYWORD_THRESHOLD:
                         KEYWORD_TEMP_PKT["data"] = {"keyword":"colos"}
@@ -114,8 +114,8 @@ class TGWKeywordClassifier(MQTTObject):
                         KEYWORD_TEMP_PKT["data"] = {"keyword":"mousike"}
                         self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
                         logger.debug(f"recognized mousike")
-                    #else:
-                        #logger.debug(f"Recognized something else")
+                    # else:
+                        # logger.debug(f"{result}")
                     
                     if not self.active.is_set():
                         logger.debug(f'model execution PAUSE')
