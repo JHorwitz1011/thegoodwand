@@ -83,7 +83,7 @@ class TGWKeywordClassifier(MQTTObject):
                 time.sleep(.03)
             else:
                 self.recognize()
-                time.sleep(5)
+                # time.sleep(5)
 
         
     def recognize(self):
