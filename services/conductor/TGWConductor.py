@@ -189,6 +189,7 @@ class TGWConductor():
         os.kill(self.child_process.pid, signal.SIGTERM)
         self.child_process = None
         self.audio.stop()
+        self.lights.lb_clear()
         self.lights.lb_csv_animation('app_stopped.csv')
         self.audio.play_background('app_stopped.wav')
         self.runningSpell = ""
