@@ -87,37 +87,37 @@ class TGWKeywordClassifier(MQTTObject):
     def recognize(self):
         with AudioImpulseRunner(MODEL_PATH) as self.runner:
             try:
-                model_info = self.runner.init()
-                logger.debug(f'Loaded runner for "' + model_info['project']['owner'] + ' / ' + model_info['project']['name'] + '"')                
-                #logger.debug(f"Device ID "+ str(AUDIO_DEVICE_ID) + " has been provided as an argument.")
+                if self.runnning:
+                    model_info = self.runner.init()
+                    logger.debug(f'Loaded runner for "' + model_info['project']['owner'] + ' / ' + model_info['project']['name'] + '"')                
+                    #logger.debug(f"Device ID "+ str(AUDIO_DEVICE_ID) + " has been provided as an argument.")
 
-                for res, audio in self.runner.classifier(device_id=AUDIO_DEVICE_ID): # loops forever
-                    result = res['result']['classification']
-                    
-                    logger.debug(f"rcvd classification event with Lumos: {result['''lumos''']} Extvs: {result['''extivious''']}  colos: {result['''colos''']} mousike: {result['''mousike''']}   ")
-
-                    if result["colos"] > KEYWORD_THRESHOLD:
-                        KEYWORD_TEMP_PKT["data"] = {"keyword":"colos"}
-                        self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
-                        logger.debug(f"\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!recognized colos!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
-                    elif result["extivious"] > KEYWORD_THRESHOLD:
-                        KEYWORD_TEMP_PKT["data"] = {"keyword":"extivious"}
-                        self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
-                        logger.debug(f"\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!recognized extivious!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
-                    elif result["lumos"] > KEYWORD_THRESHOLD:
-                        KEYWORD_TEMP_PKT["data"] = {"keyword":"lumos"}
-                        self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
-                        logger.debug(f"\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!recognized lumos!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
-                    elif result["mousike"] > KEYWORD_THRESHOLD:
-                        KEYWORD_TEMP_PKT["data"] = {"keyword":"mousike"}
-                        self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
-                        logger.debug(f"\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!recognized mousike!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
-                    else:
-                        logger.debug(f"{result}")
-                    
-                    if not self.running:
-                        break
+                    for res, audio in self.runner.classifier(device_id=AUDIO_DEVICE_ID): # loops forever
+                        result = res['result']['classification']
                         
+                        logger.debug(f"rcvd classification event with Lumos: {result['''lumos''']} Extvs: {result['''extivious''']}  colos: {result['''colos''']} mousike: {result['''mousike''']}   ")
+
+                        if result["colos"] > KEYWORD_THRESHOLD:
+                            KEYWORD_TEMP_PKT["data"] = {"keyword":"colos"}
+                            self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
+                            logger.debug(f"\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!recognized colos!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+                        elif result["extivious"] > KEYWORD_THRESHOLD:
+                            KEYWORD_TEMP_PKT["data"] = {"keyword":"extivious"}
+                            self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
+                            logger.debug(f"\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!recognized extivious!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+                        elif result["lumos"] > KEYWORD_THRESHOLD:
+                            KEYWORD_TEMP_PKT["data"] = {"keyword":"lumos"}
+                            self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
+                            logger.debug(f"\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!recognized lumos!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+                        elif result["mousike"] > KEYWORD_THRESHOLD:
+                            KEYWORD_TEMP_PKT["data"] = {"keyword":"mousike"}
+                            self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
+                            logger.debug(f"\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!recognized mousike!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+                        else:
+                            logger.debug(f"{result}")
+                        
+                        if not self.running:
+                            break
             finally:
                 if (self.runner):
                     logger.debug(f"exeting...")
