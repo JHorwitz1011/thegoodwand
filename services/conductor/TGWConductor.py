@@ -128,12 +128,12 @@ class TGWConductor():
             logger.debug(f"[VOICEREC: Attempting to Start Spell {keyword}") 
             game = helper.fetch_game(keyword)
             if game is not None:
-                self._start_game(game)     
+                self._start_game(game)
+                self.runningSpell = keyword
             else:
                 logger.debug(f"{keyword} game not found")
 
-            # Update runningSpell. NOT HANDLING edge condition of spells failing to start
-            self.runningSpell = keyword
+            
         else:  
             logger.debug("[VOICEREC] Spell already running") 
 
