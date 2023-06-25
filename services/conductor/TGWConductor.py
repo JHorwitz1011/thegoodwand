@@ -125,12 +125,12 @@ class TGWConductor():
             # This is a different spell then running spell, so start it:
             if self.child_process is None: #no game is running so just start new game
                 logger.debug(f"[VOICEREC: Attempting to Start Spell {keyword}") 
-                self._start_game(keyword)
+                self._start_game(helper.fetch_game(keyword))
             else:
                 # Stop currently running game
                 logger.debug(f"[VOICEREC: Another spell is running. Killing and starting {keyword}") 
                 self._kill_game ()
-                self._start_game(keyword)                        
+                self._start_game(helper.fetch_game(keyword))                        
 
             # Update runningSpell. NOT HANDLING edge condition of spells failing to start
             self.runningSpell = keyword
