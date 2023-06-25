@@ -125,7 +125,7 @@ class TGWConductor():
         translator = {
             "mousike": 'music',
             'colos' : 'colos',
-            "extivious" : "pooftos"
+            "extivious" : "pooftos",
             "lumos" : "lumos"
         }
         if self.runningSpell != keyword:
