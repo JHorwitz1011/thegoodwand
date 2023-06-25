@@ -333,7 +333,7 @@ class LightService():
     def lb_system_animation(self, animation):  
         "make sure to exclude .csv from system animation name"      
         header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
-        data = {"animation" : animation}
+        data = {'format': 'animation' "animation" : animation}
         self.__publish_message_lightbar({"header": header, "data": data})
     
     def lb_block(self, r, g, b): 
