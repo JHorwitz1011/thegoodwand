@@ -64,7 +64,7 @@ class TGWKeywordClassifier(MQTTObject):
         msg = json.loads(message.payload)
         hdr = msg['header']
         data = msg['data']
-        logger.debug("\n\nCMD RECEIVED: {message.payload}\n\n")
+        logger.debug(f"\n\nCMD RECEIVED: {message.payload}\n\n")
         if data.get('state') is not None:
             state = data['state']
             
