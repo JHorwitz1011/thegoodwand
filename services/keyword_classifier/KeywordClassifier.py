@@ -78,7 +78,12 @@ class TGWKeywordClassifier(MQTTObject):
                 logger.debug(f'service already running, ignoring...')
 
     def run(self):
-        self.start_mqtt_blocking(KEYWORD_CLIENT_ID,self.topics_and_callbacks)
+        self.start_mqtt(KEYWORD_CLIENT_ID,self.topics_and_callbacks)
+        while(1):
+            if not self.running:
+                time.sleep(.03)
+            else:
+                self.recognize()
         
     def recognize(self):
         with AudioImpulseRunner(MODEL_PATH) as self.runner:

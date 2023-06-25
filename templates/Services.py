@@ -316,17 +316,16 @@ class LightService():
     
     ### LIGHTBAR
     def lb_csv_animation(self, csv_file, path = None, granularity = 1, corssfade = 0):
-        
         if (path == None) and (self.path == None):
-            logger.warning("path to animation is undefined")
             return
         
         elif (path == None) and (self.path):
-            logger.debug(f"Using defult path {self.path}")
             path = self.path
         
+        fullAnimatioFileName = path +"/" + csv_file
+        logger.debug(f"playing animation {path} {csv_file} {fullAnimatioFileName}")
         header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
-        data = {"format": "animation", "animation" : csv_file}
+        data = {"format": "animation", "animation" : fullAnimatioFileName}
 
         self.__publish_message_lightbar({"header": header, "data": data})
     
