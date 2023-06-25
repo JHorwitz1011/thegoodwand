@@ -4,6 +4,7 @@ import json
 from multiprocessing import Process
 import subprocess
 import logging
+from paho.mqtt import client as mqtt_client
 
 import sys
 import os
@@ -120,7 +121,13 @@ class TGWConductor():
             logger.debug('mousike recognized!')
         elif keyword == 'colos':
             logger.debug('colos recognized!')
-    
+
+        translator = {
+            "mousike": 'music',
+            'colos' : 'colos',
+            "extivious" : "pooftos"
+            "lumos" : "lumos"
+        }
         if self.runningSpell != keyword:
             # This is a different spell then running spell, so start it:
             if self.child_process is not None: 
