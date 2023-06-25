@@ -112,7 +112,7 @@ class TGWButtonService():
         self.publish_button_press(self.press_id)
         logger.debug(F"Long timer expired. ID {self.press_id}")
         logger.info("Powering down")
-        self.lights.play_lb_csv_animation("power_off.csv")
+        self.lights.lb_csv_animation("power_off.csv")
         self.audio.play_foreground("power_off.wav")
         time.sleep(3)
         os.system("sudo python3 " + os.path.expanduser(BATTERY_SERVICE_PATH) +'/charger_cli.py --power_off')
