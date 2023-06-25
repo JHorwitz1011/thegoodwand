@@ -86,7 +86,7 @@ class MQTTObject():
             self.client.subscribe(topic)
             self.client.enable_logger()
     
-        self.client.loop_start_forever()
+        self.client.loop_forever()
 
     def connect_mqtt(self):
         """
