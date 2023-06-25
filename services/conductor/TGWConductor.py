@@ -128,7 +128,7 @@ class TGWConductor():
                 self._start_game(keyword, game_args)
             else:
                 # Stop currently running game
-                logger.debug("[VOICEREC: Aonther spell is running. Killing and starting {keyword}") 
+                logger.debug("[VOICEREC: Another spell is running. Killing and starting {keyword}") 
                 self._kill_game ()
                 self._start_game(keyword, game_args)                        
 
