@@ -95,7 +95,7 @@ def signal_handler(sig, frame):
     # Turn off raw data stream
     imu.disable_stream()
     logger.debug("disable stream")
-    lights.clear()
+    lights.lb_clear()
     time.sleep(.1)
     
     #GPIO.cleanup()
