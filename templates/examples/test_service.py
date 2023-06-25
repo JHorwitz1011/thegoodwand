@@ -108,7 +108,7 @@ if __name__ == '__main__':
     
     logger.debug("Light Test")
     lights = init_lights(mqtt_client)
-    lights.play_lb_csv_animation("yipee.csv")
+    lights.lb_csv_animation("yipee.csv")
 
     
     # logger.debug("Audio Test")
