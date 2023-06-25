@@ -133,10 +133,10 @@ class TGWConductor():
             if self.child_process is not None: 
                 self._kill_game()
             logger.debug(f"[VOICEREC: Attempting to Start Spell {keyword}") 
-            game = helper.fetch_game(keyword)
+            game = helper.fetch_game(translator[keyword])
             if game is not None:
                 self._start_game(game)
-                self.runningSpell = keyword
+                self.runningSpell = game
             else:
                 logger.debug(f"{keyword} game not found")
 
