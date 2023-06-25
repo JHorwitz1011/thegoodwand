@@ -87,7 +87,7 @@ class TGWKeywordClassifier(MQTTObject):
     def recognize(self):
         with AudioImpulseRunner(MODEL_PATH) as self.runner:
             try:
-                if self.runnning:
+                if self.running:
                     model_info = self.runner.init()
                     logger.debug(f'Loaded runner for "' + model_info['project']['owner'] + ' / ' + model_info['project']['name'] + '"')                
                     #logger.debug(f"Device ID "+ str(AUDIO_DEVICE_ID) + " has been provided as an argument.")
