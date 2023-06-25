@@ -57,7 +57,7 @@ class MQTTObject():
         self.client.loop_start()
 
 
-def start_mqtt_blocking(self, client_id, topics_and_callbacks={}):
+    def start_mqtt_blocking(self, client_id, topics_and_callbacks={}):
         """
         Parameters:
             client_id (str): name to identify as 
