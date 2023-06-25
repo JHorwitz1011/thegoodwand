@@ -13,7 +13,7 @@ lights.lb_csv_animation("idleDrums.csv", os.path.expanduser("~/thegoodwand/spell
 input()
 
 print("system animation")
-lights.lb_system_animation("no_failed.csv")
+lights.lb_system_animation("no_failed")
 input()
 
 print("block")
