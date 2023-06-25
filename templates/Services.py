@@ -316,17 +316,16 @@ class LightService():
     
     ### LIGHTBAR
     def lb_csv_animation(self, csv_file, path = None, granularity = 1, corssfade = 0):
-        
         if (path == None) and (self.path == None):
-            logger.warning("path to animation is undefined")
             return
         
         elif (path == None) and (self.path):
-            logger.debug(f"Using defult path {self.path}")
             path = self.path
         
+        fullAnimatioFileName = path +"/" + csv_file
+        logger.debug(f"playing animation {path} {csv_file} {fullAnimatioFileName}")
         header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
-        data = {"format": "animation", "animation" : csv_file}
+        data = {"format": "animation", "animation" : fullAnimatioFileName}
 
         self.__publish_message_lightbar({"header": header, "data": data})
     
@@ -334,14 +333,17 @@ class LightService():
     def lb_system_animation(self, animation):  
         "make sure to exclude .csv from system animation name"      
         header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
-        data = {"animation" : animation}
-
+        data = {'format': 'animation', "animation" : animation}
         self.__publish_message_lightbar({"header": header, "data": data})
     
     def lb_block(self, r, g, b): 
         header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
-        data = {"format" : "block", "color": self.__color_cast(r,g,b)}
-        logger.info("????")
+        data = {"format" : "solid", "color": self.__color_cast(r,g,b)}
+        self.__publish_message_lightbar({"header": header, "data": data})
+
+    def lb_fire(self, r, g, b): 
+        header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
+        data = {"format" : "fire", "color": self.__color_cast(r,g,b)}
         self.__publish_message_lightbar({"header": header, "data": data})
 
     def lb_raw(self, raw):
@@ -362,7 +364,7 @@ class LightService():
     ### BUTTON
     def bl_block(self, r, g, b): 
         header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
-        data = {"format" : "block", "color": self.__color_cast(r,g,b)}
+        data = {"format" : "solid", "color": self.__color_cast(r,g,b)}
         self.__publish_message_buttonled({"header": header, "data": data})
 
     def bl_heartbeat(self, r,g,b, min_brightness=DEFAULT_MIN_BRIGHTNESS, max_brightness=DEFAULT_MAX_BRIGHTNESS, ramp_time=DEFAULT_RAMP_TIME, delay_time=DEFAULT_DELAY):

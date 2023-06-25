@@ -42,15 +42,12 @@ AUDIO_DEVICE_ID = 0 # seeed studio device
 KEYWORD_THRESHOLD = 0.8 # minimum confidence rating for keyword to publish
 
 class TGWKeywordClassifier(MQTTObject):
-    def __init__(self, fs=10):
+    def __init__(self):
         super().__init__()
 
-        self.active = threading.Event()                                                         # thread based boolean (defaults false thus service is paused on startup)
-        self.exit = threading.Event()                                                           # exit var to leave execution (default false)
+        self.running = False
         self.runner = None                                                                      # ensures runner stops on edge cases
         signal.signal(signal.SIGINT, self.signal_handler)
-        self.fs = fs                                                                            
-        self.keyword_thread = threading.Thread(target=self.recognize, args=(self.active,))       
         self.topics_and_callbacks = {
             KEYWORD_CMD_TOPIC : self._on_cmd_recv
         }
@@ -58,9 +55,6 @@ class TGWKeywordClassifier(MQTTObject):
     
     def signal_handler(self, sig, frame):
         logger.debug(f'Keyword Classifier Interrupted')
-        self.active.set()
-        self.exit.set()
-        self.keyword_thread.join()
         if (self.runner):
             logger.debug(f'Stopping self')
             self.runner.stop()
@@ -70,23 +64,27 @@ class TGWKeywordClassifier(MQTTObject):
         msg = json.loads(message.payload)
         hdr = msg['header']
         data = msg['data']
-            
+        logger.debug("\n\nCMD RECEIVED: {message.payload}\n\n")
         if data.get('state') is not None:
             state = data['state']
             
             if state == 0:
-                self.active.clear()
-                logger.debug(f"rcvd Cmd to stop voicerec")
-
+                self.running = False
+            elif state == 1 and not self.running:
+                self.running = True
+                logger.debug('starting keyword info')
             elif state == 1:
-                self.active.set()
-                logger.debug(f"rcvd Cmd to start voicerec")
+                logger.debug(f'service already running, ignoring...')
 
     def run(self):
         self.start_mqtt(KEYWORD_CLIENT_ID,self.topics_and_callbacks)
-        self.keyword_thread.start()
+        while(1):
+            if not self.running:
+                time.sleep(.03)
+            else:
+                self.recognize()
         
-    def recognize(self, event):
+    def recognize(self):
         with AudioImpulseRunner(MODEL_PATH) as self.runner:
             try:
                 model_info = self.runner.init()
@@ -101,38 +99,28 @@ class TGWKeywordClassifier(MQTTObject):
                     if result["colos"] > KEYWORD_THRESHOLD:
                         KEYWORD_TEMP_PKT["data"] = {"keyword":"colos"}
                         self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
-                        logger.debug(f"recognized colos")
+                        logger.debug(f"\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!recognized colos!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
                     elif result["extivious"] > KEYWORD_THRESHOLD:
                         KEYWORD_TEMP_PKT["data"] = {"keyword":"extivious"}
                         self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
-                        logger.debug(f"recognized extivious")
+                        logger.debug(f"\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!recognized extivious!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
                     elif result["lumos"] > KEYWORD_THRESHOLD:
                         KEYWORD_TEMP_PKT["data"] = {"keyword":"lumos"}
                         self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
-                        logger.debug(f"recognized lumos")
+                        logger.debug(f"\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!recognized lumos!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
                     elif result["mousike"] > KEYWORD_THRESHOLD:
                         KEYWORD_TEMP_PKT["data"] = {"keyword":"mousike"}
                         self.publish(KEYWORD_TOPIC, json.dumps(KEYWORD_TEMP_PKT))
-                        logger.debug(f"recognized mousike")
-                    # else:
-                        # logger.debug(f"{result}")
+                        logger.debug(f"\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!recognized mousike!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+                    else:
+                        logger.debug(f"{result}")
                     
-                    if not self.active.is_set():
-                        logger.debug(f'model execution PAUSE')
-                        event.wait()
-                        logger.debug(f"model execution RESUME")
-                    if self.exit.is_set():
-                        logger.debug(f"model execution Breaking!")
+                    if not self.running:
                         break
                         
-
-                    time.sleep(1/self.fs)
-            
-            #logger.debug(f"Out of recognize forever loop")
-            
             finally:
                 if (self.runner):
-                    logger.debug(f"finally stopping execution")
+                    logger.debug(f"exeting...")
                     self.runner.stop()
 
 

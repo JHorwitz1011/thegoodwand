@@ -1,66 +1,59 @@
-#! /usr/bin/env python3
-import time
-import json
-from paho.mqtt import client as mqtt_client
 import sys
+import os
+sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
+from Services import *
 
-broker = 'localhost'
-port = 1883
-topic = "goodwand/ui/view/lightbar"
-# generate client ID with pub prefix randomly
-client_id = f'temp-test-client'
-
-
-def connect_mqtt():
-    def on_connect(client, userdata, flags, rc):
-        if rc == 0:
-            print("Connected to MQTT Broker!")
-        else:
-            print("Failed to connect, return code %d\n", rc)
-
-    client = mqtt_client.Client(client_id)
-    client.on_connect = on_connect
-    client.connect(broker, port)
-    return client
+mqtt_obj = MQTTClient()
+mqtt_client = mqtt_obj.start("CONDUCTOR_CLIENT_ID")
+lights = LightService(mqtt_client)
 
 
-def publish(client):
-    msg_count = 0
-    time.sleep(1)
-    try:
-        pkt = {
-            "header": {
-                "type": "UI_LIGHTBAR",
-                "version": 1,
-            },
-            "data": {
-		        "format": "block",
-        		"r": 255, 
-                "g": 255,
-                "b": 
-            }
-        }
+print("absolute path csv")
+lights.lb_csv_animation("idleDrums.csv", os.path.expanduser("~/thegoodwand/spells/idle"))
+input()
 
-        result = client.publish(topic, json.dumps(pkt))
-        # result: [0, 1]
-        status = result[0]
-        if status == 0:
-            print(f"Send {pkt} to topic `{topic}`")
-        else:
-            print(f"Failed to send message to topic {topic}")
-        msg_count += 1
-    except IndexError:
-        print("ERROR: no argument given. please use format: python3 pub_client.py [animation code]")
-    
+print("system animation")
+lights.lb_system_animation("no_failed")
+input()
 
+print("block")
+lights.lb_block(0, 0, 255)
+input()
+lights.lb_block(0, 255, 0)
+input()
+lights.lb_block(255, 0, 0)
+input()
+lights.lb_block(255,255,255)
+input()
 
-def run():
-    client = connect_mqtt()
-    client.loop_start()
-    publish(client)
+print("raw")
+lights.lb_raw(5*[0xffffff, 0xff0000, 0x00ff00, 0x0000ff])
+input()
+lights.lb_raw(5*[0x123483, 0xaaaaaa, 0x192748, 0x888888])
+input()
+lights.lb_raw(5*[0x29a6f3, 0x6a9c3b, 0x92500a, 0x001100])
+input()
 
+print("heartbeat slow, red")
+lights.lb_heartbeat(255, 0, 0, delay_time=1000000, ramp_time=1000000)
+input()
+print("heartbeat fast, blue")
+lights.lb_heartbeat(0, 0, 255, delay_time=750000, ramp_time=250000)
+input()
+print("heartbeat faster, white")
+lights.lb_heartbeat(255, 255, 255, delay_time=100000, ramp_time=100000)
+input()
 
+print("clear")
+lights.lb_clear()
+input()
 
-
-if __name__ == '__main__':
-    run()
+print("fire slow, red")
+lights.lb_fire(255, 0, 0)
+input()
+print("fire fast, blue")
+lights.lb_fire(0, 0, 255)
+input()
+print("fire faster, white")
+lights.lb_fire(255, 255, 255)
+input()
