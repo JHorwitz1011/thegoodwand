@@ -96,7 +96,7 @@ class TGWKeywordClassifier(MQTTObject):
                 for res, audio in self.runner.classifier(device_id=AUDIO_DEVICE_ID): # loops forever
                     result = res['result']['classification']
                     
-                    # logger.debug(f"rcvd classification event with Lumos: {result['''lumos''']} Extvs: {result['''extivious''']}  colos: {result['''colos''']} mousike: {result['''mousike''']}   ")
+                    logger.debug(f"rcvd classification event with Lumos: {result['''lumos''']} Extvs: {result['''extivious''']}  colos: {result['''colos''']} mousike: {result['''mousike''']}   ")
 
                     if result["colos"] > KEYWORD_THRESHOLD:
                         KEYWORD_TEMP_PKT["data"] = {"keyword":"colos"}

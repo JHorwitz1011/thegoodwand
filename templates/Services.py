@@ -295,10 +295,10 @@ class LightService():
     SHIFT_C3 = 0
 
     #HB defaults
-    DEFAULT_MIN_BRIGHTNESS  = 100
-    DEFAULT_MAX_BRIGHTNESS  = 200
+    DEFAULT_MIN_BRIGHTNESS  = 50
+    DEFAULT_MAX_BRIGHTNESS  = 150
     DEFAULT_RAMP_TIME       = 250000
-    DEFAULT_DELAY           = 750000
+    DEFAULT_DELAY           = 2750000
 
     def __init__(self, mqtt_client, path = None) -> None:
         self.client = mqtt_client
@@ -427,7 +427,7 @@ class KeywordService():
         data = {"state":1}
         self.__publish_message({"header": header, "data": data})
 
-    # TODO, UV service needs an off function
+    # TODO, VoiceRec service needs an off function
     def disable(self):
         header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
         data = {"state":0}
@@ -437,6 +437,10 @@ class KeywordService():
         self.callback = callback
         self.client.message_callback_add(self.KEYWORD_TOPIC, self.__on_message)
         self.client.subscribe(self.KEYWORD_TOPIC, qos)
+
+
+
+        
 
     def unsubscribe(self):
         """Unsubscribe from button service callbacks"""

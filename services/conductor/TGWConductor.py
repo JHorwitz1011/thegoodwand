@@ -109,6 +109,7 @@ class TGWConductor():
             self.keyword.disable()
 
     def keyword_on_message(self, keyword):
+        logger.debug('keyword event rcvdl')
         if keyword == 'lumos':
             logger.debug('lumos recognized!')
             self.lights.lb_block(0, 255, 255)
@@ -119,6 +120,23 @@ class TGWConductor():
             logger.debug('mousike recognized!')
         elif keyword == 'colos':
             logger.debug('colos recognized!')
+    
+        if self.runningSpell != keyword:
+            # This is a different spell then running spell, so start it:
+            if self.child_process is None: #no game is running so just start new game
+                logger.debug("[VOICEREC: Attempting to Start Spell {keyword}") 
+                self._start_game(keyword, game_args)
+            else:
+                # Stop currently running game
+                logger.debug("[VOICEREC: Aonther spell is running. Killing and starting {keyword}") 
+                self._kill_game ()
+                self._start_game(keyword, game_args)                        
+
+            # Update runningSpell. NOT HANDLING edge condition of spells failing to start
+            self.runningSpell = keyword
+        else:  
+            logger.debug("[VOICEREC] Spell already running") 
+
 
         
     def listening_check(self):
