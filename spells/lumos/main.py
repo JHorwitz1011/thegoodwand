@@ -18,7 +18,7 @@ if __name__ == '__main__':
     mqttobj = MQTTClient()
     mqttclient = mqttobj.start("lumos")
 
-    lights = LightService()
+    lights = LightService(mqttclient)
     lights.lb_fire(0xaa, 0x42, 0x03)
     lights.bl_heartbeat(0xaa, 0x42, 0x03)
     signal.pause()

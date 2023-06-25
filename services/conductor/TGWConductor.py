@@ -110,18 +110,6 @@ class TGWConductor():
             self.keyword.disable()
 
     def keyword_on_message(self, keyword):
-        logger.debug('keyword event rcvdl')
-        if keyword == 'lumos':
-            logger.debug('lumos recognized!')
-            self.lights.lb_block(0, 255, 255)
-        elif keyword == 'extivious':
-            logger.debug('extivious recognized!')
-            self.lights.lb_clear()
-        elif keyword == 'mousike':
-            logger.debug('mousike recognized!')
-        elif keyword == 'colos':
-            logger.debug('colos recognized!')
-
         translator = {
             "mousike": 'music',
             'colos' : 'colos',
