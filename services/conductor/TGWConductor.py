@@ -70,18 +70,23 @@ class TGWConductor():
         self.imu.subscribe_orientation(self.imu_on_orientation)
 
     def update_buttonled(self):
-        logger.info("update buttonled call")
+        logger.debug(f"update buttonled call. bat status={self.bat_current_status} bat fault= {self.bat_current_fault}")
         if self.listening:
             self.lights.bl_heartbeat(0xa0, 0x20, 0xf0) # purple a020f0
+            logger.debug("Setting HB clr to Purple - Listening")
         elif self.bat_current_fault == "hot":
             self.lights.bl_heartbeat(0xFF, 0xa0, 0x00) # orange ffa000
+            logger.debug("Setting HB clr to Orange - Bat HOT")
         elif self.bat_current_status == "fast charging":
             self.lights.bl_heartbeat(0x93, 0xc4, 0x7d) # green 93c47d
+            logger.debug("Setting HB clr to GREEN for fast charging")
         elif self.bat_current_status == "complete":
-            self.lights.bl_heartbeat(0x3c, 0x78, 0xd8) # blue 3c78d8
+            self.lights.bl_heartbeat(0x3c, 0x78, 0xd8) # Light blue 3c78d8
+            logger.debug("Setting HB clr to LIGHT BLUE for Completed charging")
         else:
-            logger.info("else")
-            self.lights.bl_heartbeat(0, 0, 0xFF) # light blue 1fffe1
+            # Not charging, no faults
+            logger.debug("Setting HB clr to LIGHT=  BLUE for NOT CHARGING ")
+            self.lights.bl_heartbeat(0, 0, 0xFF) # blue 0000FF
 
     def imu_on_orientation(self, orientation):
 
@@ -96,15 +101,13 @@ class TGWConductor():
     def keyword_turn_on(self):
         logger.info("turn on call keyword")
         if not self.listening:
-            logger.info("inside conditional")
             self.listening = True
-            self.update_buttonled()
             self.keyword.enable()
+            self.update_buttonled()
 
     def keyword_turn_off(self):
         logger.info("turn off call keyword")
         if self.listening:
-            logger.info("inside conditional")
             self.listening = False
             self.update_buttonled()
             self.keyword.disable()
@@ -161,24 +164,22 @@ class TGWConductor():
         self.update_buttonled()    
     
     def charger_on_status(self, status):
-        logger.debug("on status callback")
+        logger.debug("on charger status callback with {status}")
         if status == 0: 
-            logger.debug("Not charging")
+            logger.debug("Status=Not charging")
             self.bat_current_status = None
         elif status == 0x10:
-            logger.debug("Pre Charge")
+            logger.debug("Status=Pre Charge")
             self.bat_current_status = "pre charge"
         elif status == 0x20:
-            logger.debug("Fast Charging")
+            logger.debug("Status=Fast Charging")
             self.bat_current_status = "fast charging"
         elif status == 0x30:
-            logger.debug("Charge Complete")
+            logger.debug("Status=Charge Complete")
             self.bat_current_status = "complete"
         else:
-            logger.debug("Unknown Status")
+            logger.debug("Status=Unknown Status")
             self.bat_current_status = "unknown"
-        
-        logger.info(f"FAULT CALL: {self.bat_current_status}")
 
         self.update_buttonled()
     
@@ -206,8 +207,12 @@ class TGWConductor():
                 logger.info("Medium button press. Killing Spell")
                 self._kill_game() 
             else:
-                #Long press while idle - what should the behavior be?
-                logger.info("Medium press while idle")
+                #Long press while idle - temp starting idle spell
+                logger.info("Medium press while idle Starting idle spell")
+                self._start_game ("idle","")
+                self.runningSpell = "idle"
+
+                
             
 
     def _start_game(self, game: str, game_args=""):

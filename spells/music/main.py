@@ -86,10 +86,13 @@ class musicSpell():
 			for record in payload['card_data']['records']:
 				if record['type'] == "text":
 					cardData = json.loads(record['data'])
-					if cardData['spell']=='music':
-						if "instrument" in cardData: 
+					if cardData['spell']=='music':						
+						if 'instrument' in cardData:
 							self.instrumentName = cardData['instrument']
-							logger.info(f"instrumentName set to {self.instrumentName}")
+							fileName = '2SPLptup-' + cardData['instrument'] + '.wav'
+							self.play_audio (fileName, "background")
+							logger.info(f"instrumentName set to {self.instrumentName} and playing:{fileName}")
+							
 
 						if 'background' in cardData:
 							backTrack = cardData['background']

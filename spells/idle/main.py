@@ -18,7 +18,7 @@ logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 MQTT_CLIENT_ID = "idle_SPELL"
 
 idleStep = 1
-IDLE_NUMBER_STEPS = 4
+IDLE_NUMBER_STEPS = 5
 IDLE_DELAY = 120 # 2 min
 idleLightRed = 255    #Gold
 idleLightGreen = 215  #Gold
@@ -36,7 +36,7 @@ def orientation_callback(orientation):
 
 
 def display_lights(red,green,blue):
-    lights.lb_block(red,green,blue)
+    lights.lb_fire(red,green,blue)
 
 def idle_timer_callback():
     global idleStep
