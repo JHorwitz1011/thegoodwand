@@ -53,6 +53,33 @@ class TGWConductor():
         self.nfc = NFCService(self.mqtt_client)
         self.nfc.subscribe(self.on_nfc_scan)
 
+        self.charger = ChargerService(self.mqtt_client)
+        self.charger.on_fault(self.charger_on_fault)
+        self.charger.on_status(self.charger_on_status)
+
+
+    def charger_on_fault(self,fault):
+        if fault == 0: 
+            logger.debug("Temperature Normal")
+        elif fault == 1:
+            logger.debug("Temperature Hot")
+        elif fault == 2:
+            logger.debug("Temperature Cold")
+        else:
+            logger.debug("Unknown Fault")
+    
+    def charger_on_status(self, status):
+        if status == 0: 
+            logger.debug("Not charging")
+        elif status == 0x10:
+            logger.debug("Pre Charge")
+        elif status == 0x20:
+            logger.debug("Fast Charging")
+        elif status == 0x30:
+            logger.debug("Charge Complete")
+        else:
+            logger.debug("Unknown Status")
+
     def _kill_game(self):
         # kills current game
         logger.info(f"Killing Process {self.child_process.pid}")

@@ -9,12 +9,8 @@ import json
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
 
 from Services import MQTTClient
-from Services import ButtonService
-from Services import LightService
-from Services import IMUService
-from Services import AudioService
 from log import log
-from tgw_timer import tgw_timer
+
 
 DEBUG_LEVEL = "DEBUG"
 LOGGER_NAME = __name__
@@ -39,75 +35,10 @@ NTC_FAULT = ["Normal", "Hot", "Cold", "hot cold"]
 MQTT_TYPE = "CHARGER"
 MQTT_VERSION = "1"
 MQTT_CLIENT_ID = "charger_services"
-CHARGER_TOPIC = "goodwand/battery/charger"
+STATUS_TOPIC = "goodwand/battery/status"
 FAULTS_TOPIC = "goodwand/battery/faults"
 
-# SYSTEM_ANIMATION_PATH = os.path.expanduser("~/thegoodwand/system_files")
-# POWER_OFF_LIGHT = "power_off.csv"
-# POWER_OFF_AUDIO = "power_off.wav"
 
-# set to 0 to dissable 
-# disavle is done in the timer file
-INACTIVITY_TIME = 0
-
-class PowerManagement():
-
-    SYSTEM_RUNNING = 1
-    SYSTEM_IDLE = 0
-
-    def __init__(self, charger) -> None:
-        
-        self.system_state = self.SYSTEM_RUNNING
-        self.charger = charger
-
-# TODO Move to conductor
-    # def idle(self):
-    #     lights.play_lb_csv_animation(POWER_OFF_LIGHT, path = SYSTEM_ANIMATION_PATH )
-    #     audio.play_foreground(POWER_OFF_AUDIO, path = SYSTEM_ANIMATION_PATH)
-    #     if self.is_usb_power():
-    #         logger.debug("System State  Running > Idle")
-    #         self.system_state = self.SYSTEM_IDLE
-    #         self.__disable_wifi()
-    #         self.__disable_service()
-
-    #     else: 
-    #         logger.debug("unplugged, power down")
-    #         self.system_state = self.SYSTEM_IDLE
-    #         self.__power_down()
-            
-    # def run(self):
-    #     logger.debug("System State Idle > Running")
-    #     self.system_state = self.SYSTEM_RUNNING
-
-    #     self.__enable_wifi()
-    #     self.__enable_service()
-    #     # TODO Power up services.
-    #     pass
-
-    # def __power_down(self):
-
-    #     logger.debug("Power down system")
-        
-    # def is_usb_power(self) -> bool:  
-    #     status = self.charger.getVbusStatus() 
-    #     logger.debug(f"USB Status {status}") 
-    #     return True if status else False
-    
-    # def __enable_wifi(self):
-    #     logger.debug("Turning on wifi")
-    #     #subprocess.run(["sudo", "ifconfig", "wlan0", "up"])
-        
-    # def __disable_wifi(self):
-    #     logger.debug("Turning off wifi")
-    #     #subprocess.run(["sudo", "ifconfig", "wlan0", "down"])
-
-    # def __disable_service(self):
-    #     logger.debug("Turning off TGW services")
-
-    # def __enable_service(self):
-    #     logger.debug("Turning on TGW services")
-
-           
 def charger_init():
     #set 500mA charge current limit
     charger.setICHG(charger.ICHRG_512MA)
@@ -121,42 +52,13 @@ def publish_faults(client, faults):
     data = {"faults": faults}
     msg = {"header": header, "data": data}
     client.publish(FAULTS_TOPIC, json.dumps(msg))
-    logger.debug(f"Charger faults {faults}")
 
+def publish_status(client, status):
+    header = {"type": MQTT_TYPE, "version": MQTT_VERSION}
+    data = {"status": status}
+    msg = {"header": header, "data": data}
+    client.publish(STATUS_TOPIC, json.dumps(msg))
 
-# def inactivity_timer_cb():
-#     logger.debug("Inactivity expired")
-#     power_management.idle()
-
-# def button_callback(press):
-    
-#     logger.debug(f"button callback {press} ")
-
-#     if press == "long":
-#         if power_management.system_state == power_management.SYSTEM_RUNNING:
-#             power_management.idle()
-    
-#     elif power_management.system_state == power_management.SYSTEM_IDLE:
-#         power_management.run()
-
-# TODO Move to conductor  
-# def imu_on_wake_callback(wake_status:'bool'):
-#     '''
-#         Start the inactivity timer if idle
-#         stop Inactiviy time if not expired on wake 
-#         Do nothing if system is idle. Button press needed to wake.
-#     '''
-#     # TODO Known edge condition if the wand wakes up and is inactive it wont go to the idle state.
-#     logger.debug(f"Wand active state: {wake_status} SYSTEM STATE { power_management.system_state}")
-#     if wake_status == True: 
-#         if inactivity_timer.is_alive():
-#             inactivity_timer.stop()
-#     elif wake_status == False: 
-#         if power_management.system_state == power_management.SYSTEM_RUNNING:
-#             inactivity_timer.start()
-#     else:    
-#         logger.debug(f"Unknown active state {wake_status}")
-#         inactivity_timer.stop()
 
 def signal_handler(sig, frame):
     logger.info(f"Terminating charger service {sig} ")
@@ -170,32 +72,29 @@ if __name__ == "__main__":
     
     logger.info("Charger service started")
     charger = bq24296M()
-    power_management = PowerManagement(charger)
     mqtt_object = MQTTClient()
     mqtt_client = mqtt_object.start(MQTT_CLIENT_ID)
-    
-    # Move idle control to the conductor 
-    #button = ButtonService(mqtt_client)
-    #button.subscribe(button_callback)
-    #imu = IMUService(mqtt_client)
-    #imu.subscribe_on_wake(imu_on_wake_callback)
-    #lights = LightService(mqtt_client)
-    #audio = AudioService(mqtt_client)
-
-    #inactivity_timer = tgw_timer(INACTIVITY_TIME, inactivity_timer_cb, name = "inactivity")
+    last_faults = 0
+    last_status = 0
+    temperature_mask = 0x03
+    charger_mask = 0x30
 
     charger_init()
 
-    # poll for charger status
-    # TODO replace with interrupt driven events
     while(1):
 
-        faults = charger.getNewFaults()
-        status = charger.getSystemStatus()
+        faults = charger.getNewFaults() & temperature_mask
+        status = charger.getSystemStatus() & charger_mask
         logger.debug(f"Charge status {CHRG_STATUS_STR[(status & charger.CHRG_STAT_MASK) >> charger.CHRG_STAT_SHIFT]}")
-        if faults :
-            publish_faults(mqtt_client, faults)
         
-        time.sleep(60) 
+        if status != last_status:
+            logger.debug(f"Status Changed {status}")
+            publish_status(mqtt_client, status)
+            last_status = status
 
-
+        if faults != last_faults :
+            logger.debug(f"Faults Changed {faults}")
+            publish_faults(mqtt_client, faults)
+            last_faults = faults
+        
+        time.sleep(20) 
