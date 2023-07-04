@@ -76,7 +76,7 @@ class musicSpell():
 
 	def play_light(self, lightEffect):
 		logger.info(f"Light Effect {lightEffect}")
-		self.lights.play_lb_csv_animation(lightEffect)
+		self.lights.lb_csv_animation(lightEffect)
 
 	def on_nfc_scan(self, payload):
 
@@ -86,10 +86,13 @@ class musicSpell():
 			for record in payload['card_data']['records']:
 				if record['type'] == "text":
 					cardData = json.loads(record['data'])
-					if cardData['spell']=='music':
-						if "instrument" in cardData: 
+					if cardData['spell']=='music':						
+						if 'instrument' in cardData:
 							self.instrumentName = cardData['instrument']
-							logger.info(f"instrumentName set to {self.instrumentName}")
+							fileName = '2SPLptup-' + cardData['instrument'] + '.wav'
+							self.play_audio (fileName, "background")
+							logger.info(f"instrumentName set to {self.instrumentName} and playing:{fileName}")
+							
 
 						if 'background' in cardData:
 							backTrack = cardData['background']
@@ -110,7 +113,7 @@ class musicSpell():
 		logger.debug(f"orientation change. New: {new_orient}  Old: {self.old_orient}")
 		fileName = "2SPL" + orientationText[new_orient] + '-' + self.instrumentName
 		logger.debug(f"FileName is: {fileName}")
-		self.play_audio (fileName + '.wav', "foreground")
+		self.play_audio (fileName + '.wav', "background")
 		self.play_light (fileName + '.csv')	
 		self.old_orient = new_orient 
 

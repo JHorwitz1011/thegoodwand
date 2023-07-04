@@ -59,7 +59,7 @@ class Secretica():
 
     def play_light(self, lightEffect):
         logger.info(f"Light Effect {lightEffect}")
-        self.lights.play_lb_csv_animation(lightEffect)
+        self.lights.lb_csv_animation(lightEffect)
 
     def play_animations(self):
         self.play_audio ("uv_activated.wav", "background")

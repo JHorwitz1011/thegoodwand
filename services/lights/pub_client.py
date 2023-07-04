@@ -71,8 +71,8 @@ def publish(client):
         #     },
         #     "data": {
         #         "color_space" : "hsv",
-		#         "format": "raw",
-        # 		"raw": 20*[0x4400FF]
+		#         "format": "block",
+        # 		"color": 0x4400FF
         #     }
         # }
         
@@ -124,7 +124,7 @@ def publish(client):
         #         "b": 0
         #     }
         # }
-        # a = 20*[0x000000
+        # a = 20*[0x000000]
         # while True:
         #     for x in range(0, 0xFF0000, 0x020000):
         #         # a.pop(0)
@@ -151,12 +151,7 @@ def publish(client):
 def run():
     client = connect_mqtt()
     client.loop_start()
-
-
     publish(client)
-
-
-
 
 if __name__ == '__main__':
     run()

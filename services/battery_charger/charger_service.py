@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
         faults = charger.getNewFaults() & temperature_mask
         status = charger.getSystemStatus() & charger_mask
-        logger.debug(f"Charge status {CHRG_STATUS_STR[(status & charger.CHRG_STAT_MASK) >> charger.CHRG_STAT_SHIFT]}")
+        logger.debug(f"Charge status {status}={CHRG_STATUS_STR[(status & charger.CHRG_STAT_MASK) >> charger.CHRG_STAT_SHIFT]}")
         
         if status != last_status:
             logger.debug(f"Status Changed {status}")

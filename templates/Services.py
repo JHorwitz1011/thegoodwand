@@ -74,7 +74,6 @@ class ChargerService():
     def __on_subscribe(self, client, userdata, mid, granted_qos):
         pass 
 
-
 # TODO Add is active and wake up callback
 class IMUService():
 
@@ -208,7 +207,6 @@ class NFCService():
     def __on_subscribe(self, client, userdata, mid, granted_qos):
         pass 
 
-
 class AudioService():
 
     AUDIO_TOPIC = "goodwand/ui/view/audio_playback"
@@ -277,8 +275,8 @@ class AudioService():
     def __on_subscribe(self, client, userdata, mid, granted_qos):
         pass 
 
-
 # TODO System animations and Button Animations
+# TODO hsv control
 class LightService():
 
     LIGHT_BAR_TOPIC = "goodwand/ui/view/lightbar"
@@ -287,12 +285,27 @@ class LightService():
     SERVICE_TYPE = "UI_LIGHTBAR"
     SERVICE_VERSION ="1"
 
+    #mask vars for color manipulation
+    MASK_C1 = 0x00FF0000
+    MASK_C2 = 0x0000FF00
+    MASK_C3 = 0x000000FF
+
+    SHIFT_C1 = 16
+    SHIFT_C2 = 8
+    SHIFT_C3 = 0
+
+    #HB defaults
+    DEFAULT_MIN_BRIGHTNESS  = 50
+    DEFAULT_MAX_BRIGHTNESS  = 150
+    DEFAULT_RAMP_TIME       = 250000
+    DEFAULT_DELAY           = 2750000
+
     def __init__(self, mqtt_client, path = None) -> None:
         self.client = mqtt_client
         self.callback = None
         
-        # Default path for light animations. Can be overrode in the play methods
-        self.path = path 
+        # Default path for light animations. Can be overrode in the animation methods
+        self.path = path     
 
     def subscribe(self, callback, qos=0):
         pass
@@ -301,36 +314,78 @@ class LightService():
         """Unsubscribe from button service callbacks"""
         pass
     
-    def play_lb_csv_animation(self, csv_file, path = None, granularity = 1, corssfade = 0):
-        
+    ### LIGHTBAR
+    def lb_csv_animation(self, csv_file, path = None, granularity = 1, corssfade = 0):
         if (path == None) and (self.path == None):
-            logger.warning("path to animation is undefined")
             return
         
         elif (path == None) and (self.path):
-            logger.debug(f"Using defult path {self.path}")
             path = self.path
         
+        fullAnimatioFileName = path +"/" + csv_file
+        logger.debug(f"playing animation {path} {csv_file} {fullAnimatioFileName}")
         header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
-        data = {"granularity":granularity, "animation" : csv_file, "path": path, "crossfade":corssfade }
+        data = {"format": "animation", "animation" : fullAnimatioFileName}
 
-        self.__publish_message({"header": header, "data": data})
+        self.__publish_message_lightbar({"header": header, "data": data})
     
 
-    def play_lb_system_animation(self, animation):
-        pass
-
-    
-    def block(self, r, g, b): 
+    def lb_system_animation(self, animation):  
+        "make sure to exclude .csv from system animation name"      
         header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
-        data = {"format" : "block", "r": r, "g": g, "b": b}
-        self.__publish_message({"header": header, "data": data})
+        data = {'format': 'animation', "animation" : animation}
+        self.__publish_message_lightbar({"header": header, "data": data})
+    
+    def lb_block(self, r, g, b): 
+        header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
+        data = {"format" : "solid", "color": self.__color_cast(r,g,b)}
+        self.__publish_message_lightbar({"header": header, "data": data})
+
+    def lb_fire(self, r, g, b): 
+        header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
+        data = {"format" : "fire", "color": self.__color_cast(r,g,b)}
+        self.__publish_message_lightbar({"header": header, "data": data})
+
+    def lb_raw(self, raw):
+        header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
+        data = {"format" : "raw", "raw": raw}
+        self.__publish_message_lightbar({"header": header, "data": data})
+
+    def lb_heartbeat(self, r,g,b, min_brightness=DEFAULT_MIN_BRIGHTNESS, max_brightness=DEFAULT_MAX_BRIGHTNESS, ramp_time=DEFAULT_RAMP_TIME, delay_time=DEFAULT_DELAY):
+        header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
+        data = {"format" : "heartbeat", "min_brightness": min_brightness, "max_brightness":max_brightness, "color": self.__color_cast(r,g,b), "delay_time":delay_time, "ramp_time":ramp_time}
+        self.__publish_message_lightbar({"header": header, "data": data})
+
+    def lb_clear(self):
+        header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
+        data = {"format" : "none"}
+        self.__publish_message_lightbar({"header": header, "data": data})
+
+    ### BUTTON
+    def bl_block(self, r, g, b): 
+        header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
+        data = {"format" : "solid", "color": self.__color_cast(r,g,b)}
+        self.__publish_message_buttonled({"header": header, "data": data})
+
+    def bl_heartbeat(self, r,g,b, min_brightness=DEFAULT_MIN_BRIGHTNESS, max_brightness=DEFAULT_MAX_BRIGHTNESS, ramp_time=DEFAULT_RAMP_TIME, delay_time=DEFAULT_DELAY):
+        header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
+        data = {"format" : "heartbeat", "min_brightness": min_brightness, "max_brightness":max_brightness, "color": self.__color_cast(r,g,b), "delay_time":delay_time, "ramp_time":ramp_time}
+        self.__publish_message_buttonled({"header": header, "data": data})
+
+    def bl_clear(self):
+        header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
+        data = {"format" : "none"}
+        self.__publish_message_buttonled({"header": header, "data": data})
 
     ### Private Methods ### 
+    def __color_cast(self, c1,c2,c3) -> int:
+        return (int(c1)<<self.SHIFT_C1)&self.MASK_C1 | (int(c2)<<self.SHIFT_C2)&self.MASK_C2 | (int(c3)<<self.SHIFT_C3)&self.MASK_C3
 
-    def __publish_message(self, msg):
-
+    def __publish_message_lightbar(self, msg):
         self.client.publish(self.LIGHT_BAR_TOPIC, json.dumps(msg))
+
+    def __publish_message_buttonled(self, msg):
+        self.client.publish(self.MAIN_LED_TOPIC, json.dumps(msg))
 
 class UVService():
 
@@ -358,11 +413,60 @@ class UVService():
 
         self.client.publish(self.UV_TOPIC, json.dumps(msg))
 
+class KeywordService():
+    KEYWORD_TOPIC = "goodwand/ui/controller/keyword"
+    KEYWORD_CMD_TOPIC = "goodwand/ui/controller/keyword/command"
+
+    SERVICE_TYPE = "UI_KEYWORD"
+    SERVICE_VERSION ="1"
+
+    def __init__(self, mqtt_client) -> None:
+        self.client = mqtt_client
+        self.callback = None
+
+    def enable(self):
+        header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
+        data = {"state":1}
+        self.__publish_message({"header": header, "data": data})
+
+    # TODO, VoiceRec service needs an off function
+    def disable(self):
+        header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
+        data = {"state":0}
+        self.__publish_message({"header": header, "data": data})
+
+    def subscribe(self, callback, qos=0):
+        self.callback = callback
+        self.client.message_callback_add(self.KEYWORD_TOPIC, self.__on_message)
+        self.client.subscribe(self.KEYWORD_TOPIC, qos)
+
+
+
+        
+
+    def unsubscribe(self):
+        """Unsubscribe from button service callbacks"""
+        pass
+
+    ### Private Methods ### 
+    def __publish_message(self, msg):
+        self.client.publish(self.KEYWORD_CMD_TOPIC, json.dumps(msg))
+
+    def __on_message(self,client, userdata, message):
+        """Parse data and call subscriber callback"""
+        
+        msg = json.loads(message.payload)
+        keyword = msg["data"]["keyword"]
+
+        if self.callback:
+            self.callback(keyword)
+        else: 
+            logger.warning(f"Button callback not set")
 
 class ButtonService():
 
     BUTTON_TOPIC = "goodwand/ui/controller/button"
-        # Single click IDS
+    # Single click IDS
     SHORT_ID = 'short'
     MEDIUM_ID = 'medium'
     LONG_ID = 'long'
@@ -409,7 +513,6 @@ class ButtonService():
  
     def __on_subscribe(self, client, userdata, mid, granted_qos):
         pass 
-
 
 class MQTTClient():
     """Abstracts away irrelevavnt aspects of mqtt functionality for ease of programming"""

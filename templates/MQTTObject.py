@@ -57,6 +57,37 @@ class MQTTObject():
         self.client.loop_start()
 
 
+    def start_mqtt_blocking(self, client_id, topics_and_callbacks={}):
+        """
+        Parameters:
+            client_id (str): name to identify as 
+            topics_and_callbacks (dict): dictionary with str keys describing topics to subscribe to, and values of callback functions
+        """
+        self.client_id = client_id
+        self.topics_and_callbacks = topics_and_callbacks
+        
+        # Connect to client
+        def on_connect(client, userdata, flags, rc):
+            if rc == 0:
+                logger.info(f"Connected {self.client_id} to MQTT Broker!")
+            else:
+                raise Exception(f"Failed to connect to MQTT server, return code {rc}")
+
+        self.client = mqtt_client.Client(self.client_id)
+        self.client.on_connect = on_connect
+        self.client.connect(self.broker, self.port)    
+        
+        # Start MQTT
+        # Add all callbacks
+        #logger.info(self.topics_and_callbacks)
+        for topic in self.topics_and_callbacks.keys():
+            self.client.message_callback_add(topic, self.topics_and_callbacks[topic])
+            logger.info(f"subscribed to {topic}")
+            self.client.subscribe(topic)
+            self.client.enable_logger()
+    
+        self.client.loop_forever()
+
     def connect_mqtt(self):
         """
         Connect this service to MQTT broker
@@ -66,4 +97,5 @@ class MQTTObject():
 
     def publish(self, topic: str, payload: str, qos: int = 0):
         """Publish packet to topic"""
+        logger.debug(f"PUBLISHING {payload} to {topic}, with client {self.client}")
         self.client.publish(topic, payload, qos)

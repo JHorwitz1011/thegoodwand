@@ -49,7 +49,7 @@ def display_lights(x,y,z):
     red = int(sum(x_buffer) / buffer_size)
     green = int(sum(y_buffer) / buffer_size)
     blue = int(sum(z_buffer) / buffer_size)
-    lights.block(red, green, blue)
+    lights.lb_block(red, green, blue)
     logger.debug(f"r: {red} g: {green}  b: {blue}  {z*NORMALIZE} {NORMALIZE}")
 
 
@@ -95,7 +95,7 @@ def signal_handler(sig, frame):
     # Turn off raw data stream
     imu.disable_stream()
     logger.debug("disable stream")
-    lights.block(0,0,0)
+    lights.lb_clear()
     time.sleep(.1)
     
     #GPIO.cleanup()

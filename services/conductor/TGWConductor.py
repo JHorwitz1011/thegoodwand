@@ -1,10 +1,10 @@
-
 import time
 import signal
 import json
 from multiprocessing import Process
 import subprocess
 import logging
+from paho.mqtt import client as mqtt_client
 
 import sys
 import os
@@ -38,7 +38,13 @@ class TGWConductor():
         
         self.runningSpell = "" 
         self.child_process = None
-        self.current_game = ""
+
+        self.bat_current_fault = None
+        self.bat_current_status = None
+        
+        self.current_orientation = 0
+        self.prev_orientation = 0
+        self.listening = False
 
         self.mqtt_obj = MQTTClient()
         self.mqtt_client = self.mqtt_obj.start(self.CONDUCTOR_CLIENT_ID)
@@ -57,29 +63,126 @@ class TGWConductor():
         self.charger.on_fault(self.charger_on_fault)
         self.charger.on_status(self.charger_on_status)
 
+        self.keyword = KeywordService(self.mqtt_client)
+        self.keyword.subscribe(self.keyword_on_message)
+
+        self.imu = IMUService(self.mqtt_client)
+        self.imu.subscribe_orientation(self.imu_on_orientation)
+
+    def update_buttonled(self):
+        logger.debug(f"update buttonled call. bat status={self.bat_current_status} bat fault= {self.bat_current_fault}")
+        if self.listening:
+            self.lights.bl_heartbeat(0xa0, 0x20, 0xf0) # purple a020f0
+            logger.debug("Setting HB clr to Purple - Listening")
+        elif self.bat_current_fault == "hot":
+            self.lights.bl_heartbeat(0xFF, 0xa0, 0x00) # orange ffa000
+            logger.debug("Setting HB clr to Orange - Bat HOT")
+        elif self.bat_current_status == "fast charging":
+            self.lights.bl_heartbeat(0x93, 0xc4, 0x7d) # green 93c47d
+            logger.debug("Setting HB clr to GREEN for fast charging")
+        elif self.bat_current_status == "complete":
+            self.lights.bl_heartbeat(0x3c, 0x78, 0xd8) # Light blue 3c78d8
+            logger.debug("Setting HB clr to LIGHT BLUE for Completed charging")
+        else:
+            # Not charging, no faults
+            logger.debug("Setting HB clr to LIGHT=  BLUE for NOT CHARGING ")
+            self.lights.bl_heartbeat(0, 0, 0xFF) # blue 0000FF
+
+    def imu_on_orientation(self, orientation):
+
+        self.current_orientation = orientation
+        logger.info(f"imu orientation update:{self.current_orientation}")
+        if self.current_orientation == 8: # upright
+            self.listening_check()
+        elif self.current_orientation != 8 and self.prev_orientation == 8:
+            self.listening_check()
+        self.prev_orientation = orientation
+
+    def keyword_turn_on(self):
+        logger.info("turn on call keyword")
+        if not self.listening:
+            self.listening = True
+            self.keyword.enable()
+            self.update_buttonled()
+
+    def keyword_turn_off(self):
+        logger.info("turn off call keyword")
+        if self.listening:
+            self.listening = False
+            self.update_buttonled()
+            self.keyword.disable()
+
+    def keyword_on_message(self, keyword):
+        translator = {
+            "mousike": 'music',
+            'colos' : 'colos',
+            "extivious" : "pooftos",
+            "lumos" : "lumos"
+        }
+        if self.runningSpell != keyword:
+            # This is a different spell then running spell, so start it:
+            if self.child_process is not None: 
+                self._kill_game()
+            logger.debug(f"[VOICEREC: Attempting to Start Spell {keyword}") 
+            game = helper.fetch_game(translator[keyword])
+            if game is not None:
+                self.runningSpell = game
+                self._start_game(game)
+            else:
+                logger.debug(f"{keyword} game not found")
+
+            
+        else:  
+            logger.debug("[VOICEREC] Spell already running") 
+
+
+        
+    def listening_check(self):
+        logger.info(f"LISTENING CALL:{self.current_orientation}, >{self.runningSpell}<")
+        if self.current_orientation == 8 and not self.runningSpell:
+            logger.info("start keyword")
+            self.keyword_turn_on()
+        elif self.listening:
+            logger.info("stop keyword")
+            self.keyword_turn_off()
 
     def charger_on_fault(self,fault):
+        logger.debug("on fault callback")
         if fault == 0: 
-            logger.debug("Temperature Normal")
+            #logger.debug("Temperature Normal")
+            self.bat_current_fault = None
         elif fault == 1:
-            logger.debug("Temperature Hot")
+            #logger.debug("Temperature Hot")
+            self.bat_current_fault = "hot"
         elif fault == 2:
-            logger.debug("Temperature Cold")
+            #logger.debug("Temperature Cold")
+            self.bat_current_fault = "cold"
         else:
-            logger.debug("Unknown Fault")
+            #logger.debug("Unknown Fault")
+            self.bat_current_fault = "unknown"
+        logger.info(f"FAULT CALL: {self.bat_current_status}")
+        self.update_buttonled()    
     
     def charger_on_status(self, status):
+        logger.debug("on charger status callback with {status}")
         if status == 0: 
-            logger.debug("Not charging")
+            logger.debug("Status=Not charging")
+            self.bat_current_status = None
         elif status == 0x10:
-            logger.debug("Pre Charge")
+            logger.debug("Status=Pre Charge")
+            self.bat_current_status = "pre charge"
         elif status == 0x20:
-            logger.debug("Fast Charging")
+            logger.debug("Status=Fast Charging")
+            self.bat_current_status = "fast charging"
         elif status == 0x30:
-            logger.debug("Charge Complete")
+            logger.debug("Status=Charge Complete")
+            self.bat_current_status = "complete"
         else:
-            logger.debug("Unknown Status")
+            logger.debug("Status=Unknown Status")
+            self.bat_current_status = "unknown"
 
+        self.update_buttonled()
+    
     def _kill_game(self):
         # kills current game
         logger.info(f"Killing Process {self.child_process.pid}")
@@ -87,7 +190,12 @@ class TGWConductor():
         os.kill(self.child_process.pid, signal.SIGTERM)
         self.child_process = None
         self.audio.stop()
-        self.lights.play_lb_csv_animation('app_stopped.csv')
+        self.lights.lb_clear()
+
+        time.sleep(2)
+        self.listening_check()
+        self.update_buttonled()
+        self.lights.lb_csv_animation('app_stopped.csv')
         self.audio.play_background('app_stopped.wav')
         self.runningSpell = ""
 
@@ -99,11 +207,15 @@ class TGWConductor():
                 logger.info("Medium button press. Killing Spell")
                 self._kill_game() 
             else:
-                #Long press while idle - what should the behavior be?
-                logger.info("Medium press while idle")
+                #Long press while idle - temp starting idle spell
+                logger.info("Medium press while idle Starting idle spell")
+                self._start_game ("idle","")
+                self.runningSpell = "idle"
+
+                
             
 
-    def _start_game(self, game: str, game_args):
+    def _start_game(self, game: str, game_args=""):
         """
         starts game. assumes path is valid per helper.fetch_game checking
         """
@@ -114,13 +226,17 @@ class TGWConductor():
         
         if filePath is not None:
             logger.debug(f"Playing app start animation")
-            self.lights.play_lb_csv_animation('app_launch.csv')
+            self.lights.lb_csv_animation('app_launch.csv')
             logger.debug(f"Launching spell: {game} : {filePath} : {game_args}")
             self.child_process = subprocess.Popen(['python3', filePathandMain, filePath, game_args ] )
             logger.debug(f"[SUBPROCESS ID] {self.child_process.pid}")
             
         else:
             logger.debug("invalid game found...")
+            self.runningSpell = ""
+        
+        self.update_buttonled()
+        self.listening_check()
 
     def on_nfc_scan(self, records):
         """
@@ -175,7 +291,8 @@ class TGWConductor():
 
     def run(self):
         time.sleep(1) # Just in case the light service is not running. 
-        self.lights.play_lb_csv_animation('power_on.csv')
+        self.lights.lb_csv_animation('power_on.csv')
+        self.update_buttonled()
         #TODO Get power on audio
         # self.audio.play_background('power_on.wav')
         signal.pause()

@@ -88,7 +88,7 @@ def orientation_callback(orientation):
 
     if orientation == 8: #PointUp
         logger.debug(f"Wand pointing up" )
-        lights.play_lb_csv_animation ("STdrumRoll.csv")
+        lights.lb_csv_animation ("STdrumRoll.csv")
         audio.play_foreground("stDrumRoll.wav")
         lastOrientation = orientation
         
@@ -127,7 +127,7 @@ def signal_handler(sig, frame):
     # Turn off raw data stream
     imu.disable_stream()
     logger.debug("disable stream")
-    lights.block(0,0,0)
+    lights.lb_block(0,0,0)
     time.sleep(.1)
     
     #GPIO.cleanup()

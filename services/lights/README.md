@@ -60,8 +60,8 @@ To set the entire lightbar to heartbeat:
         "color": 0x00FF00,
         "min_brightness": 0, (uint8_t)
         "max_brightness": 255, (uint8_t)
-        "ramp_time": 500000,
-        "delay_time": 500000
+        "ramp_time": 500000, (us)
+        "delay_time": 500000 (us)
     }
 }
 ```
