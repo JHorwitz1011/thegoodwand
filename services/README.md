@@ -4,5 +4,5 @@ Click the embedded link for more details on each service (MQTT packet format, in
 
 | Service | Description | Topic Space |
 | :-: | :-: | - |
-| [IMU](imu/README.md) | Handles communication between LSM6DSOX | pub to `goodwand/ui/controller/gesture` <br /> pub to `goodwand/ui/controller/gesture/data`<br /> sub to `goodwand/ui/controller/gesture/command`|
+| [IMU](services/imu/README.md) | Handles communication between LSM6DSOX | pub to `goodwand/ui/controller/gesture` <br /> pub to `goodwand/ui/controller/gesture/data`<br /> sub to `goodwand/ui/controller/gesture/command`|
 
