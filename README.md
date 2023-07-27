@@ -2,13 +2,23 @@
 
 This repository contains all software necessary for implementing the good wand on a Raspberry Pi 0W 2 running Raspberry Pi OS Lite
 
+### Services ###
+
 ![system architecture](images/system_architecture.png)
 
-[Services](services/README.md)
+Services connect the technology behind the wand together via MQTT. [Click here for a detailed description of all services, and the MQTT API.](services/README.md)
 
-[Spells](spells/README.md)
+### Templates ###
 
-### How do I get set up? ###
+Templates provide a Python API that abstracts away the MQTT interface.
+
+### Spells ###
+
+Spells utilize the services to create games. [Click here for a detailed description of all spells](spells/README.md)
+
+### Setup ###
+
+Shell scripts are provided to install dependencies of the project. [Click here for more setup details](setup/README.md)
 
 1. Clone repo
 2. cd to setup folder

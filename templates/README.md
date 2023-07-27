@@ -1,3 +1,5 @@
+[<- back to home](../README.md)
+
 # IMPORTING TEMPLATES #
 
 To use, add repository to system path at the top of a python script:
