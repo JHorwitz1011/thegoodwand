@@ -10,7 +10,7 @@ This repository contains all software necessary for implementing the good wand o
 
 ### How do I get set up? ###
 
-1. Clone repo above
+1. Clone repo
 2. cd to setup folder
 3. run ./install_all.sh (DO NOT RUN AS SUDO)
 4. Monitor for errors
