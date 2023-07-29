@@ -88,6 +88,7 @@ mqtt_obj = MQTTClient()
 mqtt_client = mqtt_obj.start("imu record")
 imu = IMUService(mqtt_client)
 imu.subscribe_stream(onIMUStream)
+imu.enable_stream()
 button = ButtonService(mqtt_client)
 button.subscribe(onButton)
 

@@ -27,7 +27,8 @@ device_name =":".join(re.findall('..', '%012x' % uuid.getnode()))
 
 # here we'll collect 2 seconds of data at a frequency defined by interval_ms
 freq = 26 #hz
-
+sample_length = 1 #s
+interval_ms = sample_length/freq #ms
 values = []
 full = False
 

@@ -60,7 +60,6 @@ def onButton(msg):
             "values": values
         }
     }
-
     # encode in JSON
     encoded = json.dumps(data)
 
@@ -84,12 +83,26 @@ def onButton(msg):
     else:
         print('Failed to upload file to Edge Impulse', res.status_code, res.content)
 
+# Cleanup
+def signal_handler(sig, frame): 
+    # Turn off raw data stream
+    imu.disable_stream()
+    logger.debug("disable stream")
+    time.sleep(.1)
+    
+    #GPIO.cleanup()
+    sys.exit(0)
 
-mqtt_obj = MQTTClient()
-mqtt_client = mqtt_obj.start("imu record")
-imu = IMUService(mqtt_client)
-imu.subscribe_stream(onIMUStream)
-button = ButtonService(mqtt_client)
-button.subscribe(onButton)
 
-signal.pause()
+if __name__ == '__main__':
+    mqtt_obj = MQTTClient()
+    mqtt_client = mqtt_obj.start("imu record")
+    imu = IMUService(mqtt_client)
+    imu.subscribe_stream(onIMUStream)
+    imu.enable_stream()
+    button = ButtonService(mqtt_client)
+    button.subscribe(onButton)
+
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.pause()

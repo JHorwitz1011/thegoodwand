@@ -82,8 +82,8 @@ class imu_service:
 
     def __init__(self, arg = None):
         
-        self.imu = LSM6DSOX(acc_odr = CTRL1_XL_ODR_1_6_HZ,
-                    gyro_odr = CTRL2_G_ODR_1_6_HZ,
+        self.imu = LSM6DSOX(acc_odr = CTRL1_XL_ODR_26_HZ,
+                    gyro_odr = CTRL2_G_ODR_26_HZ,
                     acc_scale = CTRL1_XL_SCALE_4G,
                     gyro_scale = CTRL2_G_SCALE_1000DPS,
                     mag_scale= MAG_CTRL2_FS_16G,
