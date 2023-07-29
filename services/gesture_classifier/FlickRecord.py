@@ -33,6 +33,7 @@ full = False
 
 def onIMUStream(msg):
     # buffer logic; values will always be of length 200 and once it is 
+    print("streamed!")
     accel = msg["data"]["accel"]
     gyro = msg["data"]["gyro"]
     values.append((accel['x'], accel['y'], accel['z'], gyro['x'], gyro['y'], gyro['z']))
@@ -60,7 +61,7 @@ def onButton(msg):
             "values": values
         }
     }
-    
+
     # encode in JSON
     encoded = json.dumps(data)
 
