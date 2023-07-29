@@ -51,12 +51,14 @@ def onIMUStream(msg):
     logger.debug(f"{time.time()}, {counter}, {len(values)}")
 
     counter += 1
-    if len(values) > buffer_size:
-        values.pop(0)
-
     if counter > 10 and len(values) > buffer_size:
         counter = 0
         uploadToEI()
+        
+    if len(values) > buffer_size:
+        values.pop(0)
+
+
 
 def uploadToEI():
     data = {
