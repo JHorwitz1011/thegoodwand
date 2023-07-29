@@ -111,8 +111,8 @@ if __name__ == '__main__':
     imu = IMUService(mqtt_client)
     imu.subscribe_stream(onIMUStream)
     imu.enable_stream()
-    button = ButtonService(mqtt_client)
-    button.subscribe(onButton)
+    # button = ButtonService(mqtt_client)
+    # button.subscribe(onButton)
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
