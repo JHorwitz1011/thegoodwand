@@ -30,7 +30,7 @@ freq = 26 #hz
 sample_length = 1.5 #sec
 buffer_size = sample_length/freq
 
-values = []
+values = 20*[(20,20,20,20,20,20)]
 full = False
 def onIMUStream(msg):
     if len(values) > buffer_size:
@@ -43,10 +43,10 @@ def onIMUStream(msg):
     values.append((accel['x'], accel['y'], accel['z'], gyro['x'], gyro['y'], gyro['z']))
 
 
-mqtt_obj = MQTTClient()
-mqtt_client = mqtt_obj.start("imu record")
-imu = IMUService(mqtt_client)
-imu.subscribe_stream()
+# mqtt_obj = MQTTClient()
+# mqtt_client = mqtt_obj.start("imu record")
+# imu = IMUService(mqtt_client)
+# imu.subscribe_stream()
 
 data = {
     "protected": {
@@ -67,11 +67,9 @@ data = {
             { "name": "gyroY", "units": "rad/s2" },
             { "name": "gyroZ", "units": "rad/s2" }
         ],
-        "values": values_list
+        "values": values
     }
 }
-
-
 
 # encode in JSON
 encoded = json.dumps(data)
