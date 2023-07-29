@@ -48,7 +48,7 @@ def onIMUStream(msg):
     accel = msg["accel"]
     gyro = msg["gyro"]
     values.append((accel['x'], accel['y'], accel['z'], gyro['x'], gyro['y'], gyro['z']))
-    logger.debug(time.time())
+    logger.debug(f"{time.time()}, {counter}, {len(values)}")
 
     counter += 1
     if len(values) > buffer_size:
