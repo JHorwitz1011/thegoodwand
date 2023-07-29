@@ -15,6 +15,13 @@ sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
 from Services import *
 from log import log
 
+
+DEBUG_LEVEL = "DEBUG"
+LOGGER_NAME = __name__
+logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
+
+MQTT_CLIENT_ID = "IDLE RECORD"
+
 # Your API & HMAC keys can be found here (go to your project > Dashboard > Keys to find this)
 HMAC_KEY = "d1d9eb0237b00728aff47e11f7f5b16e"
 API_KEY = "ei_6278693fa35e2537d9dc9671cdd47eefa87806ec841f9774"
@@ -42,6 +49,7 @@ def onIMUStream(msg):
     gyro = msg["gyro"]
     values.append((accel['x'], accel['y'], accel['z'], gyro['x'], gyro['y'], gyro['z']))
     logger.debug(time.time())
+
     counter += 1
     if len(values) > buffer_size:
         values.pop(0)
