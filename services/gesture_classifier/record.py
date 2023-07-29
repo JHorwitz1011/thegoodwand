@@ -58,7 +58,7 @@ data = {
     "payload": {
         "device_name":  device_name,
         "device_type": "LINUX_TEST",
-        "interval_ms": 1/freq,
+        "interval_ms": 1000/freq,
         "sensors": [
             { "name": "accX", "units": "m/s2" },
             { "name": "accY", "units": "m/s2" },
