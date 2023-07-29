@@ -158,7 +158,7 @@ class IMUService():
         else: 
             logger.warning(f"IMU Orientation callback not set")
      
-    def __on_stream(self,client, userdata, message):
+    def __on_stream(self, client, userdata, message):
         """Parse data and call subscriber callback"""
         logger.debug(f"IMU Stream {message.payload}")
         msg = json.loads(message.payload)
@@ -168,6 +168,7 @@ class IMUService():
 
         else: 
             logger.warning(f"NFC callback not set")
+
     def __on_subscribe(self, client, userdata, mid, granted_qos):
         pass 
 
