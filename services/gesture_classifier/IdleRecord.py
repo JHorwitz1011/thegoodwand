@@ -27,9 +27,13 @@ device_name =":".join(re.findall('..', '%012x' % uuid.getnode()))
 
 # here we'll collect 2 seconds of data at a frequency defined by interval_ms
 freq = 26 #hz
+sample_length = 1 #s
+buffer_size = sample_length*freq
 
 values = []
 full = False
+
+counter = 0
 
 def onIMUStream(msg):
     # buffer logic; values will always be of length 200 and once it is 
@@ -37,8 +41,15 @@ def onIMUStream(msg):
     gyro = msg["gyro"]
     values.append((accel['x'], accel['y'], accel['z'], gyro['x'], gyro['y'], gyro['z']))
     logger.debug(time.time())
+    counter += 1
+    if len(values) > buffer_size:
+        values.pop(0)
 
-def onButton(msg):
+    if counter > 10 and len(values) > buffer_size:
+        counter = 0
+        uploadToEI()
+
+def uploadToEI():
     data = {
         "protected": {
             "ver": "v1",
@@ -49,7 +60,7 @@ def onButton(msg):
         "payload": {
             "device_name":  device_name,
             "device_type": "LINUX_TEST",
-            "interval_ms": 1000/freq,
+            "interval_ms": sample_length*1000/freq, #1000 ms per second
             "sensors": [
                 { "name": "accX", "units": "m/s2" },
                 { "name": "accY", "units": "m/s2" },
