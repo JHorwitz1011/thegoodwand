@@ -36,6 +36,7 @@ def onIMUStream(msg):
     accel = msg["data"]["accel"]
     gyro = msg["data"]["gyro"]
     values.append((accel['x'], accel['y'], accel['z'], gyro['x'], gyro['y'], gyro['z']))
+    logger.debug(time.time())
 
 def onButton(msg):
     data = {
@@ -92,7 +93,6 @@ def signal_handler(sig, frame):
     
     #GPIO.cleanup()
     sys.exit(0)
-
 
 if __name__ == '__main__':
     mqtt_obj = MQTTClient()
