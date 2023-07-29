@@ -33,8 +33,8 @@ full = False
 
 def onIMUStream(msg):
     # buffer logic; values will always be of length 200 and once it is 
-    accel = msg["data"]["accel"]
-    gyro = msg["data"]["gyro"]
+    accel = msg["accel"]
+    gyro = msg["gyro"]
     values.append((accel['x'], accel['y'], accel['z'], gyro['x'], gyro['y'], gyro['z']))
     logger.debug(time.time())
 
