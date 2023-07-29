@@ -33,8 +33,10 @@ buffer_size = sample_length*freq
 values = []
 full = False
 
+counter = 0
 
 def onIMUStream(msg):
+    global counter
     # buffer logic; values will always be of length 200 and once it is 
     accel = msg["accel"]
     gyro = msg["gyro"]
@@ -105,7 +107,6 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 if __name__ == '__main__':
-    counter = 0
 
     mqtt_obj = MQTTClient()
     mqtt_client = mqtt_obj.start("imu record")
