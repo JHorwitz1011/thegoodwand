@@ -15,6 +15,13 @@ sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
 from Services import *
 from log import log
 
+
+DEBUG_LEVEL = "DEBUG"
+LOGGER_NAME = __name__
+logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
+
+MQTT_CLIENT_ID = "CHANNEL RECORD"
+
 # Your API & HMAC keys can be found here (go to your project > Dashboard > Keys to find this)
 HMAC_KEY = "d1d9eb0237b00728aff47e11f7f5b16e"
 API_KEY = "ei_6278693fa35e2537d9dc9671cdd47eefa87806ec841f9774"
@@ -27,17 +34,33 @@ device_name =":".join(re.findall('..', '%012x' % uuid.getnode()))
 
 # here we'll collect 2 seconds of data at a frequency defined by interval_ms
 freq = 26 #hz
+sample_length = 1 #s
+buffer_size = sample_length*freq
 
 values = []
 full = False
 
-def onIMUStream(msg):
-    # buffer logic; values will always be of length 200 and once it is 
-    accel = msg["data"]["accel"]
-    gyro = msg["data"]["gyro"]
-    values.append((accel['x'], accel['y'], accel['z'], gyro['x'], gyro['y'], gyro['z']))
+counter = 0
 
-def onButton(msg):
+def onIMUStream(msg):
+    global counter
+    # buffer logic; values will always be of length 200 and once it is 
+    accel = msg["accel"]
+    gyro = msg["gyro"]
+    values.append((accel['x'], accel['y'], accel['z'], gyro['x'], gyro['y'], gyro['z']))
+    logger.debug(f"{time.time()}, {counter}, {len(values)}")
+
+    counter += 1
+    if counter > 10 and len(values) > buffer_size:
+        counter = 0
+        uploadToEI()
+        
+    if len(values) > buffer_size:
+        values.pop(0)
+
+
+
+def uploadToEI():
     data = {
         "protected": {
             "ver": "v1",
@@ -48,7 +71,7 @@ def onButton(msg):
         "payload": {
             "device_name":  device_name,
             "device_type": "LINUX_TEST",
-            "interval_ms": 1000/freq,
+            "interval_ms": sample_length*1000/freq, #1000 ms per second
             "sensors": [
                 { "name": "accX", "units": "m/s2" },
                 { "name": "accY", "units": "m/s2" },
@@ -75,7 +98,7 @@ def onButton(msg):
                         data=encoded,
                         headers={
                             'Content-Type': 'application/json',
-                            'x-file-name': 'unknown',
+                            'x-file-name': 'channel',
                             'x-api-key': API_KEY
                         })
     if (res.status_code == 200):
@@ -83,12 +106,26 @@ def onButton(msg):
     else:
         print('Failed to upload file to Edge Impulse', res.status_code, res.content)
 
+# Cleanup
+def signal_handler(sig, frame): 
+    # Turn off raw data stream
+    imu.disable_stream()
+    logger.debug("disable stream")
+    time.sleep(.1)
+    
+    #GPIO.cleanup()
+    sys.exit(0)
 
-mqtt_obj = MQTTClient()
-mqtt_client = mqtt_obj.start("imu record")
-imu = IMUService(mqtt_client)
-imu.subscribe_stream(onIMUStream)
-button = ButtonService(mqtt_client)
-button.subscribe(onButton)
+if __name__ == '__main__':
 
-signal.pause()
+    mqtt_obj = MQTTClient()
+    mqtt_client = mqtt_obj.start("imu record")
+    imu = IMUService(mqtt_client)
+    imu.subscribe_stream(onIMUStream)
+    imu.enable_stream()
+    # button = ButtonService(mqtt_client)
+    # button.subscribe(onButton)
+
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.pause()
