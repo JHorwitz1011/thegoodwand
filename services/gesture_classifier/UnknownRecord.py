@@ -20,11 +20,14 @@ DEBUG_LEVEL = "DEBUG"
 LOGGER_NAME = __name__
 logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 
-MQTT_CLIENT_ID = "IDLE RECORD"
+MQTT_CLIENT_ID = "CHANNEL RECORD"
 
 # Your API & HMAC keys can be found here (go to your project > Dashboard > Keys to find this)
 HMAC_KEY = "d1d9eb0237b00728aff47e11f7f5b16e"
 API_KEY = "ei_6278693fa35e2537d9dc9671cdd47eefa87806ec841f9774"
+
+GYRO_NORM = 60000
+ACCEL_NORM = 100
 
 # empty signature (all zeros). HS256 gives 32 byte signature, and we encode in hex, so we need 64 characters here
 emptySignature = ''.join(['0'] * 64)
@@ -43,19 +46,24 @@ full = False
 counter = 0
 
 def onIMUStream(msg):
+    global counter
     # buffer logic; values will always be of length 200 and once it is 
     accel = msg["accel"]
     gyro = msg["gyro"]
-    values.append((accel['x'], accel['y'], accel['z'], gyro['x'], gyro['y'], gyro['z']))
+    values.append((accel['x']/ACCEL_NORM, accel['y']/ACCEL_NORM, accel['z']/ACCEL_NORM, gyro['x']/GYRO_NORM, gyro['y']/GYRO_NORM, gyro['z']/GYRO_NORM))
     logger.debug(f"{time.time()}, {counter}, {len(values)}")
+
+    counter += 1
+    if counter > 10 and len(values) > buffer_size:
+        counter = 0
+        uploadToEI()
         
     if len(values) > buffer_size:
         values.pop(0)
 
 
 
-def onButton(msg):
-    imu.disable_stream()
+def uploadToEI():
     data = {
         "protected": {
             "ver": "v1",
@@ -86,7 +94,6 @@ def onButton(msg):
 
     # set the signature again in the message, and encode again
     data['signature'] = signature
-    # data['payload']['values'] = [(0,0,0,0,0,0)*25 + (1000, 0,0,0,0,0)]
     encoded = json.dumps(data)
 
     # and upload the file
@@ -94,14 +101,13 @@ def onButton(msg):
                         data=encoded,
                         headers={
                             'Content-Type': 'application/json',
-                            'x-file-name': 'unknown',
+                            'x-file-name': 'shake',
                             'x-api-key': API_KEY
                         })
     if (res.status_code == 200):
         print('Uploaded file to Edge Impulse', res.status_code, res.content)
     else:
         print('Failed to upload file to Edge Impulse', res.status_code, res.content)
-    imu.enable_stream()
 
 # Cleanup
 def signal_handler(sig, frame): 
@@ -118,12 +124,11 @@ if __name__ == '__main__':
     mqtt_obj = MQTTClient()
     mqtt_client = mqtt_obj.start("imu record")
     imu = IMUService(mqtt_client)
-    button = ButtonService(mqtt_client)
-    button.subscribe(onButton)    
     imu.subscribe_stream(onIMUStream)
     imu.enable_stream()
+    # button = ButtonService(mqtt_client)
+    # button.subscribe(onButton)
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     signal.pause()
-            
