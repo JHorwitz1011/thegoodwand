@@ -132,6 +132,7 @@ class GestureClassifier():
                 res = self.runner.classify(self.values)
                 result = res['result']
                 print(res["result"])
+                print(self.values)
 
                 classification = result['classification']
                 # if not self._isAnomaly(classification['unknown']):
