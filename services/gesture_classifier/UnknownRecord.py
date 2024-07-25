@@ -43,24 +43,19 @@ full = False
 counter = 0
 
 def onIMUStream(msg):
-    global counter
     # buffer logic; values will always be of length 200 and once it is 
     accel = msg["accel"]
     gyro = msg["gyro"]
     values.append((accel['x'], accel['y'], accel['z'], gyro['x'], gyro['y'], gyro['z']))
     logger.debug(f"{time.time()}, {counter}, {len(values)}")
-
-    counter += 1
-    if counter > 10 and len(values) > buffer_size:
-        counter = 0
-        uploadToEI()
         
     if len(values) > buffer_size:
         values.pop(0)
 
 
 
-def uploadToEI():
+def onButton(msg):
+    imu.disable_stream()
     data = {
         "protected": {
             "ver": "v1",
@@ -105,6 +100,7 @@ def uploadToEI():
         print('Uploaded file to Edge Impulse', res.status_code, res.content)
     else:
         print('Failed to upload file to Edge Impulse', res.status_code, res.content)
+    imu.enable_stream()
 
 # Cleanup
 def signal_handler(sig, frame): 
@@ -121,11 +117,12 @@ if __name__ == '__main__':
     mqtt_obj = MQTTClient()
     mqtt_client = mqtt_obj.start("imu record")
     imu = IMUService(mqtt_client)
+    button = ButtonService(mqtt_client)
+    button.subscribe(onButton)    
     imu.subscribe_stream(onIMUStream)
     imu.enable_stream()
-    # button = ButtonService(mqtt_client)
-    # button.subscribe(onButton)
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     signal.pause()
+            
