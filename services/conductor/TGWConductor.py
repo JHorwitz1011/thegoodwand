@@ -89,7 +89,6 @@ class TGWConductor():
             self.lights.bl_heartbeat(0, 0, 0xFF) # blue 0000FF
 
     def imu_on_orientation(self, orientation):
-
         self.current_orientation = orientation
         logger.info(f"imu orientation update:{self.current_orientation}")
         if self.current_orientation == 8: # upright
@@ -210,10 +209,7 @@ class TGWConductor():
                 #Long press while idle - temp starting idle spell
                 logger.info("Medium press while idle Starting idle spell")
                 self._start_game ("idle","")
-                self.runningSpell = "idle"
-
-                
-            
+                self.runningSpell = "idle"  
 
     def _start_game(self, game: str, game_args=""):
         """
