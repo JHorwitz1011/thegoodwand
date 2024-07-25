@@ -39,7 +39,7 @@ MODEL_PATH = os.path.join(MODEL_DIR_PATH, MODEL)
 # service constants
 GESTURE_THRESHOLD = 0.8 # minimum confidence rating for keyword to publish
 ANOMOLY_THRESHOLD = 0.8
-MODEL_RATE = 20 # hz
+MODEL_RATE = 10 # hz
 
 FS = 26 # hz
 SAMPLE_LENGTH = 1 # second
@@ -73,7 +73,6 @@ class GestureClassifier():
         self.values.append(gyro['x'])
         self.values.append(gyro['y'])
         self.values.append(gyro['z'])
-        print("helo from callback!")
 
         if len(self.values) > BUFFER_SIZE:
             for x in range(6):
