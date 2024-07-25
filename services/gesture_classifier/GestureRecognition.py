@@ -59,6 +59,7 @@ class GestureClassifier():
         self.runner = None                                                                      # ensures runner stops on edge cases
         self.values = BUFFER_SIZE*[0]
         self.last_trigger = 0
+        time.sleep(2)
 
         signal.signal(signal.SIGINT, self.signal_handler)
         signal.signal(signal.SIGTERM, self.signal_handler)
@@ -141,17 +142,17 @@ class GestureClassifier():
                     GESTURE_TEMP_PKT["data"] = {"gesture":"jab"}
                     self.mqtt_client.publish(GESTURE_TOPIC, json.dumps(GESTURE_TEMP_PKT))
                     time.sleep(COOLDOWN)
-                    self.values = BUFFER_SIZE*[0]
+                    # self.values = BUFFER_SIZE*[0]
                 elif self._isGestureDetected(classification['channel']):
                     GESTURE_TEMP_PKT["data"] = {"gesture":"channel"}
                     self.mqtt_client.publish(GESTURE_TOPIC, json.dumps(GESTURE_TEMP_PKT))
                     time.sleep(COOLDOWN)
-                    self.values = BUFFER_SIZE*[0]
+                    # self.values = BUFFER_SIZE*[0]
                 elif self._isGestureDetected(classification['flick']):
                     GESTURE_TEMP_PKT["data"] = {"gesture":"flick"}
                     self.mqtt_client.publish(GESTURE_TOPIC, json.dumps(GESTURE_TEMP_PKT))
                     time.sleep(COOLDOWN)
-                    self.values = BUFFER_SIZE*[0]
+                    # self.values = BUFFER_SIZE*[0]
                 time.sleep(1/MODEL_RATE)
         finally:
             if (self.runner):
