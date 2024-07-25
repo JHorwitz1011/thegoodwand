@@ -72,6 +72,7 @@ class GestureClassifier():
         self.values.append(gyro['x'])
         self.values.append(gyro['y'])
         self.values.append(gyro['z'])
+        print("helo from callback!")
 
         if len(self.values) > BUFFER_SIZE:
             for x in range(6):
