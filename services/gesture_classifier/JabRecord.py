@@ -80,6 +80,7 @@ def onButton(msg):
             "values": values
         }
     }
+    logger.debug(values)
     # encode in JSON
     encoded = json.dumps(data)
 
