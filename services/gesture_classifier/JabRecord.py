@@ -26,6 +26,8 @@ MQTT_CLIENT_ID = "IDLE RECORD"
 HMAC_KEY = "d1d9eb0237b00728aff47e11f7f5b16e"
 API_KEY = "ei_6278693fa35e2537d9dc9671cdd47eefa87806ec841f9774"
 
+GYRO_NORM = 60000
+
 # empty signature (all zeros). HS256 gives 32 byte signature, and we encode in hex, so we need 64 characters here
 emptySignature = ''.join(['0'] * 64)
 
@@ -46,7 +48,7 @@ def onIMUStream(msg):
     # buffer logic; values will always be of length 200 and once it is 
     accel = msg["accel"]
     gyro = msg["gyro"]
-    values.append((accel['x'], accel['y'], accel['z'], gyro['x'], gyro['y'], gyro['z']))
+    values.append((accel['x'], accel['y'], accel['z'], gyro['x']/GYRO_NORM, gyro['y']/GYRO_NORM, gyro['z']/GYRO_NORM))
     logger.debug(f"{time.time()}, {counter}, {len(values)}")
         
     if len(values) > buffer_size:
@@ -93,7 +95,7 @@ def onButton(msg):
                         data=encoded,
                         headers={
                             'Content-Type': 'application/json',
-                            'x-file-name': 'unknown',
+                            'x-file-name': 'jab',
                             'x-api-key': API_KEY
                         })
     if (res.status_code == 200):
