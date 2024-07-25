@@ -27,9 +27,9 @@ GESTURE_TEMP_PKT = {
 }
 
 # MQTT constants
-GESTURE_TOPIC = "goodwand/ui/controller/gesture"
-GESTURE_CMD_TOPIC = "goodwand/ui/controller/gesture/command"
-KEYWORD_CLIENT_ID = "keyword-classifier"
+GESTURE_TOPIC = "goodwand/ui/controller/gesturerec"
+GESTURE_CMD_TOPIC = "goodwand/ui/controller/gesturerec/command"
+KEYWORD_CLIENT_ID = "gesture-classifier"
 
 # EI constants
 MODEL = "model.eim"
