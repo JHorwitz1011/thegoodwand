@@ -141,17 +141,17 @@ class GestureClassifier():
                     GESTURE_TEMP_PKT["data"] = {"gesture":"jab"}
                     self.mqtt_client.publish(GESTURE_TOPIC, json.dumps(GESTURE_TEMP_PKT))
                     time.sleep(COOLDOWN)
-                    # self.values = BUFFER_SIZE*[0]
+                    self.values = BUFFER_SIZE*[0]
                 elif self._isGestureDetected(classification['channel']):
                     GESTURE_TEMP_PKT["data"] = {"gesture":"channel"}
                     self.mqtt_client.publish(GESTURE_TOPIC, json.dumps(GESTURE_TEMP_PKT))
                     time.sleep(COOLDOWN)
-                    # self.values = BUFFER_SIZE*[0]
+                    self.values = BUFFER_SIZE*[0]
                 elif self._isGestureDetected(classification['flick']):
                     GESTURE_TEMP_PKT["data"] = {"gesture":"flick"}
                     self.mqtt_client.publish(GESTURE_TOPIC, json.dumps(GESTURE_TEMP_PKT))
                     time.sleep(COOLDOWN)
-                    # self.values = BUFFER_SIZE*[0]
+                    self.values = BUFFER_SIZE*[0]
                 time.sleep(1/MODEL_RATE)
         finally:
             if (self.runner):
