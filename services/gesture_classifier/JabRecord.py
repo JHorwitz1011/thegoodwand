@@ -26,7 +26,7 @@ MQTT_CLIENT_ID = "IDLE RECORD"
 HMAC_KEY = "d1d9eb0237b00728aff47e11f7f5b16e"
 API_KEY = "ei_6278693fa35e2537d9dc9671cdd47eefa87806ec841f9774"
 
-GYRO_NORM = 60000
+GYRO_NORM = 6000
 
 # empty signature (all zeros). HS256 gives 32 byte signature, and we encode in hex, so we need 64 characters here
 emptySignature = ''.join(['0'] * 64)
