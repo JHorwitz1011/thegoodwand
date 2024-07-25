@@ -86,7 +86,7 @@ def onButton(msg):
 
     # set the signature again in the message, and encode again
     data['signature'] = signature
-    data['payload']['values'] = [(0,0,0,0,0,0)*25 + (1000, 0,0,0,0,0)]
+    # data['payload']['values'] = [(0,0,0,0,0,0)*25 + (1000, 0,0,0,0,0)]
     encoded = json.dumps(data)
 
     # and upload the file
