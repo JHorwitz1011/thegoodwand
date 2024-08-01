@@ -154,6 +154,10 @@ class GestureClassifier():
                         GESTURE_TEMP_PKT["data"] = {"gesture":"flick"}
                         self.mqtt_client.publish(GESTURE_TOPIC, json.dumps(GESTURE_TEMP_PKT))
                         time.sleep(COOLDOWN)
+                    elif self._isGestureDetected(classification['shake']):
+                        GESTURE_TEMP_PKT["data"] = {"gesture":"shake"}
+                        self.mqtt_client.publish(GESTURE_TOPIC, json.dumps(GESTURE_TEMP_PKT))
+                        time.sleep(COOLDOWN)
                         # self.values = BUFFER_SIZE*[0]
                 time.sleep(1/MODEL_RATE)
         finally:
