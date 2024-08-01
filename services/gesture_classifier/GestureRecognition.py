@@ -47,6 +47,9 @@ NUM_FEATURES = 6
 BUFFER_SIZE = SAMPLE_LENGTH * FS * NUM_FEATURES
 COOLDOWN = 1
 
+GYRO_NORM = 60000
+ACCEL_NORM = 100
+
 
 class GestureClassifier():
     def __init__(self):
@@ -67,12 +70,12 @@ class GestureClassifier():
     def onIMUStream(self, msg):
         accel = msg["accel"]
         gyro = msg["gyro"]
-        self.values.append(accel['x'])
-        self.values.append(accel['y'])
-        self.values.append(accel['z'])
-        self.values.append(gyro['x'])
-        self.values.append(gyro['y'])
-        self.values.append(gyro['z'])
+        self.values.append(accel['x']/ACCEL_NORM)
+        self.values.append(accel['y']/ACCEL_NORM)
+        self.values.append(accel['z']/ACCEL_NORM)
+        self.values.append(gyro['x']/GYRO_NORM)
+        self.values.append(gyro['y']/GYRO_NORM)
+        self.values.append(gyro['z']/GYRO_NORM)
 
         if len(self.values) > BUFFER_SIZE:
             for x in range(6):
