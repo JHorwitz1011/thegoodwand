@@ -101,7 +101,7 @@ def uploadToEI():
                         data=encoded,
                         headers={
                             'Content-Type': 'application/json',
-                            'x-file-name': 'shake',
+                            'x-file-name': 'unknown',
                             'x-api-key': API_KEY
                         })
     if (res.status_code == 200):

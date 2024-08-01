@@ -37,7 +37,7 @@ MODEL_DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 MODEL_PATH = os.path.join(MODEL_DIR_PATH, MODEL)
 
 # service constants
-GESTURE_THRESHOLD = 0.9 # minimum confidence rating for keyword to publish
+GESTURE_THRESHOLD = 0.95 # minimum confidence rating for keyword to publish
 ANOMOLY_THRESHOLD = 0.7
 MODEL_RATE = 10 # hz
 
