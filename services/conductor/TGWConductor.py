@@ -271,8 +271,8 @@ class TGWConductor():
                             self._start_game(game_on_card, game_args)
                         else:
                             # Stop currently running game
-                            self._kill_game ()
-                            self._start_game(game_on_card, game_args)                        
+                            self._kill_game()
+                            self._start_game(game_on_card, game_args)                     
 
                         # Update runningSpell. NOT HANDLING edge condition of spells failing to start
                         self.runningSpell = game_on_card
