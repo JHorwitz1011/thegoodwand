@@ -69,7 +69,7 @@ def init_audio(mqtt_client, path):
     return AudioService(mqtt_client = mqtt_client, path = path)
 
 def init_gesturerec(mqtt_client, path):
-    gesture = GestureRecService(mqtt_client = mqtt_client, path = path)
+    gesture = GestureRecService(mqtt_client = mqtt_client)
     gesture.subscribe(gesture_callback)
     return gesture
 
