@@ -57,6 +57,7 @@ def display_lights(x,y,z):
     logger.debug(f"r: {red} g: {green}  b: {blue}  {z*NORMALIZE} {NORMALIZE}")
 
 def gesture_callback(param):
+    global gesture_completed
     if not gesture_completed:
         if param == target_gesture:
             gesture_completed = True
@@ -139,7 +140,7 @@ if __name__ == '__main__':
    
     while(1):
         select_target_gesture()
-        time.sleep(random.randint(1,4))
+        time.sleep(random.randint(2,6))
         if not gesture_completed:
             failure()
 
