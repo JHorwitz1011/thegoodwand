@@ -19,7 +19,7 @@ MQTT_CLIENT_ID = "COLOS_SPELL"
 
 NORMALIZE = float(255/90)
 
-gesture_completed = None
+gesture_completed = False
 target_gesture = None
 
 def magnitude(vector):
@@ -111,6 +111,8 @@ def select_target_gesture():
     if target == 0:
         target_gesture = "flick"
         audio.play_background("flick.wav")
+
+    time.sleep(1)
 
 if __name__ == '__main__':
     # Connect to MQTT and get client instance 
