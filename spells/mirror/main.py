@@ -103,10 +103,14 @@ def failure():
     lights.lb_block(255,255,255)
     time.sleep(.1)
     lights.lb_block(255,0,0)
+    time.sleep(.1)
+    lights.lb_block(255,255,255)
+    time.sleep(.1)
+    lights.lb_block(255,0,0)
 
     audio.play_foreground("fail.wav")
     lights.lb_clear()
-    time.sleep(.5)
+    time.sleep(1)
 
 def select_target_gesture():
     target = 0#random.randint(0,4)
@@ -140,8 +144,9 @@ if __name__ == '__main__':
     gesture = init_gesturerec(mqtt_client, spellPath)
    
     while(1):
+        gesture_completed = False
         select_target_gesture()
-        time.sleep(random.randint(2,6))
+        time.sleep(4)
         if not gesture_completed:
             failure()
 
