@@ -96,8 +96,13 @@ def success():
     audio.play_foreground("success.wav")
 
 def failure():
-    lights.lb_system_animation('no_failed')
-    audio.play_background("fail.wav")
+    lights.lb_block(255,0,0)
+    time.sleep(.1)
+    lights.lb_block(255,255,255)
+    time.sleep(.1)
+    lights.lb_block(255,0,0)
+
+    audio.play_foreground("fail.wav")
 
 def select_target_gesture():
     target = 0#random.randint(0,4)
