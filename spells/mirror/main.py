@@ -115,6 +115,7 @@ def failure():
     time.sleep(1)
 
 def select_target_gesture():
+    global target_gesture
     target = 0#random.randint(0,4)
     if target == 0:
         target_gesture = "flick"
