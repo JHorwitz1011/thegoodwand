@@ -19,6 +19,9 @@ MQTT_CLIENT_ID = "COLOS_SPELL"
 
 NORMALIZE = float(255/90)
 
+gesture_completed = None
+target_gesture = None
+
 def magnitude(vector):
     return math.sqrt(sum(pow(element, 2) for element in vector))
 
@@ -54,7 +57,10 @@ def display_lights(x,y,z):
     logger.debug(f"r: {red} g: {green}  b: {blue}  {z*NORMALIZE} {NORMALIZE}")
 
 def gesture_callback(param):
-    print(param) 
+    if not gesture_completed:
+        if param == target_gesture:
+            gesture_completed = True
+            success()
 
 # Initialize button. return button object
 def init_button(mqtt_client, callback):
@@ -86,11 +92,15 @@ def signal_handler(sig, frame):
 
 
 def success():
-    lights.lb_system_animation("yipee")
-    audio.play_foreground("gun.wav")
+    lights.lb_system_animation("yes_confirmed")
+    audio.play_foreground("success.wav")
 
 def failure():
-    pass
+    lights.lb_system_animation('no_failed')
+    audio.play_background("fail.wav")
+
+def select_target_gesture():
+    target = random.randint(1,4)
 
 if __name__ == '__main__':
     # Connect to MQTT and get client instance 
@@ -116,13 +126,10 @@ if __name__ == '__main__':
     gesture = init_gesturerec(mqtt_client, spellPath)
    
     while(1):
+        select_target_gesture()
         time.sleep(random.randint(1,4))
-        success()
-
-
-        # select spell
-
-    
+        if not gesture_completed:
+            failure()
     
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
