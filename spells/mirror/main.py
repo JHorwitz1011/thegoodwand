@@ -89,7 +89,7 @@ def success():
     lights.lb_system_animation("yipee")
 
 def failure():
-
+    pass
 
 if __name__ == '__main__':
     # Connect to MQTT and get client instance 
