@@ -1,6 +1,6 @@
 """ Unit tests for Service Files """
 import sys, os, time, signal, math
-from collections import deque
+import random
 
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
 from Services import MQTTClient
@@ -85,6 +85,12 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 
+def success():
+    lights.lb_system_animation("yipee")
+
+def failure():
+
+
 if __name__ == '__main__':
     # Connect to MQTT and get client instance 
     logger.debug("Starting Mirror spell")
@@ -101,7 +107,7 @@ if __name__ == '__main__':
     if param_1 !="":
         spellPath = param_1
     else:
-        spellPath =os.getcwd() 
+        spellPath = os.getcwd() 
 
     audio   = init_audio(mqtt_client, spellPath)
     button  = init_button(mqtt_client, button_callback)
@@ -109,7 +115,12 @@ if __name__ == '__main__':
     gesture = init_gesturerec(mqtt_client, spellPath)
    
     while(1):
-        
+        time.sleep(random.randint(1,4))
+        success()
+
+
+        # select spell
+
     
     
     signal.signal(signal.SIGINT, signal_handler)

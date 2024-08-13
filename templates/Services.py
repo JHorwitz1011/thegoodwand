@@ -316,7 +316,7 @@ class LightService():
         pass
     
     ### LIGHTBAR
-    def lb_csv_animation(self, csv_file, path = None, granularity = 1, corssfade = 0):
+    def lb_csv_animation(self, csv_file, path = None, granularity = 1, crossfade = 0):
         if (path == None) and (self.path == None):
             return
         
