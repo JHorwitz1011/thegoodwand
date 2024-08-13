@@ -87,6 +87,7 @@ def signal_handler(sig, frame):
 
 def success():
     lights.lb_system_animation("yipee")
+    audio.play_foreground("gun.wav")
 
 def failure():
     pass
