@@ -97,7 +97,7 @@ def signal_handler(sig, frame):
 
 def success():
     lights.lb_system_animation("yes_confirmed")
-    audio.play_foreground("success.wav")
+    audio.play_background("success.wav")
 
 def failure():
     lights.lb_block(255,0,0)
@@ -110,13 +110,13 @@ def failure():
     time.sleep(.1)
     lights.lb_block(255,0,0)
 
-    audio.play_foreground("fail.wav")
+    audio.play_background("fail.wav")
     lights.lb_clear()
     time.sleep(1)
 
 def select_target_gesture():
     global target_gesture
-    target = random.randint(0,4)
+    target = random.randint(0,3)
     if target == 0:
         target_gesture = "flick"
         audio.play_background("flick.wav")
@@ -160,6 +160,7 @@ if __name__ == '__main__':
         select_target_gesture()
         time.sleep(4)
         if not gesture_completed:
+            gesture_completed = True
             failure()
 
     
