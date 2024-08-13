@@ -103,6 +103,8 @@ def failure():
     lights.lb_block(255,0,0)
 
     audio.play_foreground("fail.wav")
+    lights.lb_clear()
+    time.sleep(.5)
 
 def select_target_gesture():
     target = 0#random.randint(0,4)
@@ -138,6 +140,7 @@ if __name__ == '__main__':
         time.sleep(random.randint(1,4))
         if not gesture_completed:
             failure()
+
     
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
