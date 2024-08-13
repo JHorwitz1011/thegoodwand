@@ -57,6 +57,7 @@ def display_lights(x,y,z):
     logger.debug(f"r: {red} g: {green}  b: {blue}  {z*NORMALIZE} {NORMALIZE}")
 
 def gesture_callback(param):
+    print("GESTURE RECOGNIZED, ", param)
     global gesture_completed
     if not gesture_completed:
         if param == target_gesture:
