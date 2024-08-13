@@ -439,15 +439,7 @@ class KeywordService():
     def subscribe(self, callback, qos=0):
         self.callback = callback
         self.client.message_callback_add(self.KEYWORD_TOPIC, self.__on_message)
-        self.client.subscribe(self.KEYWORD_TOPIC, qos)
-
-
-
-        
-
-    def unsubscribe(self):
-        """Unsubscribe from button service callbacks"""
-        pass
+        self.client.subscribe(self.KEYWORD_TOPIC, qos) 
 
     ### Private Methods ### 
     def __publish_message(self, msg):
@@ -462,7 +454,50 @@ class KeywordService():
         if self.callback:
             self.callback(keyword)
         else: 
-            logger.warning(f"Button callback not set")
+            logger.warning(f"keyword callback not set")
+
+class GestureRecService():
+    KEYWORD_TOPIC = "goodwand/ui/controller/gesturerec"
+    KEYWORD_CMD_TOPIC = "goodwand/ui/controller/gesturerec/command"
+
+    SERVICE_TYPE = "UI_GESTUREREC"
+    SERVICE_VERSION ="1"
+
+    def __init__(self, mqtt_client) -> None:
+        self.client = mqtt_client
+        self.callback = None
+
+    def enable(self):
+        header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
+        data = {"state":1}
+        self.__publish_message({"header": header, "data": data})
+
+    # TODO, VoiceRec service needs an off function
+    def disable(self):
+        header = {"type": self.SERVICE_TYPE, "version": self.SERVICE_VERSION}
+        data = {"state":0}
+        self.__publish_message({"header": header, "data": data})
+
+    def subscribe(self, callback, qos=0):
+        self.callback = callback
+        self.client.message_callback_add(self.KEYWORD_TOPIC, self.__on_message)
+        self.client.subscribe(self.KEYWORD_TOPIC, qos) 
+
+
+    ### Private Methods ### 
+    def __publish_message(self, msg):
+        self.client.publish(self.KEYWORD_CMD_TOPIC, json.dumps(msg))
+
+    def __on_message(self,client, userdata, message):
+        """Parse data and call subscriber callback"""
+        
+        msg = json.loads(message.payload)
+        gesture = msg["data"]["gesture"]
+
+        if self.callback:
+            self.callback(gesture)
+        else: 
+            logger.warning(f"gesture callback not set")
 
 class ButtonService():
 

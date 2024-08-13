@@ -8,6 +8,7 @@ from Services import ButtonService
 from Services import LightService
 from Services import AudioService
 from Services import IMUService
+from Services import GestureRecService
 from log import log
 
 DEBUG_LEVEL = "DEBUG"
@@ -52,25 +53,8 @@ def display_lights(x,y,z):
     lights.lb_block(red, green, blue)
     logger.debug(f"r: {red} g: {green}  b: {blue}  {z*NORMALIZE} {NORMALIZE}")
 
-
-def imu_stream_callback(stream):
-    start = time.time()
-    accel_mag = magnitude(get_vector(stream['accel']))
-    gyro_mag  = int(magnitude(get_vector(stream['gyro'])))
-    x, y, z = tilt_angle(get_vector(stream['accel']), accel_mag )
-    display_lights(x,y,z)
-
-
-def imu_on_wake_callback(wake_status:'bool'):
-
-    if wake_status == True: 
-        logger.debug(f"Wand is active, enable stream{wake_status}")
-        imu.enable_stream()
-    elif wake_status == False: 
-        logger.debug(f"Wand is inactive, disable stream{wake_status}")
-        imu.disable_stream()
-    else:    
-        logger.warning(f"Unknown active state {wake_status}")
+def gesture_callback(param):
+    print(param) 
 
 # Initialize button. return button object
 def init_button(mqtt_client, callback):
@@ -84,11 +68,10 @@ def init_lights(mqtt_client, path):
 def init_audio(mqtt_client, path):
     return AudioService(mqtt_client = mqtt_client, path = path)
 
-def init_imu(mqtt_client, imu_stream_cb, on_wake_cb):
-    imu = IMUService(mqtt_client)
-    imu.subscribe_stream(imu_stream_cb)
-    imu.subscribe_on_wake(on_wake_cb)
-    return imu
+def init_gesturerec(mqtt_client, path):
+    gesture = GestureRecService(mqtt_client = mqtt_client, path = path)
+    gesture.subscribe(gesture_callback)
+    return gesture
 
 # Cleanup
 def signal_handler(sig, frame): 
@@ -104,7 +87,7 @@ def signal_handler(sig, frame):
 
 if __name__ == '__main__':
     # Connect to MQTT and get client instance 
-    logger.debug("Starting Colos spell")
+    logger.debug("Starting Mirror spell")
     mqtt_object = MQTTClient()
     mqtt_client = mqtt_object.start(MQTT_CLIENT_ID)
 
@@ -123,19 +106,10 @@ if __name__ == '__main__':
     audio   = init_audio(mqtt_client, spellPath)
     button  = init_button(mqtt_client, button_callback)
     lights  = init_lights(mqtt_client, spellPath)
-    imu     = init_imu(mqtt_client, imu_stream_cb= imu_stream_callback, on_wake_cb = imu_on_wake_callback)
-    imu.enable_stream()
+    gesture = init_gesturerec(mqtt_client, spellPath)
    
-    audio.play_foreground("activatingColos.wav")
-    audio.play_background("colosBkgrnd.wav")
-
-    # Buffer size = smoothing effect 
-    # The higher the value the slower the colors will change 
-    # Dont make it too high or the color will be white most the time. 
-    buffer_size = 6
-    x_buffer = deque(maxlen=buffer_size)
-    y_buffer = deque(maxlen=buffer_size)
-    z_buffer = deque(maxlen=buffer_size)
+    while(1):
+        
     
     
     signal.signal(signal.SIGINT, signal_handler)
