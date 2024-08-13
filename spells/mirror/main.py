@@ -60,7 +60,7 @@ def gesture_callback(param):
     print("GESTURE RECOGNIZED, ", param)
     global gesture_completed
     if not gesture_completed:
-        print("gesture incomplete")
+        print("gesture incomplete", target_gesture)
         if param == target_gesture:
             print("idk man")
             gesture_completed = True
