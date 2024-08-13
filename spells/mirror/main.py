@@ -120,6 +120,15 @@ def select_target_gesture():
     if target == 0:
         target_gesture = "flick"
         audio.play_background("flick.wav")
+    elif target == 0:
+        target_gesture = "channel"
+        audio.play_background("channel.wav")
+    elif target == 0:
+        target_gesture = "shake"
+        audio.play_background("shake.wav")
+    elif target == 0:
+        target_gesture = "jab"
+        audio.play_background("jab.wav")
 
     time.sleep(1)
 
