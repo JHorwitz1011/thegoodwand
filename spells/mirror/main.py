@@ -62,6 +62,7 @@ def gesture_callback(param):
     if not gesture_completed:
         print("gesture incomplete")
         if param == target_gesture:
+            print("idk man")
             gesture_completed = True
             success()
 
