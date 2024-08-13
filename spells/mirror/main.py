@@ -100,7 +100,10 @@ def failure():
     audio.play_background("fail.wav")
 
 def select_target_gesture():
-    target = random.randint(1,4)
+    target = 0#random.randint(0,4)
+    if target == 0:
+        target_gesture = "flick"
+        audio.play_background("flick.wav")
 
 if __name__ == '__main__':
     # Connect to MQTT and get client instance 
