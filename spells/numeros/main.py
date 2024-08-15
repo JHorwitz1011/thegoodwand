@@ -60,6 +60,7 @@ def button_callback(press):
                 success()
 
 def nfc_callback(param):
+    audio.play_background('on_scan.wav')
     global next_number, current_string, most_recent_number
 
     logger.debug(f"Recieved nfc {param}")    
