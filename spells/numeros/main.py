@@ -51,10 +51,7 @@ def button_callback(press):
         
 
 def nfc_callback(param):
-    print("WEOUFIGDUYVHJKVDS FKUSDHJ<GSDBFKJH")
-    time.sleep(2)
-    # packet = json.loads(param)
-    # print(packet["card_data"]['records'][1]['data']['data'])
+    print(param["card_data"]['records'][1]['data']['data'])
     
 
 
@@ -115,9 +112,6 @@ if __name__ == '__main__':
    
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
-    
-
-
     
     signal.pause()
 
