@@ -1,5 +1,6 @@
 import sys, os, time, signal, math
 import random
+import json
 import pyttsx3
 
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
@@ -9,21 +10,17 @@ from Services import LightService
 from Services import AudioService
 from Services import IMUService
 from Services import GestureRecService
+from Services import NFCService
 from log import log
 
 DEBUG_LEVEL = "DEBUG"
 LOGGER_NAME = __name__
 logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 
-MQTT_CLIENT_ID = "COLOS_SPELL"
-
-NORMALIZE = float(255/90)
+MQTT_CLIENT_ID = "NUMEROS_SPELL"
 
 gesture_completed = False
 target_gesture = None
-
-def magnitude(vector):
-    return math.sqrt(sum(pow(element, 2) for element in vector))
 
 # Receives "short", "medium", "long"
 def button_callback(press):
@@ -34,12 +31,9 @@ def button_callback(press):
         pass
         
 
-def gesture_callback(param):
-    global gesture_completed
-    if not gesture_completed:
-        if param == target_gesture:
-            gesture_completed = True
-            success()
+def nfc_callback(param):
+    packet = json.loads(param)
+
 
 # Initialize button. return button object
 def init_button(mqtt_client, callback):
@@ -53,10 +47,10 @@ def init_lights(mqtt_client, path):
 def init_audio(mqtt_client, path):
     return AudioService(mqtt_client = mqtt_client, path = path)
 
-def init_gesturerec(mqtt_client, path):
-    gesture = GestureRecService(mqtt_client = mqtt_client)
-    gesture.subscribe(gesture_callback)
-    return gesture
+def init_nfc(mqtt_client, path):
+    nfc = GestureRecService(mqtt_client = mqtt_client)
+    nfc.subscribe(nfc_callback)
+    return nfc
 
 # Cleanup
 def signal_handler(sig, frame): 
@@ -74,9 +68,9 @@ if __name__ == '__main__':
     # Initialize the TTS engine
     speaker = pyttsx3.init()
     # Set properties (optional)
-    speaker.setProperty('rate', 150)  # Speed of speech (words per minute)
+    speaker.setProperty('rate', 125)  # Speed of speech (words per minute)
     speaker.setProperty('volume', 1.0)  # Volume (0.0 to 1.0)
-    speaker.say('this is a test')
+    speaker.say('Lets count!')
     speaker.runAndWait()
     # Connect to MQTT and get client instance 
     logger.debug("Starting Mirror spell")
@@ -98,7 +92,6 @@ if __name__ == '__main__':
     audio   = init_audio(mqtt_client, spellPath)
     button  = init_button(mqtt_client, button_callback)
     lights  = init_lights(mqtt_client, spellPath)
-    gesture = init_gesturerec(mqtt_client, spellPath)
    
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
