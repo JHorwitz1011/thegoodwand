@@ -1,15 +1,6 @@
-import pyttsx3
-
-
-
-
-
-
-
-
-""" Unit tests for Service Files """
 import sys, os, time, signal, math
 import random
+import pyttsx3
 
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
 from Services import MQTTClient
@@ -42,36 +33,11 @@ def button_callback(press):
     if press == "short":
         pass
         
-def orientation_callback(orientation):
-    logger.debug(f"IMU orientation {orientation}")
-
-def get_vector(data) -> "vector[3]":
-    return [data['x'], data['y'], data['z']]
-
-def tilt_angle(vector,  mag):
-    x = int(math.degrees(math.asin(vector[0]/mag)))
-    y= int(math.degrees(math.asin(vector[1]/mag)))
-    z = int(math.degrees(math.asin(vector[2]/mag)))
-    return  x, y, z
-
-
-def display_lights(x,y,z):
-    x_buffer.append(abs(x*NORMALIZE))
-    y_buffer.append(abs(y*NORMALIZE))
-    z_buffer.append(abs(z*NORMALIZE))
-    red = int(sum(x_buffer) / buffer_size)
-    green = int(sum(y_buffer) / buffer_size)
-    blue = int(sum(z_buffer) / buffer_size)
-    lights.lb_block(red, green, blue)
-    logger.debug(f"r: {red} g: {green}  b: {blue}  {z*NORMALIZE} {NORMALIZE}")
 
 def gesture_callback(param):
-    print("GESTURE RECOGNIZED, ", param)
     global gesture_completed
     if not gesture_completed:
-        print("gesture incomplete", target_gesture)
         if param == target_gesture:
-            print("idk man")
             gesture_completed = True
             success()
 
@@ -103,43 +69,6 @@ def signal_handler(sig, frame):
     #GPIO.cleanup()
     sys.exit(0)
 
-
-def success():
-    lights.lb_system_animation("yes_confirmed")
-    audio.play_background("success.wav")
-
-def failure():
-    lights.lb_block(255,0,0)
-    time.sleep(.1)
-    lights.lb_block(255,255,255)
-    time.sleep(.1)
-    lights.lb_block(255,0,0)
-    time.sleep(.1)
-    lights.lb_block(255,255,255)
-    time.sleep(.1)
-    lights.lb_block(255,0,0)
-
-    audio.play_background("fail.wav")
-    lights.lb_clear()
-    time.sleep(1)
-
-def select_target_gesture():
-    global target_gesture
-    target = random.randint(0,3)
-    if target == 0:
-        target_gesture = "flick"
-        audio.play_background("flick.wav")
-    elif target == 1:
-        target_gesture = "channel"
-        audio.play_background("channel.wav")
-    elif target == 2:
-        target_gesture = "shake"
-        audio.play_background("shake.wav")
-    elif target == 3:
-        target_gesture = "jab"
-        audio.play_background("jab.wav")
-
-    time.sleep(1)
  
 if __name__ == '__main__':
     # Initialize the TTS engine
@@ -148,6 +77,7 @@ if __name__ == '__main__':
     speaker.setProperty('rate', 150)  # Speed of speech (words per minute)
     speaker.setProperty('volume', 1.0)  # Volume (0.0 to 1.0)
     speaker.say('this is a test')
+    speaker.runAndWait()
     # Connect to MQTT and get client instance 
     logger.debug("Starting Mirror spell")
     mqtt_object = MQTTClient()
@@ -170,16 +100,9 @@ if __name__ == '__main__':
     lights  = init_lights(mqtt_client, spellPath)
     gesture = init_gesturerec(mqtt_client, spellPath)
    
-    while(1):
-        gesture_completed = False
-        select_target_gesture()
-        time.sleep(4)
-        if not gesture_completed:
-            gesture_completed = True
-            failure()
-
-    
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
+
+    
     signal.pause()
 
