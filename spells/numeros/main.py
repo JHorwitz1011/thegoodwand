@@ -41,17 +41,18 @@ def button_callback(press):
     # User Code Here
     logger.debug(f"Recieved Press {press}")    
     if press == "short":
-        if int(current_string) == next_number:
-            success()
-        else:
-            failure()
-        current_string = ''
+        if current_string:
+            if int(current_string) == next_number:
+                success()
+            else:
+                failure()
+            current_string = ''
 
         
         
 
 def nfc_callback(param):
-    print(json.loads(param['card_data']['records'][1]["data"])["data"])
+    current_string += json.loads(param['card_data']['records'][1]["data"])["data"]
     
 
 
