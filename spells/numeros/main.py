@@ -8,7 +8,6 @@ from Services import MQTTClient
 from Services import ButtonService
 from Services import LightService
 from Services import AudioService
-from Services import IMUService
 from Services import GestureRecService
 from Services import NFCService
 from log import log
@@ -69,14 +68,13 @@ def init_audio(mqtt_client, path):
     return AudioService(mqtt_client = mqtt_client, path = path)
 
 def init_nfc(mqtt_client, path):
-    nfc = GestureRecService(mqtt_client = mqtt_client)
+    nfc = NFCService(mqtt_client = mqtt_client)
     nfc.subscribe(nfc_callback)
     return nfc
 
 # Cleanup
 def signal_handler(sig, frame): 
     # Turn off raw data stream
-    imu.disable_stream()
     logger.debug("disable stream")
     lights.lb_clear()
     time.sleep(.1)
