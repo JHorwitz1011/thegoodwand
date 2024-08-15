@@ -51,7 +51,7 @@ def button_callback(press):
         
 
 def nfc_callback(param):
-    print(param["card_data"]['records'][1]['data']['data'])
+    print(param)
     
 
 
