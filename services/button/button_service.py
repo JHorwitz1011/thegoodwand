@@ -114,7 +114,7 @@ class TGWButtonService():
         logger.info("Powering down")
         self.lights.lb_csv_animation("power_off.csv")
         self.audio.play_background("power_off.wav")
-        time.sleep(4)
+        time.sleep(6)
         os.system("sudo python3 " + os.path.expanduser(BATTERY_SERVICE_PATH) +'/charger_cli.py --power_off')
 
 
