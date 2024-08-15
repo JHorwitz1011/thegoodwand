@@ -31,9 +31,8 @@ most_recent_number = ""
 def success():
     global count, current_string
 
-    # lights.lb_system_animation("confused_not_understood")
-    lights.lb_block(255,255,255)
-    # count += 1
+    lights.lb_system_animation("confused_not_understood")
+    count += 1
     speaker.say(str(int(current_string)) + " is correct!")
     speaker.runAndWait()
 
@@ -42,9 +41,8 @@ def success():
 def failure():
     global count, current_string
 
-    lights.lb_block(255,255,255)
-    # lights.lb_system_animation("no_failed")
-
+    lights.lb_system_animation("no_failed")
+    time.sleep(5)
     speaker.say(str(int(current_string)) + " is incorrect. Back to the beginning! Start with 1.")
     speaker.runAndWait()
     count = 0
