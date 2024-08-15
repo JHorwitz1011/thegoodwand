@@ -28,11 +28,15 @@ next_number = 0
 current_string = ""
 
 def success():
+    global next_number, current_string
+
     next_number += 1
     speaker.say(str(int(current_string)) + " is correct!")
     speaker.runAndWait()
 
 def failure():
+    global next_number, current_string
+
     speaker.say(str(int(current_string)) + " is incorrect. Back to the beginning! Start with 1.")
     next_number = 0
     speaker.runAndWait()
