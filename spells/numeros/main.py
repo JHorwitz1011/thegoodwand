@@ -52,6 +52,7 @@ def button_callback(press):
         
 
 def nfc_callback(param):
+    global next_number, current_string
     current_string += json.loads(param['card_data']['records'][1]["data"])["data"]
     
 
