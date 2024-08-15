@@ -28,11 +28,13 @@ next_number = 0
 current_string = ""
 
 def success():
-    speaker.say(current_string + " is correct!")
+    next_number += 1
+    speaker.say(str(int(current_string)) + " is correct!")
     speaker.runAndWait()
 
 def failure():
-    speaker.say(current_string + " is incorrect. Back to the beginning! Start with 1.")
+    speaker.say(str(int(current_string)) + " is incorrect. Back to the beginning! Start with 1.")
+    next_number = 0
     speaker.runAndWait()
 
 # Receives "short", "medium", "long"
