@@ -31,7 +31,7 @@ most_recent_number = ""
 def success():
     global count, current_string
 
-    lights.lb_system_animation("confused_not_understood")
+    # lights.lb_system_animation("confused_not_understood")
     lights.lb_block(255,255,255)
     # count += 1
     speaker.say(str(int(current_string)) + " is correct!")
@@ -70,8 +70,10 @@ def nfc_callback(param):
     audio.play_background('on_scan.wav')
     lights.lb_system_animation("select")
     logger.debug(f"Recieved nfc {param}")    
-    most_recent_number = json.loads(param['card_data']['records'][1]["data"])["data"]
-    
+    try:
+        most_recent_number = json.loads(param['card_data']['records'][1]["data"])["data"]
+    finally:
+        pass
 
 
 # Initialize button. return button object
