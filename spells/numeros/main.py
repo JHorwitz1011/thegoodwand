@@ -51,7 +51,7 @@ def button_callback(press):
         
 
 def nfc_callback(param):
-    print(param)
+    print("WEOUFIGDUYVHJKVDS FKUSDHJ<GSDBFKJH")
     # packet = json.loads(param)
     # print(packet["card_data"]['records'][1]['data']['data'])
     
