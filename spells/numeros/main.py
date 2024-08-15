@@ -19,20 +19,41 @@ logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 
 MQTT_CLIENT_ID = "NUMEROS_SPELL"
 
-gesture_completed = False
-target_gesture = None
+# Initialize the TTS engine
+speaker = pyttsx3.init()
+# Set properties (optional)
+speaker.setProperty('rate', 125)  # Speed of speech (words per minute)
+speaker.setProperty('volume', 1.0)  # Volume (0.0 to 1.0)
+
+next_number = 0
+current_string = ""
+
+def success():
+    speaker.say(current_string + " is correct!")
+    speaker.runAndWait()
+
+def failure():
+    speaker.say(current_string + " is incorrect. Back to the beginning! Start with 1.")
+    speaker.runAndWait()
 
 # Receives "short", "medium", "long"
 def button_callback(press):
     # User Code Here
-    logger.debug(f"Recieved Press {press}")
-    
+    logger.debug(f"Recieved Press {press}")    
     if press == "short":
-        pass
+        if int(current_string) == next_number:
+            success()
+        else:
+            failure()
+        current_string = ''
+
+        
         
 
 def nfc_callback(param):
     packet = json.loads(param)
+    print(packet["card_data"]['records'][1]['data']['data'])
+    
 
 
 # Initialize button. return button object
@@ -65,11 +86,7 @@ def signal_handler(sig, frame):
 
  
 if __name__ == '__main__':
-    # Initialize the TTS engine
-    speaker = pyttsx3.init()
-    # Set properties (optional)
-    speaker.setProperty('rate', 125)  # Speed of speech (words per minute)
-    speaker.setProperty('volume', 1.0)  # Volume (0.0 to 1.0)
+
     speaker.say('Lets count!')
     speaker.runAndWait()
     # Connect to MQTT and get client instance 
@@ -95,6 +112,8 @@ if __name__ == '__main__':
    
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
+    
+
 
     
     signal.pause()
