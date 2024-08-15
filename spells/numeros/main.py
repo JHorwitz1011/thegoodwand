@@ -42,7 +42,6 @@ def failure():
     global count, current_string
 
     lights.lb_system_animation("no_failed")
-    time.sleep(5)
     speaker.say(str(int(current_string)) + " is incorrect. Back to the beginning! Start with 1.")
     speaker.runAndWait()
     count = 0
