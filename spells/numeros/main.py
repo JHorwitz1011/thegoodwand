@@ -37,6 +37,7 @@ def failure():
 
 # Receives "short", "medium", "long"
 def button_callback(press):
+    global next_number, current_string
     # User Code Here
     logger.debug(f"Recieved Press {press}")    
     if press == "short":
