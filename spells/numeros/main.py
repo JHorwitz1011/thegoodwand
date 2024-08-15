@@ -56,15 +56,16 @@ def button_callback(press):
         current_string += most_recent_number
         if int(current_string) > count + 1:
                 failure()
+                lights.lb_system_animation("no_failed")
         elif int(current_string) == count + 1:
                 success()
+                lights.lb_system_animation("confused_not_understood")
 
 def nfc_callback(param):
-    audio.play_background('on_scan.wav')
     global next_number, current_string, most_recent_number
-    lights.lb_system_animation("confused_not_understood")
 
-
+    audio.play_background('on_scan.wav')
+    lights.lb_system_animation("select")
     logger.debug(f"Recieved nfc {param}")    
     most_recent_number = json.loads(param['card_data']['records'][1]["data"])["data"]
     
