@@ -32,10 +32,9 @@ def success():
     global count, current_string
 
     lights.lb_system_animation("confused_not_understood")
-    time.sleep(1)
     # count += 1
-    # speaker.say(str(int(current_string)) + " is correct!")
-    # speaker.runAndWait()
+    speaker.say(str(int(current_string)) + " is correct!")
+    speaker.runAndWait()
 
     current_string = "0"
 
@@ -43,9 +42,9 @@ def failure():
     global count, current_string
 
     lights.lb_system_animation("no_failed")
-    # time.sleep(1)
-    # speaker.say(str(int(current_string)) + " is incorrect. Back to the beginning! Start with 1.")
-    # speaker.runAndWait()
+
+    speaker.say(str(int(current_string)) + " is incorrect. Back to the beginning! Start with 1.")
+    speaker.runAndWait()
     count = 0
 
     current_string = "0"
