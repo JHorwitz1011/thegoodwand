@@ -69,7 +69,7 @@ def nfc_callback(param):
     logger.debug(f"Recieved nfc {param}")    
     try:
         most_recent_number = json.loads(param['card_data']['records'][1]["data"])["data"]
-    finally:
+    except:
         pass
 
 
