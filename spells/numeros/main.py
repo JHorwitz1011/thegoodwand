@@ -24,44 +24,46 @@ speaker = pyttsx3.init()
 speaker.setProperty('rate', 125)  # Speed of speech (words per minute)
 speaker.setProperty('volume', 1.0)  # Volume (0.0 to 1.0)
 
-next_number = 0
+count = 0
 current_string = ""
+most_recent_number = ""
 
 def success():
-    global next_number, current_string
+    global count, current_string
 
-    next_number += 1
+    count += 1
     speaker.say(str(int(current_string)) + " is correct!")
     speaker.runAndWait()
 
+    current_string = "0"
+
 def failure():
-    global next_number, current_string
+    global count, current_string
 
     speaker.say(str(int(current_string)) + " is incorrect. Back to the beginning! Start with 1.")
-    next_number = 0
+    count = 0
     speaker.runAndWait()
+    
+    current_string = "0"
 
 # Receives "short", "medium", "long"
 def button_callback(press):
-    global next_number, current_string
-    # User Code Here
+    global next_number, current_string, most_recent_number
+    time.sleep(.5)
+
     logger.debug(f"Recieved Press {press}")    
     if press == "short":
-        if current_string:
-            if int(current_string) == next_number:
-                success()
-            else:
+        current_string += most_recent_number
+        if int(current_string) > count + 1:
                 failure()
-            current_string = ''
-
-        
-        
+        elif int(current_string) == count + 1:
+                success()
 
 def nfc_callback(param):
-    global next_number, current_string
+    global next_number, current_string, most_recent_number
 
     logger.debug(f"Recieved nfc {param}")    
-    current_string += json.loads(param['card_data']['records'][1]["data"])["data"]
+    most_recent_number = json.loads(param['card_data']['records'][1]["data"])["data"]
     
 
 
