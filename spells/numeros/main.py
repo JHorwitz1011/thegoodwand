@@ -62,7 +62,7 @@ def button_callback(press):
 def nfc_callback(param):
     audio.play_background('on_scan.wav')
     global next_number, current_string, most_recent_number
-    lights.lb_system_animation("junk")
+    lights.lb_system_animation("confused_not_understood")
 
 
     logger.debug(f"Recieved nfc {param}")    
