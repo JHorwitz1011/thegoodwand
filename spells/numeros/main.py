@@ -52,6 +52,7 @@ def button_callback(press):
 
 def nfc_callback(param):
     print("WEOUFIGDUYVHJKVDS FKUSDHJ<GSDBFKJH")
+    time.sleep(2)
     # packet = json.loads(param)
     # print(packet["card_data"]['records'][1]['data']['data'])
     
@@ -70,8 +71,9 @@ def init_audio(mqtt_client, path):
     return AudioService(mqtt_client = mqtt_client, path = path)
 
 def init_nfc(mqtt_client, path):
-    nfc = NFCService(mqtt_client = mqtt_client)
+    nfc = NFCService(mqtt_client)
     nfc.subscribe(nfc_callback)
+    print("init nfc called")
     return nfc
 
 # Cleanup
