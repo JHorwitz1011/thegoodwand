@@ -108,6 +108,7 @@ if __name__ == '__main__':
     audio   = init_audio(mqtt_client, spellPath)
     button  = init_button(mqtt_client, button_callback)
     lights  = init_lights(mqtt_client, spellPath)
+    nfc     = init_nfc(mqtt_client, spellPath)
    
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
