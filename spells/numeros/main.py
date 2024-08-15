@@ -62,6 +62,8 @@ def button_callback(press):
 def nfc_callback(param):
     audio.play_background('on_scan.wav')
     global next_number, current_string, most_recent_number
+    lights.lb_system_animation("junk")
+
 
     logger.debug(f"Recieved nfc {param}")    
     most_recent_number = json.loads(param['card_data']['records'][1]["data"])["data"]
