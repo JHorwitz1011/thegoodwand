@@ -31,6 +31,7 @@ most_recent_number = ""
 def success():
     global count, current_string
 
+    lights.lb_system_animation("confused_not_understood")
     count += 1
     speaker.say(str(int(current_string)) + " is correct!")
     speaker.runAndWait()
@@ -40,10 +41,11 @@ def success():
 def failure():
     global count, current_string
 
+    lights.lb_system_animation("no_failed")
     speaker.say(str(int(current_string)) + " is incorrect. Back to the beginning! Start with 1.")
     count = 0
     speaker.runAndWait()
-    
+
     current_string = "0"
 
 # Receives "short", "medium", "long"
@@ -56,10 +58,8 @@ def button_callback(press):
         current_string += most_recent_number
         if int(current_string) > count + 1:
                 failure()
-                lights.lb_system_animation("no_failed")
         elif int(current_string) == count + 1:
                 success()
-                lights.lb_system_animation("confused_not_understood")
 
 def nfc_callback(param):
     global next_number, current_string, most_recent_number
