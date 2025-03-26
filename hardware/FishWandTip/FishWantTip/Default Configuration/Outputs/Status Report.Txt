@@ -1,0 +1,14 @@
+Project Outputs Generation Report
+---------------------------------
+Start Output Generation At 8:44:23 PM On 2022-08-25
+
+Output: ExportSTEP
+Type  : ExportSTEP
+From  : Variant [DevelopmentBoard] of PCB Document [FishWantTip.CSPcbDoc]
+   Generated File[FishWantTip(DevelopmentBoard).step]
+
+
+Files Generated   : 1
+Documents Printed : 0
+
+Finished Output Generation At 8:44:26 PM On 2022-08-25

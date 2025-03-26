@@ -1,0 +1,50 @@
+Field=Comment~String~Comment~100|Field=Description~String~Description~100|Field=Designator~String~Designator~100|Field=Manufacturer~String~Manufacturer~100|Field=Manufacturer PN~String~Manufacturer PN~100|Field=Package~String~Package~100|Field=Package / Case~String~Package / Case~100|Field=Quantity~Integer~Quantity~100|Field=Supplier~String~Supplier~100|Field=Supplier PN~String~Supplier PN~100|ReportField=Currency~<none>|ReportField=ProductionQuantity~1|ReportField=ProjectFileName~FishWand.PrjPcb|ReportField=ProjectFullPath~D:\19Labs\gitHub\FishWand\PCB\FishWand\FishWand.PrjPcb|ReportField=Title~BOM_PartType For Project [FishWand.PrjPcb] (No PCB Document Selected)|ReportField=TotalQuantity~167|ReportField=ReportTime~4:02:06 PM|ReportField=ReportDate~2022-07-21|ReportField=ReportDateTime~2022-07-21 4:02:06 PM|ReportField=OutputName~BOM_PartType|ReportField=OutputType~BOM_PartType|ReportField=GeneratorName~BOM|ReportField=GeneratorDescription~Bill of Materials|ReportField=VariantName~None|ReportField=Address1~|ReportField=Address2~|ReportField=Address3~|ReportField=Address4~|ReportField=Application_BuildNumber~|ReportField=ApprovedBy~|ReportField=Author~|ReportField=CheckedBy~|ReportField=CompanyName~|ReportField=CurrentDate~|ReportField=CurrentTime~|ReportField=Date~|ReportField=DocumentFullPathAndName~|ReportField=DocumentName~|ReportField=DocumentNumber~1|ReportField=DrawnBy~|ReportField=Engineer~|ReportField=ImagePath~|ReportField=ModifiedDate~|ReportField=Organization~|ReportField=ProjectName~FishWand|ReportField=Revision~1|ReportField=Rule~|ReportField=SheetNumber~1|ReportField=SheetTotal~7|ReportField=Time~|ReportField=Title~Top Level Design|ReportField=ConfigurationParameters~|ReportField=ConfiguratorName~|ReportField=IsUserConfigurable~|ReportField=VersionControl_RevNumber~|ReportField=DataSourceFileName~FishWand.PrjPcb|ReportField=DataSourceFullPath~D:\19Labs\gitHub\FishWand\PCB\FishWand\FishWand.PrjPcb
+100nF|CAP CER 100nF 25V X5R 0402|C1, C9, C14, C20, C21, C22, C23, C24, C26, C29, C30, C31, C38, C45, C46, C47, C49, C51, C52, C53, C55, C56|Murata Electronics|GRM155R61E104KA87D|||22|Digi-Key|490-5920-2-ND
+10uF|CAP CER 10UF 10V X5R 0402|C2, C3, C4, C5, C8, C10, C13, C25, C39, C40, C54|Samsung Electro-Mechanics|CL05A106MP5NUNC|||11||1276-1450-1-ND
+1uF|CAP CER 1UF 25V X5R 0402|C6, C11|Murata Electronics North America|GRT155R61E105KE01D|||2||490-12263-2-ND
+47nF|CAP CER 0.047UF 25V X7R 0402|C7, C19|Murata Electronics|GRM155R71E473KA88D|||2|Digi-Key|490-3254-2-ND
+4.7uF|CAP CER 4.7UF 10V X5R 0402|C12, C27, C28, C32, C33, C34, C35, C48, C50|Murata Electronics North America|GRM155R61A475MEAAD|||9||490-14306-1-ND
+22uF|CAP CER 22UF 10V X5R 0805|C15, C16, C17, C18|Murata Electronics North America|GRM21BR61A226ME51L|||4||490-10511-1-ND
+100pF|CAP CER 100PF 50V C0G/NP0 0402|C36, C37|Murata Electronics|GRT1555C1H101JA02J|||2|Digi-Key|490-GRT1555C1H101JA02JTR-ND
+33pF|CAP CER 33PF 50V C0G/NP0 0402|C41, C42, C43, C44|Murata Electronics|GRM1555C1H330JA01D|||4|Digi-Key|490-5936-2-ND
+15pf|15 pF ±2% 50V Ceramic Capacitor C0G, NP0 0402 (1005 Metric)|C57, C62|YAGEO|CC0402GRNPO9BN150|||2|Digi-Key|311-1649-1-ND
+47pF|47 pF ±1% 50V Ceramic Capacitor C0G, NP0 0402 (1005 Metric)|C58, C60|YAGEO|CC0402FRNPO9BN470|||2|Digi-Key|311-1646-1-ND
+180pF|180 pF ±2% 50V Ceramic Capacitor C0G, NP0 0402 (1005 Metric)|C59, C61|YAGEO|CC0402GRNPO9BN181|||2|Digi-Key|311-3333-1-ND
+10pF|CAP CER 10PF 50V C0G/NP0 0402|C63, C64|Murata Electronics|GRT1555C1H100JA02J|||2|Digi-Key|490-GRT1555C1H100JA02JTR-ND
+Diode|DIODE GEN PURP 75V 150MA SOD323F|D1, D2, D3|onsemi|1N4148WS||SC-90, SOD-323F|3||
+BLM18RK121SN1D|120 Ohms @ 100 MHz 1 Ferrite Bead 0603 (1608 Metric) 200mA 250mOhm|FB1, FB2, FB3|Murata Electronics|BLM18RK121SN1D||0603|3|Digi-Key|490-5226-1-ND
+BLM18BD252SN1D|2.5 kOhms @ 100 MHz 1 Signal Line Ferrite Bead 0603 (1608 Metric) 50mA 1.5Ohm|FB4, FB5|Murata Electronics|BLM18BD252SN1D||0603|2||
+C25582-40G-M36-0A|SMT GPIO Header for Raspberry Pi HAT - 2x20 Short Female Header|J1|Kaweeu Technology|C25582-40G-M36-0A||Raspberry Pi HAT - 2x20|1|Adafruit|2187
+0522071233|CONN FPC BOTTOM 12POS 1.00MM R/A|J2|Molex|0522711279|||1|Digi-Key|WM7960CT-ND
+BM03B-ADHKS-GAN-ETB|CONN HEADER SMD R/A 3POS 1.3MM|J3, J4, J6|JST Sales America Inc.|BM03B-ADHKS-GAN-ETB|||3|Digi-Key|455-2900-1-ND
+USB4110-GF-A_REVB|USB-C (USB TYPE-C) USB 2.0 Receptacle Connector 24 (16+8 Dummy) Position Surface Mount, Right Angle; Through Hole|J5|GCT|USB4110-GF-A||USB TYPE-C|1|Digi-Key|2073-USB4110-GF-A-2-ND
+RF20-01B-L-00-50-G-T/R|CONN RF MCX SMT VERT 50OHM|J7|Adam Tech|RF20-01B-L-00-50-G-T/R||MCX SMT VERT 50OHM|1|Digi-Key|2057-RF20-01B-L-00-50-G-T/RCT-ND
+1uH|1 µH Shielded Drum Core, Wirewound Inductor 5.5 A 32mOhm Max 1210 (3225 Metric)|L1, L2|Bourns Inc.|SRP3212-1R0M||1210 (3225 Metric)|2|Digi-Key|118-SRP3212-1R0MTR-ND
+2.2uF|2.2 µH Unshielded Drum Core, Wirewound Inductor 340 mA 540mOhm 0806 (2016 Metric)|L3, L4|Taiyo Yuden|LBM2016T2R2J||0805|2|Digi-Key|587-1807-1-ND
+BSS138LT1G|MOSFET N-CH 50V 200MA SOT-23|Q1, Q2, Q3, Q4, Q5, Q6|ON Semiconductor|BSS138LT1G|||6||BSS138LT1GOSCT-ND
+10K|10 kOhms ±1% 0.063W, 1/16W Chip Resistor 0402 (1005 Metric) Moisture Resistant Thick Film|R1, R2, R6, R9, R11, R12, R13, R14, R26, R27, R35, R37, R53, R56|YAGEO|RC0402FR-0710KL||0402|14||
+1M|1 MOhms ±1% 0.063W, 1/16W Chip Resistor 0402 (1005 Metric) Moisture Resistant Thick Film|R3, R4, R10, R25, R54, R57|YAGEO|RC0402FR-071ML||0402|6|Digi-Key|311-1.00MLRTR-ND
+0R|0 Ohms Jumper 0.063W, 1/16W Chip Resistor 0402 (1005 Metric) Thick Film|R5, R7, R16, R28, R29, R30, R31, R32, R33, R34, R36, R38, R39, R40, R41, R42, R43, R44, R45, R46, R47, R48, R49, R50, R58, R59, R60, R64, R65|YAGEO|RC0402JR-070RP||0402|29||
+237R|237 Ohms ±1% 0.063W, 1/16W Chip Resistor 0402 (1005 Metric) Moisture Resistant Thick Film|R8|YAGEO|RC0402FR-07237RL||0402|1|Digi-Key|YAG3065TR-ND
+5.23K|5.23 kOhms ±1% 0.063W, 1/16W Chip Resistor 0402 (1005 Metric) Moisture Resistant Thick Film|R15|YAGEO|RC0402FR-075K23L||0402|1|Digi-Key|YAG3195TR-ND
+30.9k|RES 30.9K OHM 1% 1/16W 0402|R17|YAGEO|RC0402FR-0730K9L||0402|1|Digi-Key|YAG3110TR-ND
+100k|100 kOhms ±1% 0.063W, 1/16W Chip Resistor 0402 (1005 Metric) Moisture Resistant Thick Film|R18, R23, R62|YAGEO|RC0402FR-07100KL||0402|3|Digi-Key|311-100KLRTR-ND
+402k|402 kOhms ±1% 0.063W, 1/16W Chip Resistor 0402 (1005 Metric) Moisture Resistant Thick Film|R19|YAGEO|RC0402FR-07402KL||0402|1|Digi-Key|YAG3151TR-ND
+5.1K|5.1 kOhms ±1% 0.063W, 1/16W Chip Resistor 0402 (1005 Metric) Moisture Resistant Thick Film|R20, R21, R61|YAGEO|RC0402FR-075K1L||0402|3|Digi-Key|311-5.10KLRTR-ND
+59k|59 kOhms ±1% 0.063W, 1/16W Chip Resistor 0402 (1005 Metric) Moisture Resistant Thick Film|R22|YAGEO|RC0402FR-0759KL||0402|1|Digi-Key|311-59KLRTR-ND
+47.5k|47.5 kOhms ±1% 0.063W, 1/16W Chip Resistor 0402 (1005 Metric) Moisture Resistant Thick Film|R24, R52|YAGEO|RC0402FR-0747K5L||0402|2||
+22.1k|22.1 kOhms ±1% 0.063W, 1/16W Chip Resistor 0402 (1005 Metric) Moisture Resistant Thick Film|R51|YAGEO|RC0402FR-0722K1L||0402|1||
+1K|1 kOhms ±1% 0.063W, 1/16W Chip Resistor 0402 (1005 Metric) Moisture Resistant Thick Film|R55|YAGEO|RC0402FR-071KL||0402|1||
+820R|820 Ohms ±1% 0.063W, 1/16W Chip Resistor 0402 (1005 Metric) Moisture Resistant Thick Film|R63|YAGEO|RC0402FR-07820RL||0402|1|Digi-Key|311-820LRCT-ND
+KSC621GLFS|SWITCH_TACTILE_SPST-NO_0.05A_32V|SW1|C&K|KSC621GLFS|||1|Digi-Key|401-1786-2-ND
+LED_WS2812B-B|Intelligent control LED integrated light source|U1|Worldsemi|WS2812B-V5||5050|1||
+Battery Management BQ24296M|Charger IC Lithium Ion/Polymer 24-VQFN (4x4)|U2|TI|BQ24296MRGER||VQFN-24|1|Mouser|595-BQ24296MRGER
+TPS61230DRCR|High Efficiency Synchronous Boost Converter With 5-A Switch 10-VSON -40 to 85|U3|Texas Instruments|TPS61230DRCR||VSON-10 Texas Instruments|1|Digi-Key|296-37761-2-ND
+LSM6DSOXTR|Accelerometer, Gyroscope, Temperature, 6 Axis Sensor IÂ²C, SPI Output|U4|STMicroelectronics|LSM6DSOXTR||14-VFLGA Module|1|Digi-Key|497-18367-2-ND
+U_magnetic_sensor_LIS3MDLTR|Magnetoresistive Sensor X, Y, Z Axis 12-LGA _2x2_|U5|STMicroelectronics|LIS3MDLTR||VFLGA-12 STMicroelectronics|1|Digi-Key|497-13892-1-ND
+WM8960CGEFL|WM8960CGEFL|U6|Cirrus Logic|WM8960CGEFL/V||QFN32|1||
+CMM-3722AT-42116-TR|MICROPHONE MEMS ANALOG OMNI|U7, U8|CUI Devices|CMM-3722AT-42116-TR||SMD/SMT|2|Mouser|490-CMM3722AT42116TR
+USB to UART USB 2.0 UART Interface 28-QFN|USB Bridge, USB to UART USB 2.0 UART Interface 28-QFN (5x5)|U9|Silicon Labs|CP2102N-A02-GQFN28||QFN-28|1|Mouser|634-CP2102NA02GQFN28
+MFRC52201HN1,151|RFID Reader IC 13.56MHz ISO 14443, MIFARE IÂ²C, SPI, UART 2.5V ~ 3.3V 32-VFQFN Exposed Pad|U10|NXP USA|MFRC52201HN1,151||HVQFN-32|1||
+24Mhz|24 MHz XO (Standard) CMOS Oscillator 1.6V ~ 3.6V Standby (Power Down) 4-SMD, No Lead|Y1|EPSON|SG-210STF 24.0000ML0||4-SMD, No Lead|1|Digi-Key|SER4078TR-ND
+27.12Mhz|27.12MHz Â±30ppm Crystal 6pF 150 Ohms 4-SMD, No Lead|Y2|Murata Electronics|XRCGB27M120F3M00R0||SMD-4 Murata|1|Mouser|81-XRCGB27M120F3M0R0

@@ -1,0 +1,3 @@
+Record=TopLevelDocument|FileName=00-Top-layer.SchDoc
+Record=SheetSymbol|Record=SheetSymbol|SourceDocument=00-Top-layer.SchDoc|Designator=LED|SchDesignator=LED|FileName=01-LED.SchDoc|SymbolType=Normal|RawFileName=01-LED.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=SheetSymbol|Record=SheetSymbol|SourceDocument=00-Top-layer.SchDoc|Designator=SENSORS|SchDesignator=SENSORS|FileName=02-SENSORS.SchDoc|SymbolType=Normal|RawFileName=02-SENSORS.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 

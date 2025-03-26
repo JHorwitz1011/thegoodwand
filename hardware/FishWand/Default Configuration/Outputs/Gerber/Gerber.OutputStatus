@@ -1,0 +1,17 @@
+[OutputStatus]
+OutputFileNames0=D:\FishWand\PCB\FishWand\Default Configuration\Outputs\Gerber\FishWand_wandPCB.GTL
+OutputFileNames1=D:\FishWand\PCB\FishWand\Default Configuration\Outputs\Gerber\FishWand_wandPCB.G1
+OutputFileNames2=D:\FishWand\PCB\FishWand\Default Configuration\Outputs\Gerber\FishWand_wandPCB.G2
+OutputFileNames3=D:\FishWand\PCB\FishWand\Default Configuration\Outputs\Gerber\FishWand_wandPCB.GBL
+OutputFileNames4=D:\FishWand\PCB\FishWand\Default Configuration\Outputs\Gerber\FishWand_wandPCB.GTO
+OutputFileNames5=D:\FishWand\PCB\FishWand\Default Configuration\Outputs\Gerber\FishWand_wandPCB.GTP
+OutputFileNames6=D:\FishWand\PCB\FishWand\Default Configuration\Outputs\Gerber\FishWand_wandPCB.GTS
+OutputFileNames7=D:\FishWand\PCB\FishWand\Default Configuration\Outputs\Gerber\FishWand_wandPCB.GBS
+OutputFileNames8=D:\FishWand\PCB\FishWand\Default Configuration\Outputs\Gerber\FishWand_wandPCB.GBP
+OutputFileNames9=D:\FishWand\PCB\FishWand\Default Configuration\Outputs\Gerber\FishWand_wandPCB.GBO
+OutputFileNames10=D:\FishWand\PCB\FishWand\Default Configuration\Outputs\Gerber\FishWand_wandPCB.Outline
+OutputFileNames11=D:\FishWand\PCB\FishWand\Default Configuration\Outputs\Gerber\FishWand_wandPCB.RUL
+OutputFileNames12=D:\FishWand\PCB\FishWand\Default Configuration\Outputs\Gerber\FishWand_wandPCB.EXTREP
+OutputFileNames13=D:\FishWand\PCB\FishWand\Default Configuration\Outputs\Gerber\FishWand_wandPCB.REP
+Success=1
+HasRun=1

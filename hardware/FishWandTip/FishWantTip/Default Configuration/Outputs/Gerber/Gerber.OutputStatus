@@ -1,0 +1,15 @@
+[OutputStatus]
+OutputFileNames0=D:\FishWand\PCB\FishWandTip\FishWantTip\Default Configuration\Outputs\Gerber\FishWantTip.GTL
+OutputFileNames1=D:\FishWand\PCB\FishWandTip\FishWantTip\Default Configuration\Outputs\Gerber\FishWantTip.GBL
+OutputFileNames2=D:\FishWand\PCB\FishWandTip\FishWantTip\Default Configuration\Outputs\Gerber\FishWantTip.GTO
+OutputFileNames3=D:\FishWand\PCB\FishWandTip\FishWantTip\Default Configuration\Outputs\Gerber\FishWantTip.GTP
+OutputFileNames4=D:\FishWand\PCB\FishWandTip\FishWantTip\Default Configuration\Outputs\Gerber\FishWantTip.GTS
+OutputFileNames5=D:\FishWand\PCB\FishWandTip\FishWantTip\Default Configuration\Outputs\Gerber\FishWantTip.GBS
+OutputFileNames6=D:\FishWand\PCB\FishWandTip\FishWantTip\Default Configuration\Outputs\Gerber\FishWantTip.GBP
+OutputFileNames7=D:\FishWand\PCB\FishWandTip\FishWantTip\Default Configuration\Outputs\Gerber\FishWantTip.GBO
+OutputFileNames8=D:\FishWand\PCB\FishWandTip\FishWantTip\Default Configuration\Outputs\Gerber\FishWantTip.Outline
+OutputFileNames9=D:\FishWand\PCB\FishWandTip\FishWantTip\Default Configuration\Outputs\Gerber\FishWantTip.RUL
+OutputFileNames10=D:\FishWand\PCB\FishWandTip\FishWantTip\Default Configuration\Outputs\Gerber\FishWantTip.EXTREP
+OutputFileNames11=D:\FishWand\PCB\FishWandTip\FishWantTip\Default Configuration\Outputs\Gerber\FishWantTip.REP
+Success=1
+HasRun=1

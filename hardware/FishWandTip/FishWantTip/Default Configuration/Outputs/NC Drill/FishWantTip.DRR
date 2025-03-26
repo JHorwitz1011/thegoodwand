@@ -1,0 +1,15 @@
+---------------------------------------------------------------------------
+NCDrill File Report For: FishWantTip.CSPcbDoc   2022-08-25  8:44:20 PM
+---------------------------------------------------------------------------
+
+Layer Pair : Top Layer to Bottom Layer
+ASCII RoundHoles File : FishWantTip.TXT
+
+Tool         Hole Size           Hole Type     Hole Count Plated       Tool Travel
+---------------------------------------------------------------------------
+T1        0.2mm (7.874mil)         Round          127              819.86 mm (32.28 Inch)
+T2        1mm (39.37mil)           Round          1         NPTH   0.00 mm (0.00 Inch)
+---------------------------------------------------------------------------
+Totals                                            128              819.86 mm (32.28 Inch)
+
+Total Processing Time (hh:mm:ss) : 00:00:01

@@ -1,0 +1,19 @@
+---------------------------------------------------------------------------
+NCDrill File Report For: FishWand_wandPCB.CSPcbDoc   2022-08-25  8:30:38 PM
+---------------------------------------------------------------------------
+
+Layer Pair : Top Layer to Bottom Layer
+ASCII RoundHoles File : FishWand_wandPCB.TXT
+
+Tool         Hole Size           Hole Type     Hole Count Plated       Tool Travel
+---------------------------------------------------------------------------
+T1        0.2mm (7.874mil)         Round          393              1165.38 mm (45.88 Inch)
+T2        0.8mm (31.496mil)        Round          2                2.00 mm (0.08 Inch)
+T3        0.65mm (25.591mil)       Round          2         NPTH   5.78 mm (0.23 Inch)
+T4        0.97mm (38.189mil)       Round          40        NPTH   99.06 mm (3.90 Inch)
+T5        2mm (78.74mil)           Round          1         NPTH   0.00 mm (0.00 Inch)
+T6        3mm (118.11mil)          Round          4         NPTH   139.00 mm (5.47 Inch)
+---------------------------------------------------------------------------
+Totals                                            442              1411.21 mm (55.56 Inch)
+
+Total Processing Time (hh:mm:ss) : 00:00:00
