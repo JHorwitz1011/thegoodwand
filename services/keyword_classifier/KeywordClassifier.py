@@ -83,7 +83,6 @@ class TGWKeywordClassifier(MQTTObject):
                 time.sleep(.03)
             else:
                 self.recognize()
-
         
     def recognize(self):
         with AudioImpulseRunner(MODEL_PATH) as self.runner:
