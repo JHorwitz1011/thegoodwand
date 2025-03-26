@@ -1,5 +1,6 @@
-# Conductor #
+[<- back](../README.md)
 
+# Conductor #
 
 #Setup#
 Add to the supervisorctl damons list by creating a file /etc/supervisor/conf.d/conductor.conf:

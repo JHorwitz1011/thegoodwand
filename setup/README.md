@@ -1,3 +1,5 @@
+[<- back to home](../README.md)
+
 **Setup a new Wand**
 RPI Installer *LEGACY LITE*
 Add "enable_uart=1" to the bottom of config.txt to enable Uart console from USB. Baud 115200 

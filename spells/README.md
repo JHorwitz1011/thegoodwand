@@ -1,11 +1,13 @@
-# Spells#
+[<- back to home](../README.md)
 
-Work in progress:
+# Spells #
 
-music: plays audio based on orientation
-yoto: plays first chapter of a yoto card
+### Pooftos ###
 
-Should add pooftos / secretica / etc
+### Supertip ###
 
-#Directory names must = NFC card spell field#
-#main.py is the code for each spell
+### Lumos ###
+
+### Colos ###
+
+### Fairy Fun ###
