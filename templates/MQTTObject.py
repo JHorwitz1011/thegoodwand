@@ -1,23 +1,27 @@
 from paho.mqtt import client as mqtt_client
 import sys, os
+
+# MQTT constants
 DEFAULT_BROKER = 'localhost'
 DEFAULT_PORT = 1883
 
+# templates
 sys.path.append(os.path.expanduser('~/thegoodwand/templates'))
-from log import log
 
+# logging related constants
+from log import log
 DEBUG_LEVEL = "DEBUG"
 LOGGER_NAME = __name__
 logger = log(name = LOGGER_NAME, level = DEBUG_LEVEL)
 
 class MQTTObject():
-    """Abstracts away irrelevavnt aspects of mqtt functionality for ease of programming"""
+    """Abstracts away irrelevant aspects of mqtt functionality for ease of programming"""
 
     def __init__(self, broker=DEFAULT_BROKER, port=DEFAULT_PORT):
         """
         Parameters:
             broker (str): hostname of broker to connect to. defaults to localhost
-            port (int): port to connect to. defaults to 1883
+            port   (int): port to connect to. defaults to 1883
         """
         self.broker = broker
         self.port = port
@@ -28,8 +32,9 @@ class MQTTObject():
     def start_mqtt(self, client_id, topics_and_callbacks={}):
         """
         Parameters:
-            client_id (str): name to identify as 
-            topics_and_callbacks (dict): dictionary with str keys describing topics to subscribe to, and values of callback functions
+            client_id             (str): name to identify as 
+            topics_and_callbacks (dict): dictionary with str keys describing topics to 
+                                         subscribe to, and values of callback functions
         """
         self.client_id = client_id
         self.topics_and_callbacks = topics_and_callbacks
@@ -47,7 +52,6 @@ class MQTTObject():
         
         # Start MQTT
         # Add all callbacks
-        #logger.info(self.topics_and_callbacks)
         for topic in self.topics_and_callbacks.keys():
             self.client.message_callback_add(topic, self.topics_and_callbacks[topic])
             logger.info(f"subscribed to {topic}")
@@ -60,8 +64,9 @@ class MQTTObject():
     def start_mqtt_blocking(self, client_id, topics_and_callbacks={}):
         """
         Parameters:
-            client_id (str): name to identify as 
-            topics_and_callbacks (dict): dictionary with str keys describing topics to subscribe to, and values of callback functions
+            client_id             (str): name to identify as 
+            topics_and_callbacks (dict): dictionary with str keys describing topics to 
+                                         subscribe to, and values of callback functions
         """
         self.client_id = client_id
         self.topics_and_callbacks = topics_and_callbacks
@@ -79,20 +84,18 @@ class MQTTObject():
         
         # Start MQTT
         # Add all callbacks
-        #logger.info(self.topics_and_callbacks)
         for topic in self.topics_and_callbacks.keys():
             self.client.message_callback_add(topic, self.topics_and_callbacks[topic])
             logger.info(f"subscribed to {topic}")
             self.client.subscribe(topic)
             self.client.enable_logger()
     
-        self.client.loop_forever()
 
-    def connect_mqtt(self):
-        """
-        Connect this service to MQTT broker
+    # def connect_mqtt(self):
+    #     """
+    #     Connect this service to MQTT broker
         
-        """
+    #     """
         
 
     def publish(self, topic: str, payload: str, qos: int = 0):

@@ -90,7 +90,7 @@ def init_imu(mqtt_client, imu_stream_cb, on_wake_cb):
     imu.subscribe_on_wake(on_wake_cb)
     return imu
 
-# Cleanup 
+# Cleanup
 def signal_handler(sig, frame): 
     # Turn off raw data stream
     imu.disable_stream()

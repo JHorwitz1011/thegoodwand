@@ -79,7 +79,7 @@ class WS2812Service {
         ws2811_led_t* strip;
         static bool running;
         bool emptyLightbar;
-        ws2811_return_t ret;            // return value for ws281x calls
+        ws2811_return_t ret;            //return value for ws281x calls
 
         uint64_t frameStart;
         uint64_t frameDuration;
