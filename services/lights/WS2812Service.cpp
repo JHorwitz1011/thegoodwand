@@ -18,11 +18,9 @@
  */
 bool WS2812Service::running = 0;
 
-// WS2812Service::~WS2812Service() {
-//     delete[] fireTargetBrightness;
-//     delete[] fireActualBrightness;
-// }
-
+/**
+ * @brief initializes neopixel strip and sets default variables
+ */
 WS2812Service::WS2812Service() {
     
 
@@ -43,8 +41,6 @@ WS2812Service::WS2812Service() {
 
     //fire
     srand(time(NULL));
-    // fireTargetBrightness = new uint8_t[20];
-    // fireTargetBrightness = new uint8_t[20];
     fireFramesUntilUpdate = 0;
     fireDeltaBrightness = 1;
 
@@ -55,6 +51,7 @@ WS2812Service::WS2812Service() {
     this->indicatorColorHSV = {};
     this->indicatorColorRGB = {};
 
+    //animation
     this->frameDuration = 0;
 
     //initialize rgb struct
@@ -394,7 +391,6 @@ void WS2812Service::setDefaultColorHSV(uint8_t h, uint8_t s, uint8_t v) {
     defaultColorHSV = {h,s,v};
     defaultColorRGB = hsvToRGB(defaultColorHSV);
 }
-//////////////////
 void WS2812Service::setIndicatorColorRGB(ws2811_led_t color) {
     indicatorColorRGB = rgbHexToStruct(color);
     indicatorColorHSV = rgbToHSV(indicatorColorRGB);

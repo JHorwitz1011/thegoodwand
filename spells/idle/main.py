@@ -17,7 +17,8 @@ MQTT_CLIENT_ID = "idle_SPELL"
 TERMINATION_DELAY = 18 # final audio is 16 seconds. lights is 14.5s
 
 
-IDLE_NUMBER_STEPS = 4
+idleStep = 1
+IDLE_NUMBER_STEPS = 5
 IDLE_DELAY = 120 # 2 min
 idleLightRed = 255    #Gold
 idleLightGreen = 215  #Gold
@@ -52,14 +53,36 @@ class Idle():
         self.idle_step += 1
 
 
-def display_fire(red,green,blue):
+def display_lights(red,green,blue):
     lights.lb_fire(red,green,blue)
+
+def idle_timer_callback():
+    global idleStep
+    #global IDLE_NUMBER_STEPS
+
+    fileToPlay = "jmng"+str(idleStep)+".wav"
+    logger.debug(f"idle timer expired at step {idleStep} playing {fileToPlay}")
+    audio.play_background (fileToPlay)
+
+    idleStep += 1
+    if idleStep < IDLE_NUMBER_STEPS:
+        lights.lb_csv_animation("idleDrumsShort.csv")
+        idle_timer.stop()
+        idle_timer.start()
+        logger.debug(f"restarting idle time for next step")
+    else: 
+        logger.debug(f"Last idle step. Terminating")
+        lights.lb_csv_animation("idleDrumsLong.csv")
+        os._exit(0)
+    
+
 
 def imu_on_wake_callback(wake_status:'bool'):
     if wake_status == True: 
-        logger.debug(f"Wand is active")
-        idle_spell.timer.stop()
-        delayed_terminnation(0)
+        logger.debug(f"Wand is active, terminate idle spell")
+        time.sleep(10)
+        lights.lb_block(0,0,0)
+        os._exit(0)
 
     elif wake_status == False: 
         logger.debug(f"Wand is inactive")
@@ -74,23 +97,10 @@ def delayed_terminnation(delay):
     logger.debug(f"Terminating idle spell: Delay {delay}")
     if delay: time.sleep(delay) # Delay to allow final animation to finish
     logger.debug("Terminating Idle Spell")
-    lights.lb_clear()
-    audio.stop()
-    time.sleep(.25)
+    lights.lb_block(0,0,0)
+    time.sleep(.1)
     os._exit(0)
-
-def sig_callback(sig, frame):
-    idle_spell.timer.stop()
-    delayed_terminnation(0)
-
-def get_path():
-    param_1 = None
-    if len(sys.argv) < 2:
-        logger.debug("No arguments provided.")
-    else:
-        param_1 = sys.argv[1]
-    return param_1 if param_1 else os.getcwd()
-
+    
 
 if __name__ == '__main__':
     # Connect to MQTT and get client instance 

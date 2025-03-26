@@ -126,7 +126,7 @@ fi
 cd - #change directory back
 
 # build lights service
-# ./build_lights.sh
+./build_lights.sh
 
 # Add temp files to bashrc
 
